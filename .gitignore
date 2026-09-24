@@ -1,2 +1,8 @@
 __pycache__/
 *.py[cod]
+
+# Archivos municipales de entrada y resultados generados.
+input/**/*.docx
+input/**/*.json
+output/**/*.docx
+output/**/*.json
