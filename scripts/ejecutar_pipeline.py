@@ -1,188 +1,138 @@
 #!/usr/bin/env python3
-"""Ejecuta la prevalidación y extracción inicial de un paquete municipal."""
-
-from __future__ import annotations
-
+"""Extrae tablas y calcula los criterios implementados de ambos periodos."""
 import argparse
-import hashlib
 import json
 import re
 import unicodedata
-import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
+from uuid import uuid4
 
+from documentos import leer_docx, registros, seccion_seguridad, sha256
+from calificar import agregar, calificar_indicador, dependencias
 
 ROOT = Path(__file__).resolve().parents[1]
-SUFFIXES = (
-    " Anexo.docx",
-    " PAQUETE SEGURIDAD.docx",
-    " PAQUETE GOBIERNO ABIERTO Y BUEN GOBIERNO.docx",
-    " PAQUETE DESARROLLO URBANO SOSTENIBLE Y DERECHOS HUMANOS CONEXOS.docx",
-)
-SECURITY_SUFFIX = " PAQUETE SEGURIDAD.docx"
+SUFFIXES = (' Anexo.docx', ' PAQUETE SEGURIDAD.docx',
+            ' PAQUETE GOBIERNO ABIERTO Y BUEN GOBIERNO.docx',
+            ' PAQUETE DESARROLLO URBANO SOSTENIBLE Y DERECHOS HUMANOS CONEXOS.docx')
 
 
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def slug(value):
+    value = ''.join(c for c in unicodedata.normalize('NFD', value.lower())
+                    if unicodedata.category(c) != 'Mn')
+    return re.sub(r'[^a-z0-9]+', '_', value).strip('_')
 
 
-def docx_text(path: Path) -> str:
-    with zipfile.ZipFile(path) as document:
-        xml = document.read("word/document.xml").decode("utf-8")
-    text = re.sub(r"<w:tab[^>]*/>", "\t", xml)
-    text = re.sub(r"</w:p>", "\n", text)
-    text = re.sub(r"<[^>]+>", "", text)
-    return (
-        text.replace("&amp;", "&")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&#8217;", "'")
-    )
-
-
-def slug(value: str) -> str:
-    value = unicodedata.normalize("NFD", value)
-    value = "".join(char for char in value if unicodedata.category(char) != "Mn")
-    return re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
-
-
-def discover(input_dir: Path) -> tuple[str, dict[str, Path]]:
-    documents: dict[str, Path] = {}
-    prefixes: set[str] = set()
+def discover(input_dir):
+    documents = {}
+    prefixes = set()
     for suffix in SUFFIXES:
-        matches = sorted(input_dir.glob(f"*{suffix}"))
+        matches = sorted(input_dir.glob('*' + suffix))
         if len(matches) != 1:
-            raise ValueError(
-                f"Se requiere exactamente un archivo con el sufijo {suffix!r}; "
-                f"encontrados: {len(matches)}."
-            )
-        document = matches[0]
-        documents[suffix] = document
-        prefixes.add(document.name[: -len(suffix)])
-    if len(prefixes) != 1:
-        raise ValueError("Los cuatro documentos no comparten un mismo municipio.")
+            raise ValueError(f'Se requiere exactamente un archivo con sufijo {suffix!r}; encontrados: {len(matches)}')
+        documents[suffix] = matches[0]
+        prefixes.add(matches[0].name[:-len(suffix)])
+    if len(prefixes) != 1 or not next(iter(prefixes)).strip():
+        raise ValueError('Las cuatro entradas deben compartir un municipio.')
     return prefixes.pop(), documents
 
 
-def extract_summary(text: str) -> list[dict[str, object]]:
-    section = text.split("Indicador: Plan o programa de protección civil", 1)[0]
-    matches = re.findall(r"(?m)^(\d+)\.\s+(.+?)\s*\n([A-ZÁÉÍÓÚÜÑ ]+)\s*$", section)
-    if len(matches) != 18:
-        raise ValueError(
-            "No se pudieron extraer las 18 calificaciones generales del resumen "
-            f"de seguridad; encontradas: {len(matches)}."
-        )
-    return [
-        {
-            "numero": int(number),
-            "nombre": name.strip(),
-            "calificacion_general_reportada": rating.strip(),
-            "calificacion_ultimo_periodo": None,
-            "evidencia": [
-                {
-                    "fuente": "PAQUETE SEGURIDAD",
-                    "ubicacion": "Resumen inicial de indicadores de seguridad",
-                    "extracto": f"{number}. {name.strip()} — {rating.strip()}",
-                }
-            ],
-        }
-        for number, name, rating in matches
-    ]
-
-
-def main() -> int:
+def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input", type=Path, default=ROOT / "input" / "word")
-    parser.add_argument("--output", type=Path, default=ROOT / "output")
-    arguments = parser.parse_args()
-
-    municipality, documents = discover(arguments.input)
-    texts = {suffix: docx_text(path) for suffix, path in documents.items()}
-    anexo_text = texts[" Anexo.docx"]
-    security_text = texts[SECURITY_SUFFIX]
-    identity = re.search(
-        r"municipio de\s+(.+?),\s+([A-ZÁÉÍÓÚÜÑ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+)",
-        anexo_text,
-        re.IGNORECASE,
-    )
-    state = identity.group(2).strip() if identity else None
-    indicators = extract_summary(security_text)
-
-    dictionary_path = ROOT / "diccionario_datos_diagnostico_seguridad_municipal.json"
-    dictionary = json.loads(dictionary_path.read_text(encoding="utf-8"))
-    values = {key: None for key in dictionary["variables_documento"]}
-    values.update(
-        {
-            "municipio": municipality,
-            "estado": state,
-            "año_inicial": 2014,
-            "año_final": 2024,
+    parser.add_argument('--input', type=Path, default=ROOT / 'input/word')
+    parser.add_argument('--output', type=Path, default=ROOT / 'output')
+    args = parser.parse_args()
+    municipality, documents = discover(args.input)
+    evidence = {suffix: leer_docx(path) for suffix, path in documents.items()}
+    sections = seccion_seguridad(evidence[SUFFIXES[1]])
+    annex_sections = seccion_seguridad(evidence[SUFFIXES[0]])
+    rules_path = ROOT / 'reglas_calificacion.json'
+    rules = json.loads(rules_path.read_text(encoding='utf-8'))
+    template = ROOT / rules['fuente']['archivo']
+    if sha256(template) != rules['fuente']['sha256']:
+        raise ValueError('El DOCX cambió: revisar y regenerar reglas_calificacion.json.')
+    dictionary_path = ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json'
+    dictionary = json.loads(dictionary_path.read_text(encoding='utf-8'))
+    title = next((block for block in evidence[SUFFIXES[0]]
+                  if block['tipo'] == 'parrafo' and 'Medición del municipio' in block['texto']), None)
+    identity = re.search(r'municipio de\s+(.+?),\s+([^,\n]+)', title['texto']) if title else None
+    validations = []
+    state = None
+    if identity and identity[1].strip().casefold() == municipality.casefold():
+        state = identity[2].strip()
+    else:
+        validations.append({'codigo': 'IDENTIDAD_NO_CONFIRMADA', 'nivel': 'bloqueante'})
+    evaluations = {}
+    for period in ('general', 'ultimo_periodo'):
+        calculations = {section['numero']: calificar_indicador(section, ficha, period)
+                        for section, ficha in zip(sections, rules['fichas'])}
+        dependencias(calculations)
+        evaluations[period] = calculations
+    for section, annex in zip(sections, annex_sections):
+        number = section['numero']
+        section['evaluaciones'] = {period: values[number] for period, values in evaluations.items()}
+        raw = lambda item: [(t['ambito'], t['filas']) for t in item['tablas']]
+        section['control_cruzado_anexo'] = {
+            'tablas_identicas': raw(section) == raw(annex),
+            'calificacion_reportada_coincide': section['calificacion_general_reportada'] == annex['calificacion_general_reportada'],
+            'tablas_anexo': [t['tabla'] for t in annex['tablas']],
         }
-    )
-    unresolved = sorted(key for key, value in values.items() if value is None)
-    validations = [
-        {
-            "nivel": "bloqueante",
-            "codigo": "CALIFICACION_ULTIMO_PERIODO_AUSENTE",
-            "detalle": (
-                "Las cuatro fuentes no contienen una calificación del último "
-                "periodo ya calculada para los 18 indicadores."
-            ),
-        },
-        {
-            "nivel": "bloqueante",
-            "codigo": "VARIABLES_SIN_VALOR_VALIDADO",
-            "detalle": f"Quedan sin valor validado {len(unresolved)} variables del machote.",
-            "variables": unresolved,
-        },
-    ]
+        if not all(section['control_cruzado_anexo'][key] for key in ('tablas_identicas', 'calificacion_reportada_coincide')):
+            validations.append({'nivel': 'revision', 'codigo': 'DIFERENCIA_ANEXO', 'indicador': number,
+                                'detalle': 'Diferencia documental detectada; revisar si es sustantiva o de formato.'})
+        for period, calculation in section['evaluaciones'].items():
+            if calculation['puntaje'] is None:
+                validations.append({'nivel': 'bloqueante', 'codigo': 'INDICADOR_PENDIENTE',
+                                    'indicador': number, 'periodo': period, 'detalle': calculation['motivo']})
+    years = sorted({row['año'] for section in sections for table in section['tablas']
+                    if table['ambito'] == 'municipal' for row in registros(table)})
+    census_years = sorted({row['año'] for section in sections[:16] for table in section['tablas']
+                           if table['ambito'] == 'municipal' for row in registros(table)})
+    values = {key: None for key in dictionary['variables_documento']}
+    values.update(municipio=municipality, estado=state)
+    if years:
+        values.update({'año_inicial': years[0], 'año_final': years[-1]})
+    if len(census_years) >= 2:
+        values.update({'año_ultimo_periodo_inicial': census_years[-2], 'año_ultimo_periodo_final': census_years[-1]})
+    validations.append({'nivel': 'revision', 'codigo': 'COBERTURA_EDICIONES',
+                        'detalle': 'Los años son etiquetas de las tablas. Confirmar su relación con edición censal y años no observados antes de cerrar el diagnóstico.'})
+    unresolved = [key for key, value in values.items() if value is None]
+    if unresolved:
+        validations.append({'nivel': 'bloqueante', 'codigo': 'VARIABLES_PENDIENTES', 'variables': unresolved,
+                            'detalle': 'Separar variables de variantes descartadas de campos necesarios antes de validar el Word.'})
+    aggregates = {period: agregar(results, rules) for period, results in evaluations.items()}
+    validations.append({'nivel': 'bloqueante', 'codigo': 'COMPOSICION_WORD_PENDIENTE',
+                        'detalle': 'Falta composición editorial y renderizado con resaltado amarillo verificado.'})
+    run = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8]
     result = {
-        "version": "1.0",
-        "ejecutado_en": datetime.now(timezone.utc).isoformat(),
-        "municipio": municipality,
-        "estado": state,
-        "estado_ejecucion": "requiere_revision",
-        "contrato": {
-            "diccionario": dictionary_path.name,
-            "diccionario_sha256": sha256(dictionary_path),
-            "plantilla": "templates/Machote_seguridad_general_con_calificacion.docx",
-        },
-        "fuentes": [
-            {
-                "archivo": path.name,
-                "rol": (
-                    "primaria"
-                    if suffix == SECURITY_SUFFIX
-                    else "control_cruzado_o_contexto"
-                ),
-                "sha256": sha256(path),
-            }
-            for suffix, path in documents.items()
-        ],
-        "valores_plantilla": values,
-        "indicadores": indicators,
-        "calculos": {
-            "calificacion_general_reportada": "REGULAR",
-            "calificacion_ultimo_periodo": None,
-        },
-        "validaciones": validations,
-        "salida_word_generada": False,
+        'version': '1.1', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
+        'estado_ejecucion': 'requiere_revision',
+        'contrato': {'diccionario_sha256': sha256(dictionary_path), 'plantilla_sha256': sha256(template),
+                     'reglas_sha256': sha256(rules_path)},
+        'fuentes': [{'archivo': path.name, 'sha256': sha256(path),
+                     'rol': 'primaria' if suffix == SUFFIXES[1] else 'control_cruzado_o_contexto'}
+                    for suffix, path in documents.items()],
+        'identidad_evidencia': title, 'valores_plantilla': values,
+        'indicadores': sections, 'calculos': aggregates,
+        'evidencia_documental': {documents[suffix].name: blocks for suffix, blocks in evidence.items()},
+        'validaciones': validations, 'salida_word_generada': False,
     }
-    json_dir = arguments.output / "json"
-    json_dir.mkdir(parents=True, exist_ok=True)
-    output_path = json_dir / f"{slug(municipality)}_diagnostico_seguridad_municipal.json"
-    output_path.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    print(f"JSON de prevalidación: {output_path}")
-    print("Estado: requiere_revision; no se generó Word final.")
-    return 0
+    directory = args.output / 'json'
+    directory.mkdir(parents=True, exist_ok=True)
+    dest = directory / f'{slug(municipality)}_diagnostico_seguridad_municipal_{run}.json'
+    temporary = dest.with_suffix('.json.tmp')
+    try:
+        with temporary.open('x', encoding='utf-8') as target:
+            json.dump(result, target, ensure_ascii=False, indent=2)
+            target.write('\n')
+        temporary.replace(dest)
+    finally:
+        temporary.unlink(missing_ok=True)
+    print(f'JSON: {dest}')
+    for period, results in evaluations.items():
+        print(f'{period}: {sum(value["puntaje"] is not None for value in results.values())}/18 indicadores calculados.')
+    print('Estado: requiere_revision. Los motivos específicos constan en validaciones.')
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == '__main__':
+    main()

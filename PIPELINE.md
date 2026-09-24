@@ -158,17 +158,77 @@ por defecto:
 
     python3 scripts/ejecutar_pipeline.py
 
-Valida el conjunto de cuatro DOCX, identifica el municipio, registra las
-huellas SHA-256 de las fuentes, extrae las 18 calificaciones generales del
-paquete de seguridad y escribe el JSON de salida. Nunca altera el diccionario,
-el machote ni los Word de entrada.
+Valida los cuatro DOCX, identifica municipio y estado, registra las huellas
+SHA-256 y conserva párrafos y tablas con coordenadas de bloque, tabla y fila.
+Extrae los 18 indicadores, compara sus tablas con el Anexo y calcula por
+separado el periodo general y el reciente en los casos implementados.
 
-El renderizado a Word sólo se habilita cuando el JSON tenga estado validado.
-Una ejecución con requiere_revision conserva el JSON y sus errores, pero no
-crea un documento Word que pueda confundirse con un resultado final.
+Cada corrida escribe un archivo nuevo con municipio e identificador de
+ejecución; conserva las salidas anteriores. Los años se extraen de las tablas
+y se registra la cobertura de cada indicador. Las calificaciones reportadas
+en la fuente se conservan separadas de las calculadas. La ausencia de una
+calificación reciente en la fuente no constituye un bloqueo: se calcula a
+partir de los datos cuando el criterio lo permite.
+
+El JSON incluye las tablas originales de los cuatro documentos para auditar
+la extracción. Todavía no extrae contenido exclusivo de imágenes o gráficas.
+
+El renderizador todavía está pendiente de implementación. Su contrato exige
+JSON validado y resaltado amarillo para toda inserción, conforme a la sección
+Word de salida. Las corridas actuales conservan estado requiere_revision.
+
+## Reglas de calificación versionadas
+
+[reglas_calificacion.json](reglas_calificacion.json) contiene las 18 fichas y
+los 90 criterios de puntuación transcritos del Anexo 1, con coordenadas en el
+DOCX, datos requeridos, precauciones y hash del documento fuente. Estas reglas
+reproducen la metodología interna; no acreditan vigencia normativa externa.
+
+Para regenerarlo tras una revisión del documento base:
+
+    python3 scripts/estructurar_reglas.py
+
+El motor de scripts/calificar.py interpreta las condiciones estructuradas
+del JSON. Hay automatización de existencia (1, 6, 11, 12, 13 y 16), continuidad
+de cursos (2) y porcentajes de evaluación y CUP (5 y 7). Las dependencias
+3→2, 6→10 y 12→11 se aplican antes de agregar resultados. Los otros nueve
+indicadores tienen criterios transcritos, pero requieren completar la
+normalización y automatización contextual; su puntaje permanece pendiente.
+
+La agregación exige los 18 puntajes: promedia por dimensión y después entre
+las tres dimensiones, aplicando los candados generales 1–4. Los ajustes por
+dato dudoso son decisiones del evaluador y no se aplican automáticamente.
+La composición narrativa y su comprobación de divergencia entre periodos
+siguen pendientes.
+
+Criterios operativos explícitos de esta implementación:
+
+- Se conserva precisión decimal interna y se clasifica el promedio agregado
+  con redondeo ROUND_HALF_UP a dos decimales. Es una concreción técnica de la
+  propuesta de redondeo del diccionario y debe constar al revisar el método.
+- Los rangos individuales se interpretan literalmente. No se rellenan huecos
+  entre umbrales ni se decide un puntaje cuando ninguna condición coincide.
+- En los indicadores binarios, existencia anterior con ausencia en las dos
+  observaciones recientes aplica el criterio 2 antes del de intermitencia.
+- Una celda vacía requiere clasificar la causa; no equivale automáticamente
+  a cero, falta de respuesta o inexistencia de la variable.
+- Se seleccionan las dos etiquetas temporales más recientes observadas sin
+  saltar vacíos. Debe confirmarse la relación entre edición y año de referencia,
+  así como la cobertura de las ediciones ausentes, antes de cerrar el informe.
+
+Pruebas reproducibles de umbrales, faltantes, dependencias y candados:
+
+    python3 -m unittest discover -s tests -v
 
 ## Siguiente paso técnico
 
-Completar el calculador reproducible para las calificaciones del último
-periodo. Una vez resuelto, el renderizador podrá generar el Word final sólo a
-partir de un JSON validado.
+Completar las reglas contextuales de los indicadores 3, 4, 8, 9, 10, 14, 15,
+17 y 18. Las necesidades a comprobar incluyen homologación de temas/prendas,
+población para las tasas, naturaleza del equipamiento, consistencia entre
+fallecimientos y sus desgloses, e incidencia delictiva para puestas a disposición.
+No se declara ausente un dato sólo porque su extracción aún no esté implementada.
+
+Después corresponde componer los análisis con evidencia, seleccionar las
+variantes narrativas y completar el renderizador con verificación del resaltado
+amarillo. Las variables de variantes descartadas no deben exigirse como si
+fueran campos obligatorios del informe final.

@@ -1,0 +1,2411 @@
+{
+  "version": "1.0",
+  "fuente": {
+    "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
+    "sha256": "375e8f58120fffec24367d4b57ced17151f78d175ca17cc7736f008c3d9a01e4"
+  },
+  "alcance": "Transcripción de criterios internos; no verifica vigencia legal ni bibliográfica.",
+  "criterio_operativo": {
+    "prioridad": "Primera regla satisfecha. En binarios, ausencia en el último periodo aplica 2 antes de intermitencia (3).",
+    "huecos": "No interpolar huecos entre umbrales ni asignar puntaje si no se satisface un criterio explícito.",
+    "faltantes": "Una celda vacía no demuestra falta de respuesta municipal; requiere clasificación.",
+    "periodos": "General: todas las observaciones documentadas. Último: dos etiquetas temporales más recientes, sin saltar vacíos.",
+    "cobertura": "No inferir que una variable no existía en las ediciones ausentes; declarar cobertura observada.",
+    "redondeo": "Agregación: ROUND_HALF_UP a dos decimales para clasificar; precisión interna conservada.",
+    "ajustes": "No se aplican ajustes discrecionales automáticos."
+  },
+  "dimensiones": {
+    "proteccion_civil": [
+      1,
+      2,
+      3
+    ],
+    "condiciones_del_personal": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "inteligencia_y_eficiencia_policial": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ]
+  },
+  "escala": [
+    {
+      "minimo": 4.5,
+      "calificacion": "EXCELENTE"
+    },
+    {
+      "minimo": 3.5,
+      "calificacion": "MUY BIEN"
+    },
+    {
+      "minimo": 2.5,
+      "calificacion": "REGULAR"
+    },
+    {
+      "minimo": 1.5,
+      "calificacion": "MAL"
+    },
+    {
+      "minimo": 1,
+      "calificacion": "CATASTRÓFICO"
+    }
+  ],
+  "candados": [
+    {
+      "id": 1,
+      "nombre": "dimension_colapsada",
+      "condicion": "Alguna dimensión obtiene menos de 1.50.",
+      "efecto": "La calificación no puede superar REGULAR."
+    },
+    {
+      "id": 2,
+      "nombre": "condicion_para_excelente",
+      "condicion": "Se pretende asignar EXCELENTE.",
+      "requisitos": [
+        "Ninguna dimensión por debajo de 4.00.",
+        "Ningún indicador con puntaje 1."
+      ]
+    },
+    {
+      "id": 3,
+      "nombre": "condicion_para_muy_bien",
+      "condicion": "Se pretende asignar MUY BIEN.",
+      "requisito": "Ninguna dimensión por debajo de 2.50."
+    },
+    {
+      "id": 4,
+      "nombre": "falta_de_informacion",
+      "condicion": "Más de la mitad de los 18 indicadores tiene puntaje 1 por falta de respuesta municipal.",
+      "umbral_con_18_indicadores": 10,
+      "efecto": "Asignar CATASTRÓFICO."
+    },
+    {
+      "id": 5,
+      "nombre": "ajuste_por_dato_dudoso",
+      "variacion_permitida": [
+        -1,
+        1
+      ],
+      "maximo_ajustes_segun_documento": 3,
+      "unidad_del_limite_en_el_documento": "por_evaluacion",
+      "requisito": "Justificación escrita en la hoja de cómputo.",
+      "nota": "Registrar estos ajustes en los indicadores y no tratarlos como un descuento fijo sobre el promedio."
+    },
+    {
+      "id": 6,
+      "nombre": "divergencia_entre_periodos",
+      "condicion": "Diferencia de dos niveles o más entre las categorías finales.",
+      "efecto": "Exigir una explicación narrativa del cambio.",
+      "modifica_puntaje": false
+    }
+  ],
+  "fichas": [
+    {
+      "id": 1,
+      "nombre": "Plan o programa de protección civil",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Existe en todas las ediciones.",
+          "tabla": 3,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Existe en las dos ediciones más recientes y en al menos la mitad de la serie.",
+          "tabla": 3,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Existe de forma intermitente, o solo en la edición más reciente.",
+          "tabla": 3,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Existió alguna vez, pero no en el último periodo.",
+          "tabla": 3,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "No existe en ninguna edición, o no hay dato.",
+          "tabla": 3,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 415,
+          "texto": "Ficha 1. Plan o programa de protección civil"
+        },
+        {
+          "bloque": 416,
+          "texto": "Benchmark: Programa municipal de protección civil vigente, actualizado y ligado al atlas de riesgo."
+        },
+        {
+          "bloque": 417,
+          "texto": "Dato del censo: Existencia del programa (Sí/No) por edición; dato estatal: % de municipios con programa."
+        },
+        {
+          "bloque": 418,
+          "texto": "Lógica: El Marco de Sendai y los indicadores ODS 1.5.4, 11.b.2 y 13.1.3 miden precisamente la proporción de gobiernos locales con estrategias de reducción del riesgo, de modo que la existencia del programa es el mínimo verificable a escala internacional; la Ley General de Protección Civil y la ley estatal de protección civil lo convierten, además, en obligación legal."
+        },
+        {
+          "bloque": 419,
+          "texto": "Sin embargo, la literatura advierte que el plan como documento no equivale a preparación. Perry y Lindell (2003) muestran que lo que predice una respuesta eficaz es el proceso de planeación (actualización, ejercicios, coordinación entre dependencias), y Alcántara-Ayala et al. (2019) insisten en que el riesgo se construye y se reduce en la escala local, vinculado al uso del territorio. Por eso el benchmark no se limita a 'existe', sino que pide vigencia, actualización y relación con un atlas de riesgo."
+        },
+        {
+          "bloque": 420,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 422,
+          "texto": "Nota de aplicación: Si hay evidencia documental (publicación en el periódico oficial) que contradice el censo, anotarla y usar el ajuste por dato dudoso."
+        }
+      ],
+      "datos_requeridos": {
+        "existe_programa": {
+          "tipo_dato": "boolean",
+          "periodicidad": "por_edicion"
+        },
+        "porcentaje_estatal_municipios_con_programa": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "evidencia_documental_programa": {
+          "tipo_dato": "string",
+          "debe_contener": "Referencia documental disponible sobre existencia, publicación o vigencia."
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "existencia",
+      "reglas_ejecutables": [
+        {
+          "puntaje": 5,
+          "todas": [
+            [
+              "todas",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 1, criterio 5"
+        },
+        {
+          "puntaje": 4,
+          "todas": [
+            [
+              "dos_recientes",
+              "eq",
+              true
+            ],
+            [
+              "proporcion",
+              "ge",
+              0.5
+            ]
+          ],
+          "referencia": "Ficha 1, criterio 4"
+        },
+        {
+          "puntaje": 2,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ],
+            [
+              "ninguna_reciente",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 1, criterio 2"
+        },
+        {
+          "puntaje": 3,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 1, criterio 3"
+        },
+        {
+          "puntaje": 1,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              false
+            ]
+          ],
+          "referencia": "Ficha 1, criterio 1"
+        }
+      ],
+      "regla_especifica": null,
+      "precauciones": [
+        "La existencia declarada no acredita por sí sola actualización ni funcionamiento.",
+        "Si la evidencia documental contradice el censo, registrar la discrepancia y justificar cualquier ajuste."
+      ]
+    },
+    {
+      "id": 2,
+      "nombre": "Capacitación en materia de protección civil",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Hubo cursos y personal capacitado en todas las ediciones.",
+          "tabla": 4,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Hubo cursos en al menos 75% de las ediciones, incluidas las dos más recientes.",
+          "tabla": 4,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Hubo cursos en al menos la mitad de las ediciones, o en la más reciente.",
+          "tabla": 4,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Hubo cursos en menos de la mitad de las ediciones y ninguno en el último periodo.",
+          "tabla": 4,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "No hubo cursos en ninguna edición, o no hay dato.",
+          "tabla": 4,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 423,
+          "texto": "Ficha 2. Capacitación en materia de protección civil"
+        },
+        {
+          "bloque": 424,
+          "texto": "Benchmark: Formación básica del Sistema Nacional de Protección Civil (SINAPROC) para el personal de la unidad municipal y cursos cada año."
+        },
+        {
+          "bloque": 425,
+          "texto": "Dato del censo: Número de cursos y de servidores públicos capacitados; dato estatal: totales de la entidad."
+        },
+        {
+          "bloque": 426,
+          "texto": "Lógica: La prioridad 4 de Sendai y los aspectos 6 y 7 de la iniciativa Desarrollando Ciudades Resilientes (MCR2030) suponen capacidad institucional instalada. Las revisiones sobre educación para la reducción del riesgo coinciden en que la capacitación aislada produce mejoras de corto plazo y que la preparación se sostiene con refuerzos periódicos y simulacros."
+        },
+        {
+          "bloque": 427,
+          "texto": "Por eso el umbral no es un número de cursos, que depende del tamaño del municipio, sino la continuidad anual y la cobertura del personal responsable de protección civil. Un municipio pequeño puede cumplir con uno o dos cursos al año si llegan a toda su unidad."
+        },
+        {
+          "bloque": 428,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 430,
+          "texto": "Nota de aplicación: No comparar el conteo municipal con el total estatal, que es una suma dominada por las ciudades grandes."
+        }
+      ],
+      "datos_requeridos": {
+        "numero_cursos": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "numero_servidores_publicos_capacitados": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "totales_estatales": {
+          "tipo_dato": "object",
+          "debe_contener": "Conteos estatales de cursos y personas con sus definiciones."
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "cursos",
+      "reglas_ejecutables": [
+        {
+          "puntaje": 5,
+          "todas": [
+            [
+              "cursos_y_personal_siempre",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 2, criterio 5"
+        },
+        {
+          "puntaje": 4,
+          "todas": [
+            [
+              "proporcion",
+              "ge",
+              0.75
+            ],
+            [
+              "dos_recientes",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 2, criterio 4"
+        },
+        {
+          "puntaje": 3,
+          "todas": [
+            [
+              "proporcion",
+              "ge",
+              0.5
+            ]
+          ],
+          "referencia": "Ficha 2, criterio 3"
+        },
+        {
+          "puntaje": 3,
+          "todas": [
+            [
+              "ultima",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 2, criterio 3"
+        },
+        {
+          "puntaje": 2,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ],
+            [
+              "proporcion",
+              "lt",
+              0.5
+            ],
+            [
+              "ninguna_reciente",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 2, criterio 2"
+        },
+        {
+          "puntaje": 1,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              false
+            ]
+          ],
+          "referencia": "Ficha 2, criterio 1"
+        }
+      ],
+      "regla_especifica": null,
+      "precauciones": [
+        "No comparar directamente el conteo municipal con una suma estatal como si fueran unidades equivalentes.",
+        "Distinguir personas únicas de participaciones si la fuente lo permite."
+      ]
+    },
+    {
+      "id": 3,
+      "nombre": "Temas de la capacitación (protección civil)",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Cinco o más temas núcleo en el periodo, incluido el análisis de riesgos.",
+          "tabla": 5,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Cuatro temas núcleo.",
+          "tabla": 5,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Dos o tres temas núcleo.",
+          "tabla": 5,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Un tema núcleo.",
+          "tabla": 5,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "Ningún tema, o no hubo capacitación.",
+          "tabla": 5,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 431,
+          "texto": "Ficha 3. Temas de la capacitación (protección civil)"
+        },
+        {
+          "bloque": 432,
+          "texto": "Benchmark: Cobertura de los seis temas núcleo: identificación y análisis de riesgos; Sistema de Comando de Incidentes; mapas de riesgo y alerta temprana; evacuación, búsqueda y rescate; primeros auxilios; y prevención y combate de incendios."
+        },
+        {
+          "bloque": 433,
+          "texto": "Dato del censo: Temas impartidos por edición; dato estatal: % de municipios que impartieron cada tema."
+        },
+        {
+          "bloque": 434,
+          "texto": "Lógica: Los temas núcleo se derivan del ciclo de gestión integral de riesgos que establece la Ley General de Protección Civil (identificación, prevención, preparación, auxilio y recuperación) y de estándares técnicos específicos: el SCI para la coordinación, la iniciativa Alertas Tempranas para Todos, las guías del Grupo Asesor Internacional de Operaciones de Búsqueda y Rescate (INSARAG) y las de primeros auxilios de la Federación Internacional de Sociedades de la Cruz Roja y de la Media Luna Roja (FICR)."
+        },
+        {
+          "bloque": 435,
+          "texto": "Un municipio que capacita solo en respuesta (incendios, primeros auxilios) y no en análisis de riesgos o elaboración de programas se queda en la fase reactiva. La literatura de vulnerabilidad (Blaikie et al., 1994; Wisner et al., 2012) la considera insuficiente, porque no toca las causas del riesgo."
+        },
+        {
+          "bloque": 436,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 438,
+          "texto": "Nota de aplicación: Si el indicador 2 obtiene 1, este indicador también obtiene 1. Aun así, se registra por separado para no ocultar la carencia."
+        }
+      ],
+      "datos_requeridos": {
+        "temas_impartidos_por_edicion": {
+          "tipo_dato": "array",
+          "debe_contener": "Tema, edición y condición de impartición."
+        },
+        "temas_nucleo_cubiertos": {
+          "tipo_dato": "array",
+          "tipo_elemento": "string"
+        },
+        "numero_temas_nucleo": {
+          "tipo_dato": "integer",
+          "minimo": 0,
+          "maximo": 6
+        },
+        "incluye_analisis_de_riesgos": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_por_tema": {
+          "tipo_dato": "array",
+          "debe_contener": "Porcentaje de municipios que impartieron cada tema, por edición."
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "revision_contextual",
+      "reglas_ejecutables": [],
+      "regla_especifica": "Si el indicador 2 obtiene 1, este indicador también obtiene 1 en la misma evaluación.",
+      "precauciones": []
+    },
+    {
+      "id": 4,
+      "nombre": "Personal destinado a funciones de seguridad pública",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "≥ 1.8 por cada 1,000 habitantes en todas las ediciones.",
+          "tabla": 6,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "≥ 1.8 en las dos ediciones más recientes y en al menos la mitad de la serie.",
+          "tabla": 6,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Promedio entre 1.2 y 1.79, o ≥ 1.8 solo en la edición más reciente.",
+          "tabla": 6,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Promedio entre 0.8 y 1.19.",
+          "tabla": 6,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "Promedio < 0.8, o no hay dato.",
+          "tabla": 6,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 439,
+          "texto": "Ficha 4. Personal destinado a funciones de seguridad pública"
+        },
+        {
+          "bloque": 440,
+          "texto": "Benchmark: Al menos 1.8 policías por cada 1,000 habitantes (Modelo Óptimo de la Función Policial, MOFP)."
+        },
+        {
+          "bloque": 441,
+          "texto": "Dato del censo: Total de personal por edición; se divide entre la población del censo o conteo del Consejo Nacional de Población (CONAPO) más cercano."
+        },
+        {
+          "bloque": 442,
+          "texto": "Lógica: El MOFP del Secretariado Ejecutivo del Sistema Nacional de Seguridad Pública (SESNSP) fijó 1.8 como punto medio entre el promedio mexicano (0.8) y la referencia de la ONU (2.8 policías por cada 1,000 habitantes). La evidencia económica (Chalfin y McCrary, 2018) muestra que más policías reducen delitos violentos, y la de puntos calientes (Braga et al., 2019) indica que el despliegue importa tanto como el número."
+        },
+        {
+          "bloque": 443,
+          "texto": "Por eso el benchmark funciona como un piso de capacidad, no como una medida de desempeño: un municipio puede superarlo y aun así no tener cobertura efectiva si el personal disponible no alcanza para sostener turnos."
+        },
+        {
+          "bloque": 444,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 446,
+          "texto": "Nota de aplicación: Criterio ajustable: si el estado de fuerza total tiene menos de 15 elementos, el puntaje máximo es 4, porque la cobertura por turno es insuficiente aunque la tasa sea alta."
+        }
+      ],
+      "datos_requeridos": {
+        "total_personal": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "poblacion": {
+          "tipo_dato": "integer",
+          "minimo_para_calcular_tasa": 1
+        },
+        "año_referencia_poblacion": {
+          "tipo_dato": "integer"
+        },
+        "policias_por_mil_habitantes": {
+          "tipo_dato": "number",
+          "formula": "total_personal / poblacion * 1000"
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "revision_contextual",
+      "reglas_ejecutables": [],
+      "regla_especifica": "La ficha establece un máximo de 4 si la plantilla total tiene menos de 15 elementos.",
+      "precauciones": [
+        "Documentar el año y la fuente de población.",
+        "Aclarar cómo se aplica el límite de plantilla cuando su tamaño cambia durante el periodo."
+      ]
+    },
+    {
+      "id": 5,
+      "nombre": "Evaluaciones de control de confianza",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Promedio ≥ 95% y sin caídas bajo 85% en ningún año.",
+          "tabla": 7,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Promedio entre 85% y 94.9%.",
+          "tabla": 7,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Promedio entre 70% y 84.9%.",
+          "tabla": 7,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Promedio entre 50% y 69.9%.",
+          "tabla": 7,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "Promedio < 50%, o no hay dato.",
+          "tabla": 7,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 447,
+          "texto": "Ficha 5. Evaluaciones de control de confianza"
+        },
+        {
+          "bloque": 448,
+          "texto": "Benchmark: 100% del estado de fuerza con control de confianza aprobado y vigente (MOFP; Ley General del Sistema Nacional de Seguridad Pública, LGSNSP)."
+        },
+        {
+          "bloque": 449,
+          "texto": "Dato del censo: % del personal evaluado por edición; dato estatal: % de la entidad."
+        },
+        {
+          "bloque": 450,
+          "texto": "Lógica: La evaluación de control de confianza es requisito legal de ingreso y permanencia, y el MOFP fija el 100% como estándar. La literatura sobre integridad policial (UNODC, 2011; Sabet, 2012) la ubica como un filtro necesario, pero advierte que por sí sola no produce integridad si no hay supervisión, controles internos y consecuencias."
+        },
+        {
+          "bloque": 451,
+          "texto": "La evidencia sobre el polígrafo, uno de sus componentes (National Research Council, 2003), muestra tasas de error relevantes en tamizaje. Por eso el benchmark se interpreta como cumplimiento normativo, no como medida de integridad."
+        },
+        {
+          "bloque": 452,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 454,
+          "texto": "Nota de aplicación: Si el censo pregunta por personal 'evaluado' y no 'aprobado', decirlo en el texto: 100% evaluado no equivale a 100% aprobado."
+        }
+      ],
+      "datos_requeridos": {
+        "porcentaje_personal_evaluado": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "porcentaje_estatal": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "definicion_exacta_variable": {
+          "tipo_dato": "string",
+          "debe_contener": "Aclaración de si la fuente mide evaluación, aprobación o vigencia."
+        },
+        "evidencia_aprobacion_y_vigencia": {
+          "tipo_dato": "string",
+          "obligatorio": "Si se afirma que el personal está aprobado y vigente."
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "porcentaje",
+      "reglas_ejecutables": [
+        {
+          "puntaje": 5,
+          "todas": [
+            [
+              "promedio",
+              "ge",
+              95
+            ],
+            [
+              "minimo",
+              "ge",
+              85
+            ]
+          ],
+          "referencia": "Ficha 5, criterio 5"
+        },
+        {
+          "puntaje": 4,
+          "todas": [
+            [
+              "promedio",
+              "ge",
+              85
+            ],
+            [
+              "promedio",
+              "le",
+              94.9
+            ]
+          ],
+          "referencia": "Ficha 5, criterio 4"
+        },
+        {
+          "puntaje": 3,
+          "todas": [
+            [
+              "promedio",
+              "ge",
+              70
+            ],
+            [
+              "promedio",
+              "le",
+              84.9
+            ]
+          ],
+          "referencia": "Ficha 5, criterio 3"
+        },
+        {
+          "puntaje": 2,
+          "todas": [
+            [
+              "promedio",
+              "ge",
+              50
+            ],
+            [
+              "promedio",
+              "le",
+              69.9
+            ]
+          ],
+          "referencia": "Ficha 5, criterio 2"
+        },
+        {
+          "puntaje": 1,
+          "todas": [
+            [
+              "promedio",
+              "lt",
+              50
+            ]
+          ],
+          "referencia": "Ficha 5, criterio 1"
+        }
+      ],
+      "regla_especifica": null,
+      "precauciones": [
+        "No presentar personal evaluado como equivalente a personal aprobado y vigente."
+      ]
+    },
+    {
+      "id": 6,
+      "nombre": "Instituto de formación, capacitación y/o profesionalización",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Existe en todas las ediciones.",
+          "tabla": 8,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Existe en las dos ediciones más recientes y en al menos la mitad de la serie.",
+          "tabla": 8,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Existe de forma intermitente, o solo en la edición más reciente.",
+          "tabla": 8,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Existió alguna vez, pero no en el último periodo.",
+          "tabla": 8,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "No existe en ninguna edición, o no hay dato.",
+          "tabla": 8,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 455,
+          "texto": "Ficha 6. Instituto de formación, capacitación y/o profesionalización"
+        },
+        {
+          "bloque": 456,
+          "texto": "Benchmark: Acceso a formación inicial y continua, propia o mediante convenio."
+        },
+        {
+          "bloque": 457,
+          "texto": "Dato del censo: Existencia de instituto municipal por edición; dato estatal: % de municipios con instituto."
+        },
+        {
+          "bloque": 458,
+          "texto": "Lógica: La LGSNSP y el Programa Rector de Profesionalización exigen formación inicial y continua, pero no que cada municipio tenga su propia academia; para un municipio pequeño, crear un instituto sería ineficiente. La evidencia (Wood et al., 2020; Engel et al., 2020) indica que lo que marca la diferencia es el contenido y la evaluación de la capacitación, no la infraestructura."
+        },
+        {
+          "bloque": 459,
+          "texto": "Por eso el benchmark se formula como acceso: el municipio cumple si su personal recibe formación en la academia o el instituto estatal, o en otra institución mediante convenio."
+        },
+        {
+          "bloque": 460,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 462,
+          "texto": "Nota de aplicación: Si no hay instituto propio pero el indicador 10 obtiene 3 o más, asignar al menos 3: la formación puede darse en una academia estatal o regional."
+        }
+      ],
+      "datos_requeridos": {
+        "existe_instituto_municipal": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_municipios_con_instituto": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "acceso_a_academia_externa": {
+          "tipo_dato": "boolean",
+          "admite_null": true
+        },
+        "evidencia_convenio_o_formacion_externa": {
+          "tipo_dato": "string"
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "existencia",
+      "reglas_ejecutables": [
+        {
+          "puntaje": 5,
+          "todas": [
+            [
+              "todas",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 6, criterio 5"
+        },
+        {
+          "puntaje": 4,
+          "todas": [
+            [
+              "dos_recientes",
+              "eq",
+              true
+            ],
+            [
+              "proporcion",
+              "ge",
+              0.5
+            ]
+          ],
+          "referencia": "Ficha 6, criterio 4"
+        },
+        {
+          "puntaje": 2,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ],
+            [
+              "ninguna_reciente",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 6, criterio 2"
+        },
+        {
+          "puntaje": 3,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 6, criterio 3"
+        },
+        {
+          "puntaje": 1,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              false
+            ]
+          ],
+          "referencia": "Ficha 6, criterio 1"
+        }
+      ],
+      "regla_especifica": "Si no existe instituto propio pero el indicador 10 obtiene 3 o más, la ficha establece asignar al menos 3.",
+      "precauciones": [
+        "Ausencia de instituto propio no significa necesariamente ausencia de acceso a formación."
+      ]
+    },
+    {
+      "id": 7,
+      "nombre": "Certificado Único Policial vigente",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Promedio ≥ 95% y sin caídas bajo 85% en ningún año.",
+          "tabla": 9,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Promedio entre 85% y 94.9%.",
+          "tabla": 9,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Promedio entre 70% y 84.9%.",
+          "tabla": 9,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Promedio entre 50% y 69.9%.",
+          "tabla": 9,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "Promedio < 50%, o no hay dato.",
+          "tabla": 9,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 463,
+          "texto": "Ficha 7. Certificado Único Policial vigente"
+        },
+        {
+          "bloque": 464,
+          "texto": "Benchmark: 100% del personal con Certificado Único Policial (CUP) vigente."
+        },
+        {
+          "bloque": 465,
+          "texto": "Dato del censo: % del personal con CUP vigente por edición; dato estatal: % de la entidad."
+        },
+        {
+          "bloque": 466,
+          "texto": "Lógica: El CUP reúne control de confianza, formación inicial, competencias básicas y evaluación del desempeño. Es el estándar compuesto más cercano a 'policía plenamente habilitado' según la LGSNSP y los lineamientos del Consejo Nacional de Seguridad Pública; de ahí que el umbral sea el 100%."
+        },
+        {
+          "bloque": 467,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 469,
+          "texto": "Nota de aplicación: Un 0% aislado entre valores altos, o incompatible con el indicador 5, se marca como dato dudoso."
+        }
+      ],
+      "datos_requeridos": {
+        "porcentaje_personal_cup_vigente": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "porcentaje_estatal_cup_vigente": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "revision_consistencia_control_confianza": {
+          "tipo_dato": "string"
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "porcentaje",
+      "reglas_ejecutables": [
+        {
+          "puntaje": 5,
+          "todas": [
+            [
+              "promedio",
+              "ge",
+              95
+            ],
+            [
+              "minimo",
+              "ge",
+              85
+            ]
+          ],
+          "referencia": "Ficha 7, criterio 5"
+        },
+        {
+          "puntaje": 4,
+          "todas": [
+            [
+              "promedio",
+              "ge",
+              85
+            ],
+            [
+              "promedio",
+              "le",
+              94.9
+            ]
+          ],
+          "referencia": "Ficha 7, criterio 4"
+        },
+        {
+          "puntaje": 3,
+          "todas": [
+            [
+              "promedio",
+              "ge",
+              70
+            ],
+            [
+              "promedio",
+              "le",
+              84.9
+            ]
+          ],
+          "referencia": "Ficha 7, criterio 3"
+        },
+        {
+          "puntaje": 2,
+          "todas": [
+            [
+              "promedio",
+              "ge",
+              50
+            ],
+            [
+              "promedio",
+              "le",
+              69.9
+            ]
+          ],
+          "referencia": "Ficha 7, criterio 2"
+        },
+        {
+          "puntaje": 1,
+          "todas": [
+            [
+              "promedio",
+              "lt",
+              50
+            ]
+          ],
+          "referencia": "Ficha 7, criterio 1"
+        }
+      ],
+      "regla_especifica": null,
+      "precauciones": [
+        "Marcar como dudoso un cero aislado entre valores altos o una inconsistencia relevante con el indicador 5."
+      ]
+    },
+    {
+      "id": 8,
+      "nombre": "Uniformes",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Dotación anual con cinco o más prendas básicas en todas las ediciones.",
+          "tabla": 10,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Dotación anual con cinco o más prendas básicas en el último periodo.",
+          "tabla": 10,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Dotación incompleta (menos de cinco prendas) o frecuencia 'una sola vez'.",
+          "tabla": 10,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Hubo dotación en una sola edición.",
+          "tabla": 10,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "Sin dotación, o no hay dato.",
+          "tabla": 10,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 470,
+          "texto": "Ficha 8. Uniformes"
+        },
+        {
+          "bloque": 471,
+          "texto": "Benchmark: Dotación completa y al menos anual de las prendas operativas básicas: camisola o camisa, pantalón, calzado, chamarra, fornitura o cinturón táctico y chaleco táctico."
+        },
+        {
+          "bloque": 472,
+          "texto": "Dato del censo: Prendas otorgadas y frecuencia de dotación por edición; dato estatal: % de municipios que otorgan cada prenda."
+        },
+        {
+          "bloque": 473,
+          "texto": "Lógica: No hay una norma nacional que fije la periodicidad del uniforme; el benchmark se apoya en la obligación de dotar a los elementos de lo necesario para su función (LGSNSP; Principio Básico 2 de la ONU sobre equipo de protección) y en la literatura sobre estrés organizacional. Purba y Demou (2019) muestran que las carencias materiales y organizacionales pesan en la salud mental tanto como el riesgo operativo."
+        },
+        {
+          "bloque": 474,
+          "texto": "La Encuesta Nacional de Estándares y Capacitación Profesional Policial (ENECAP 2017) permite documentar en qué medida los policías compran su propio equipo. Por eso se proponen dos criterios: 'completo' (camisola, pantalón, calzado, chamarra, chaleco táctico y fornitura) y 'periódico'."
+        },
+        {
+          "bloque": 475,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 477,
+          "texto": "Nota de aplicación: El censo no dice si la dotación alcanzó a todos los elementos; si hay información local al respecto, usarla en el texto."
+        }
+      ],
+      "datos_requeridos": {
+        "prendas_otorgadas": {
+          "tipo_dato": "array",
+          "tipo_elemento": "string"
+        },
+        "frecuencia_dotacion": {
+          "tipo_dato": "string"
+        },
+        "numero_prendas_basicas": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "porcentaje_estatal_por_prenda": {
+          "tipo_dato": "array"
+        },
+        "cobertura_del_personal": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100",
+          "admite_null": true
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "revision_contextual",
+      "reglas_ejecutables": [],
+      "regla_especifica": null,
+      "precauciones": [
+        "La entrega de prendas no demuestra que la dotación haya alcanzado a todo el personal."
+      ]
+    },
+    {
+      "id": 9,
+      "nombre": "Equipamiento",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "En todas las ediciones: chaleco/elemento ≥ 1, radio/elemento ≥ 0.5 y al menos un incapacitante menos letal.",
+          "tabla": 11,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Lo anterior en el último periodo.",
+          "tabla": 11,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Chaleco/elemento ≥ 0.5, pero sin radio suficiente o sin equipo menos letal.",
+          "tabla": 11,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Chaleco/elemento < 0.5.",
+          "tabla": 11,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "Sin equipo reportado, o no hay dato.",
+          "tabla": 11,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 478,
+          "texto": "Ficha 9. Equipamiento"
+        },
+        {
+          "bloque": 479,
+          "texto": "Benchmark: Chaleco balístico por elemento, radio para el personal en turno y al menos un incapacitante menos letal (Principio Básico 2 de la ONU; Ley Nacional sobre el Uso de la Fuerza)."
+        },
+        {
+          "bloque": 480,
+          "texto": "Dato del censo: Unidades de cada equipo por edición; se dividen entre el total de personal del indicador 4."
+        },
+        {
+          "bloque": 481,
+          "texto": "Lógica: El Principio Básico 2 de la ONU exige equipo de protección y alternativas menos letales para que el uso de la fuerza pueda graduarse; la Ley Nacional sobre el Uso de la Fuerza retoma esa obligación. Sin equipo menos letal, el policía queda entre no intervenir o usar el arma de fuego."
+        },
+        {
+          "bloque": 482,
+          "texto": "Sobre las cámaras corporales, la revisión de Lum et al. (2020) encuentra efectos mixtos sobre el uso de la fuerza y las quejas, por lo que su presencia se trata como deseable y no como umbral."
+        },
+        {
+          "bloque": 483,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 485,
+          "texto": "Nota de aplicación: Verificar si la variable es inventario o dotación del año: si es dotación, la ausencia en un año no implica que el equipo no exista."
+        }
+      ],
+      "datos_requeridos": {
+        "unidades_por_tipo_equipo": {
+          "tipo_dato": "array",
+          "debe_contener": "Tipo de equipo y número de unidades por edición."
+        },
+        "total_personal_denominador": {
+          "tipo_dato": "integer",
+          "debe_contener": "Personal compatible con el indicador 4."
+        },
+        "chalecos_por_elemento": {
+          "tipo_dato": "number"
+        },
+        "radios_por_elemento": {
+          "tipo_dato": "number"
+        },
+        "disponibilidad_equipo_menos_letal": {
+          "tipo_dato": "boolean"
+        },
+        "naturaleza_del_dato": {
+          "tipo_dato": "string",
+          "opciones": [
+            "inventario",
+            "dotacion_del_año",
+            "pendiente_aclarar"
+          ]
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "revision_contextual",
+      "reglas_ejecutables": [],
+      "regla_especifica": null,
+      "precauciones": [
+        "No dividir entre cero.",
+        "Una dotación anual de cero no prueba que el inventario sea cero.",
+        "Mantener consistencia temporal con el personal usado como denominador."
+      ]
+    },
+    {
+      "id": 10,
+      "nombre": "Temas de capacitación (policía)",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "En todas las ediciones, al menos la mitad del personal fue capacitado en dos o más temas núcleo.",
+          "tabla": 12,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Lo anterior en el último periodo.",
+          "tabla": 12,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Hubo capacitación en al menos un tema núcleo en la mitad o más de las ediciones.",
+          "tabla": 12,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Hubo capacitación en una sola edición.",
+          "tabla": 12,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "Sin capacitación, o no hay dato.",
+          "tabla": 12,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 486,
+          "texto": "Ficha 10. Temas de capacitación (policía)"
+        },
+        {
+          "bloque": 487,
+          "texto": "Benchmark: Formación continua anual en los temas núcleo: derechos humanos y uso de la fuerza, primer respondiente, Informe Policial Homologado (IPH), y proximidad o solución de problemas."
+        },
+        {
+          "bloque": 488,
+          "texto": "Dato del censo: Personal capacitado por tema y % del total por edición."
+        },
+        {
+          "bloque": 489,
+          "texto": "Lógica: Estos temas son el mínimo que exigen el Código Nacional de Procedimientos Penales, la Ley Nacional sobre el Uso de la Fuerza, el Modelo Nacional de Policía y Justicia Cívica y los Principios Básicos 19 y 20 de la ONU. En cuanto a la evidencia, la capacitación en justicia procedimental redujo el uso de la fuerza y las quejas en Chicago (Wood et al., 2020), mientras que la evidencia sobre desescalamiento es prometedora pero todavía débil (Engel et al., 2020)."
+        },
+        {
+          "bloque": 490,
+          "texto": "Para que los indicadores 11 a 13 funcionen, además, se requiere formación en análisis y en la metodología SARA (identificación, análisis, respuesta y evaluación). Por eso el benchmark combina un mínimo legal con temas que habilitan las estrategias con evidencia."
+        },
+        {
+          "bloque": 491,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 493,
+          "texto": "Nota de aplicación: Las categorías de temas cambian en 2020 y 2022; comparar por grupo de temas, no tema por tema."
+        }
+      ],
+      "datos_requeridos": {
+        "personal_capacitado_por_tema": {
+          "tipo_dato": "array",
+          "debe_contener": "Tema, edición y número de personas o porcentaje reportado."
+        },
+        "porcentaje_personal_capacitado_por_tema": {
+          "tipo_dato": "array"
+        },
+        "grupos_de_temas_homologados": {
+          "tipo_dato": "array",
+          "tipo_elemento": "string"
+        },
+        "regla_homologacion_entre_ediciones": {
+          "tipo_dato": "string"
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "revision_contextual",
+      "reglas_ejecutables": [],
+      "regla_especifica": null,
+      "precauciones": [
+        "Documentar cambios de categorías entre ediciones.",
+        "No sumar personas capacitadas por tema como si fueran personas únicas sin verificar duplicidades."
+      ]
+    },
+    {
+      "id": 11,
+      "nombre": "Sistemas de información georreferenciados",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Existe en todas las ediciones.",
+          "tabla": 13,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Existe en las dos ediciones más recientes y en al menos la mitad de la serie.",
+          "tabla": 13,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Existe de forma intermitente, o solo en la edición más reciente.",
+          "tabla": 13,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Existió alguna vez, pero no en el último periodo.",
+          "tabla": 13,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "No existe en ninguna edición, o no hay dato.",
+          "tabla": 13,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 494,
+          "texto": "Ficha 11. Sistemas de información georreferenciados"
+        },
+        {
+          "bloque": 495,
+          "texto": "Benchmark: Sistema de información geográfica (SIG) en uso para orientar el patrullaje."
+        },
+        {
+          "bloque": 496,
+          "texto": "Dato del censo: Existencia (Sí/No) por edición; dato estatal: % de municipios."
+        },
+        {
+          "bloque": 497,
+          "texto": "Lógica: La concentración del delito en pocos lugares (Weisburd, 2015) hace de la georreferenciación una condición previa para el patrullaje en puntos calientes y para evaluar resultados, siguiendo el esquema de focalizar, probar y dar seguimiento de Sherman (2013)."
+        },
+        {
+          "bloque": 498,
+          "texto": "El benchmark distingue existencia de uso, porque un SIG que no alimenta decisiones de despliegue no produce efectos."
+        },
+        {
+          "bloque": 499,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 501,
+          "texto": "Nota de aplicación: En municipios muy pequeños, el registro de incidentes con coordenadas puede considerarse equivalente si se documenta."
+        }
+      ],
+      "datos_requeridos": {
+        "existe_sistema": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_municipios_con_sistema": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "evidencia_uso_operativo": {
+          "tipo_dato": "string"
+        },
+        "equivalencia_registro_con_coordenadas": {
+          "tipo_dato": "string",
+          "debe_contener": "Justificación documental si se considera equivalente un registro de incidentes con coordenadas."
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "existencia",
+      "reglas_ejecutables": [
+        {
+          "puntaje": 5,
+          "todas": [
+            [
+              "todas",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 11, criterio 5"
+        },
+        {
+          "puntaje": 4,
+          "todas": [
+            [
+              "dos_recientes",
+              "eq",
+              true
+            ],
+            [
+              "proporcion",
+              "ge",
+              0.5
+            ]
+          ],
+          "referencia": "Ficha 11, criterio 4"
+        },
+        {
+          "puntaje": 2,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ],
+            [
+              "ninguna_reciente",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 11, criterio 2"
+        },
+        {
+          "puntaje": 3,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 11, criterio 3"
+        },
+        {
+          "puntaje": 1,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              false
+            ]
+          ],
+          "referencia": "Ficha 11, criterio 1"
+        }
+      ],
+      "regla_especifica": null,
+      "precauciones": [
+        "Existencia declarada no acredita uso efectivo para orientar el patrullaje."
+      ]
+    },
+    {
+      "id": 12,
+      "nombre": "Patrullajes estratégicos",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Existe en todas las ediciones.",
+          "tabla": 14,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Existe en las dos ediciones más recientes y en al menos la mitad de la serie.",
+          "tabla": 14,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Existe de forma intermitente, o solo en la edición más reciente.",
+          "tabla": 14,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Existió alguna vez, pero no en el último periodo.",
+          "tabla": 14,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "No existe en ninguna edición, o no hay dato.",
+          "tabla": 14,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 502,
+          "texto": "Ficha 12. Patrullajes estratégicos"
+        },
+        {
+          "bloque": 503,
+          "texto": "Benchmark: Patrullaje dirigido a puntos calientes, con dosificación documentada."
+        },
+        {
+          "bloque": 504,
+          "texto": "Dato del censo: Existencia (Sí/No) por edición; dato estatal: % de municipios."
+        },
+        {
+          "bloque": 505,
+          "texto": "Lógica: El experimento de Kansas City (Kelling et al., 1974) mostró que el patrullaje aleatorio no reduce el delito. La revisión de Braga et al. (2019) muestra que el patrullaje en puntos calientes sí lo hace, sin desplazamiento relevante, y Koper (1995) ofrece un parámetro de presencia intermitente de alrededor de 10 a 15 minutos."
+        },
+        {
+          "bloque": 506,
+          "texto": "La evidencia latinoamericana (Medellín, Bogotá y Montevideo) encuentra efectos más modestos y muy dependientes de la implementación. Por eso el benchmark pide focalización y registro de la dosis, no solo un programa declarado."
+        },
+        {
+          "bloque": 507,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 509,
+          "texto": "Nota de aplicación: Si el indicador 11 obtiene 1, la puntuación máxima aquí es 3: sin información georreferenciada es difícil que la focalización sea real."
+        }
+      ],
+      "datos_requeridos": {
+        "existen_patrullajes_estrategicos": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_municipios": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "evidencia_focalizacion_y_dosificacion": {
+          "tipo_dato": "string"
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "existencia",
+      "reglas_ejecutables": [
+        {
+          "puntaje": 5,
+          "todas": [
+            [
+              "todas",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 12, criterio 5"
+        },
+        {
+          "puntaje": 4,
+          "todas": [
+            [
+              "dos_recientes",
+              "eq",
+              true
+            ],
+            [
+              "proporcion",
+              "ge",
+              0.5
+            ]
+          ],
+          "referencia": "Ficha 12, criterio 4"
+        },
+        {
+          "puntaje": 2,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ],
+            [
+              "ninguna_reciente",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 12, criterio 2"
+        },
+        {
+          "puntaje": 3,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 12, criterio 3"
+        },
+        {
+          "puntaje": 1,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              false
+            ]
+          ],
+          "referencia": "Ficha 12, criterio 1"
+        }
+      ],
+      "regla_especifica": "Si el indicador 11 obtiene 1, este indicador no puede recibir más de 3 en la misma evaluación.",
+      "precauciones": []
+    },
+    {
+      "id": 13,
+      "nombre": "Atención a problemas comunitarios",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Existe en todas las ediciones.",
+          "tabla": 15,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Existe en las dos ediciones más recientes y en al menos la mitad de la serie.",
+          "tabla": 15,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Existe de forma intermitente, o solo en la edición más reciente.",
+          "tabla": 15,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Existió alguna vez, pero no en el último periodo.",
+          "tabla": 15,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "No existe en ninguna edición, o no hay dato.",
+          "tabla": 15,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 510,
+          "texto": "Ficha 13. Atención a problemas comunitarios"
+        },
+        {
+          "bloque": 511,
+          "texto": "Benchmark: Método documentado de solución de problemas (tipo SARA: identificación, análisis, respuesta y evaluación)."
+        },
+        {
+          "bloque": 512,
+          "texto": "Dato del censo: Existencia (Sí/No) por edición; dato estatal: % de municipios."
+        },
+        {
+          "bloque": 513,
+          "texto": "Lógica: Hinkle et al. (2020) encuentran efectos consistentes de la policía orientada a problemas sobre el delito y el desorden. En cambio, la policía de proximidad mejora la satisfacción y la legitimidad, pero tiene efectos débiles sobre el delito (Gill et al., 2014), y el estudio coordinado de Blair et al. (2021) en seis países del Sur Global encontró resultados nulos."
+        },
+        {
+          "bloque": 514,
+          "texto": "Por eso el benchmark exige un método de solución de problemas y no solo presencia o reuniones con la comunidad."
+        },
+        {
+          "bloque": 515,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 517,
+          "texto": "Nota de aplicación: Leer junto con el indicador 10: si no hay capacitación en proximidad o SARA, señalarlo en el texto."
+        }
+      ],
+      "datos_requeridos": {
+        "existe_atencion_a_problemas_comunitarios": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_municipios": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "metodo_documentado": {
+          "tipo_dato": "string"
+        },
+        "capacitacion_relacionada": {
+          "tipo_dato": "string",
+          "debe_contener": "Evidencia del indicador 10 sobre proximidad o solución de problemas."
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "existencia",
+      "reglas_ejecutables": [
+        {
+          "puntaje": 5,
+          "todas": [
+            [
+              "todas",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 13, criterio 5"
+        },
+        {
+          "puntaje": 4,
+          "todas": [
+            [
+              "dos_recientes",
+              "eq",
+              true
+            ],
+            [
+              "proporcion",
+              "ge",
+              0.5
+            ]
+          ],
+          "referencia": "Ficha 13, criterio 4"
+        },
+        {
+          "puntaje": 2,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ],
+            [
+              "ninguna_reciente",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 13, criterio 2"
+        },
+        {
+          "puntaje": 3,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 13, criterio 3"
+        },
+        {
+          "puntaje": 1,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              false
+            ]
+          ],
+          "referencia": "Ficha 13, criterio 1"
+        }
+      ],
+      "regla_especifica": null,
+      "precauciones": [
+        "No deducir la existencia de un método completo de solución de problemas a partir de una respuesta binaria."
+      ]
+    },
+    {
+      "id": 14,
+      "nombre": "Cámaras de vigilancia",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Hay cámaras en todas las ediciones, con tasa ≥ la estatal y sin retrocesos.",
+          "tabla": 16,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Tasa ≥ la estatal en el último periodo.",
+          "tabla": 16,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Hay cámaras, pero con tasa menor que la estatal.",
+          "tabla": 16,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Cámaras solo en alguna edición aislada.",
+          "tabla": 16,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "Sin cámaras, o no hay dato.",
+          "tabla": 16,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 518,
+          "texto": "Ficha 14. Cámaras de vigilancia"
+        },
+        {
+          "bloque": 519,
+          "texto": "Benchmark: Cámaras en lugares de mayor incidencia, con monitoreo activo y protocolo de datos personales."
+        },
+        {
+          "bloque": 520,
+          "texto": "Dato del censo: Total de cámaras por edición; se calcula la tasa por cada 1,000 habitantes y se compara con la estatal."
+        },
+        {
+          "bloque": 521,
+          "texto": "Lógica: La revisión de Piza et al. (2019) encuentra un efecto modesto de las cámaras, mayor cuando hay monitoreo activo y cuando se combinan con otras intervenciones; Gómez, Mejía y Tobón (2021) documentan un efecto disuasivo en Medellín. Desde los derechos humanos, la videovigilancia debe respetar el derecho a la privacidad (Oficina del Alto Comisionado de las Naciones Unidas para los Derechos Humanos, OACNUDH, 2018)."
+        },
+        {
+          "bloque": 522,
+          "texto": "Por eso el benchmark no es un número de cámaras, sino su ubicación, su monitoreo y su marco de uso."
+        },
+        {
+          "bloque": 523,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 525,
+          "texto": "Nota de aplicación: El censo no informa sobre monitoreo ni funcionamiento. Un salto abrupto en el conteo debe verificarse antes de puntuar con 5."
+        }
+      ],
+      "datos_requeridos": {
+        "total_camaras": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "poblacion": {
+          "tipo_dato": "integer",
+          "minimo_para_calcular_tasa": 1
+        },
+        "camaras_por_mil_habitantes": {
+          "tipo_dato": "number",
+          "formula": "total_camaras / poblacion * 1000"
+        },
+        "tasa_estatal_comparable": {
+          "tipo_dato": "number"
+        },
+        "evidencia_funcionamiento_y_monitoreo": {
+          "tipo_dato": "string"
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "revision_contextual",
+      "reglas_ejecutables": [],
+      "regla_especifica": null,
+      "precauciones": [
+        "El conteo no demuestra funcionamiento ni monitoreo activo.",
+        "Verificar saltos abruptos antes de asignar el puntaje máximo."
+      ]
+    },
+    {
+      "id": 15,
+      "nombre": "Llamadas procedentes",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Hay dato en todas las ediciones y el % es ≥ al estatal.",
+          "tabla": 17,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Hay dato en el último periodo y el % es ≥ al estatal.",
+          "tabla": 17,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Hay dato, pero el % es menor que el estatal.",
+          "tabla": 17,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Dato incompleto (ediciones vacías o en cero).",
+          "tabla": 17,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "No hay dato.",
+          "tabla": 17,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 526,
+          "texto": "Ficha 15. Llamadas procedentes"
+        },
+        {
+          "bloque": 527,
+          "texto": "Benchmark: Proporción creciente de llamadas procedentes y tiempos de respuesta medidos (Norma Técnica del 9-1-1)."
+        },
+        {
+          "bloque": 528,
+          "texto": "Dato del censo: % de llamadas procedentes y su número por edición; dato estatal: % de la entidad."
+        },
+        {
+          "bloque": 529,
+          "texto": "Lógica: El porcentaje de llamadas procedentes mide la calidad del filtro y de la demanda que llega a la policía. Blanes i Vidal y Kirchmaier (2018) muestran que el tiempo de respuesta afecta el esclarecimiento de delitos, de modo que el benchmark añade el tiempo como segunda dimensión; la Norma Técnica del 9-1-1 del SESNSP fija los procesos estándar de atención."
+        },
+        {
+          "bloque": 530,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 532,
+          "texto": "Nota de aplicación: Un 100% poco plausible se marca como dato dudoso y no puede recibir más de 3. Un porcentaje alto no es por sí mismo un buen resultado."
+        }
+      ],
+      "datos_requeridos": {
+        "numero_llamadas_procedentes": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "porcentaje_llamadas_procedentes": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "base_total_llamadas": {
+          "tipo_dato": "integer",
+          "admite_null": true
+        },
+        "porcentaje_estatal": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "tiempos_respuesta": {
+          "tipo_dato": "array",
+          "obligatorio": "Solo si están disponibles y se utilizan en el análisis."
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "revision_contextual",
+      "reglas_ejecutables": [],
+      "regla_especifica": "Un 100% poco plausible se marca como dato dudoso y no puede recibir más de 3 conforme a la ficha.",
+      "precauciones": [
+        "Un porcentaje alto no es por sí mismo evidencia de mejor resultado."
+      ]
+    },
+    {
+      "id": 16,
+      "nombre": "Informe anual de actividades",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Existe en todas las ediciones.",
+          "tabla": 18,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Existe en las dos ediciones más recientes y en al menos la mitad de la serie.",
+          "tabla": 18,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Existe de forma intermitente, o solo en la edición más reciente.",
+          "tabla": 18,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Existió alguna vez, pero no en el último periodo.",
+          "tabla": 18,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "No existe en ninguna edición, o no hay dato.",
+          "tabla": 18,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 533,
+          "texto": "Ficha 16. Informe anual de actividades"
+        },
+        {
+          "bloque": 534,
+          "texto": "Benchmark: Informe público anual con indicadores de resultado, no solo de actividad."
+        },
+        {
+          "bloque": 535,
+          "texto": "Dato del censo: Existencia (Sí/No) por edición; dato estatal: % de municipios."
+        },
+        {
+          "bloque": 536,
+          "texto": "Lógica: El informe es un instrumento de rendición de cuentas (UNODC, 2011; Organización para la Cooperación y el Desarrollo Económicos, OCDE, 2017, sobre gobierno abierto). La literatura sobre medición del desempeño (Moore y Braga, 2003; Sherman, 2013) advierte que los informes centrados en actividades (detenciones, patrullajes, operativos) crean incentivos perversos."
+        },
+        {
+          "bloque": 537,
+          "texto": "Por eso el benchmark pide indicadores de resultado: victimización, confianza, quejas y uso de la fuerza."
+        },
+        {
+          "bloque": 538,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 540,
+          "texto": "Nota de aplicación: Si existe un informe de gobierno con apartado de seguridad pero no un informe específico, anotarlo en el texto y considerar el ajuste por dato dudoso."
+        }
+      ],
+      "datos_requeridos": {
+        "existe_informe": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_municipios_con_informe": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "referencia_del_informe": {
+          "tipo_dato": "string"
+        },
+        "incluye_indicadores_de_resultado": {
+          "tipo_dato": "boolean",
+          "admite_null": true
+        },
+        "tipo_de_informe": {
+          "tipo_dato": "string",
+          "opciones": [
+            "especifico_de_seguridad",
+            "informe_de_gobierno_con_apartado_de_seguridad",
+            "otro",
+            "no_identificado"
+          ]
+        }
+      },
+      "periodicidad": "por_edicion",
+      "metodo": "existencia",
+      "reglas_ejecutables": [
+        {
+          "puntaje": 5,
+          "todas": [
+            [
+              "todas",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 16, criterio 5"
+        },
+        {
+          "puntaje": 4,
+          "todas": [
+            [
+              "dos_recientes",
+              "eq",
+              true
+            ],
+            [
+              "proporcion",
+              "ge",
+              0.5
+            ]
+          ],
+          "referencia": "Ficha 16, criterio 4"
+        },
+        {
+          "puntaje": 2,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ],
+            [
+              "ninguna_reciente",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 16, criterio 2"
+        },
+        {
+          "puntaje": 3,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              true
+            ]
+          ],
+          "referencia": "Ficha 16, criterio 3"
+        },
+        {
+          "puntaje": 1,
+          "todas": [
+            [
+              "alguna",
+              "eq",
+              false
+            ]
+          ],
+          "referencia": "Ficha 16, criterio 1"
+        }
+      ],
+      "regla_especifica": null,
+      "precauciones": [
+        "Distinguir existencia declarada, publicación y contenido efectivo del informe."
+      ]
+    },
+    {
+      "id": 17,
+      "nombre": "Cambio del estado de fuerza, egresos y fallecimientos",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Sin fallecimientos en toda la serie y con datos completos.",
+          "tabla": 19,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Sin fallecimientos en el último periodo; casos aislados antes.",
+          "tabla": 19,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Casos aislados, con tasa ≤ la estatal.",
+          "tabla": 19,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Tasa mayor que la estatal, o casos repetidos en enfrentamientos.",
+          "tabla": 19,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "Fallecimientos en la mayoría de los años, o no hay dato.",
+          "tabla": 19,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 541,
+          "texto": "Ficha 17. Cambio del estado de fuerza, egresos y fallecimientos"
+        },
+        {
+          "bloque": 542,
+          "texto": "Benchmark: Sin fallecimientos de policías y con capacidad de reposición del personal; seguimiento de la letalidad."
+        },
+        {
+          "bloque": 543,
+          "texto": "Dato del censo: Cadetes egresados (%), fallecimientos de policías y su desglose por evento e instrumento, por año; se calcula la tasa por cada 1,000 elementos y se compara con la estatal."
+        },
+        {
+          "bloque": 544,
+          "texto": "Lógica: El indicador combina dos preocupaciones. La primera es la seguridad del personal, que forma parte de las condiciones de trabajo y de los Principios Básicos de la ONU. La segunda es la letalidad: Silva Forné, Pérez Correa y Gutiérrez Rivas (2017) y el Monitor del Uso de la Fuerza Letal usan la razón de civiles muertos por agente muerto y la razón de muertos por heridos para detectar un posible uso excesivo de la fuerza."
+        },
+        {
+          "bloque": 545,
+          "texto": "El egreso de cadetes indica la capacidad de reponer personal."
+        },
+        {
+          "bloque": 546,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 548,
+          "texto": "Nota de aplicación: En corporaciones pequeñas, la tasa no es interpretable: reportar conteos y describir cada caso. El censo no permite calcular el índice de letalidad."
+        }
+      ],
+      "datos_requeridos": {
+        "estado_de_fuerza": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "porcentaje_cadetes_egresados": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "base_del_porcentaje_de_egresos": {
+          "tipo_dato": "string"
+        },
+        "numero_fallecimientos": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "desglose_fallecimientos": {
+          "tipo_dato": "array",
+          "debe_contener": "Desglose disponible por evento e instrumento."
+        },
+        "fallecimientos_por_mil_elementos": {
+          "tipo_dato": "number",
+          "formula": "numero_fallecimientos / estado_de_fuerza * 1000"
+        },
+        "tasa_estatal_comparable": {
+          "tipo_dato": "number"
+        },
+        "analisis_capacidad_reposicion": {
+          "tipo_dato": "string",
+          "tipo_contenido": "analisis"
+        }
+      },
+      "periodicidad": "anual",
+      "metodo": "revision_contextual",
+      "reglas_ejecutables": [],
+      "regla_especifica": null,
+      "precauciones": [
+        "Reportar los conteos junto con las tasas.",
+        "En corporaciones pequeñas, describir los casos y evitar conclusiones basadas solo en tasas inestables.",
+        "No afirmar que se calculó un índice de letalidad con datos que no lo permiten.",
+        "No confundir fallecimientos de policías con civiles fallecidos por intervención policial."
+      ]
+    },
+    {
+      "id": 18,
+      "nombre": "Puestas a disposición",
+      "criterios": [
+        {
+          "puntaje": 5,
+          "criterio": "Datos completos, razón ≥ la estatal y estable, y sin recomendaciones de organismos de derechos humanos por detención arbitraria en el periodo.",
+          "tabla": 20,
+          "fila": 2
+        },
+        {
+          "puntaje": 4,
+          "criterio": "Razón ≥ la estatal.",
+          "tabla": 20,
+          "fila": 3
+        },
+        {
+          "puntaje": 3,
+          "criterio": "Razón entre 75% y 100% de la estatal.",
+          "tabla": 20,
+          "fila": 4
+        },
+        {
+          "puntaje": 2,
+          "criterio": "Razón < 75% de la estatal.",
+          "tabla": 20,
+          "fila": 5
+        },
+        {
+          "puntaje": 1,
+          "criterio": "No hay dato.",
+          "tabla": 20,
+          "fila": 6
+        }
+      ],
+      "texto_fuente": [
+        {
+          "bloque": 549,
+          "texto": "Ficha 18. Puestas a disposición"
+        },
+        {
+          "bloque": 550,
+          "texto": "Benchmark: Puesta a disposición sin demora y proporcional a la incidencia."
+        },
+        {
+          "bloque": 551,
+          "texto": "Dato del censo: Personas puestas a disposición por año. Se divide entre los delitos del fuero común registrados en el municipio (incidencia delictiva municipal del Secretariado Ejecutivo del Sistema Nacional de Seguridad Pública, SESNSP) y se compara con la misma razón estatal."
+        },
+        {
+          "bloque": 552,
+          "texto": "Lógica: El estándar jurídico es procedimental, no cuantitativo: el artículo 16 constitucional, la Observación General 35 del Comité de Derechos Humanos, el caso Cabrera García y Montiel Flores vs. México y el Amparo Directo en Revisión 517/2011 exigen que la persona sea presentada sin demora. Más puestas a disposición no es necesariamente mejor."
+        },
+        {
+          "bloque": 553,
+          "texto": "La literatura de disuasión (Nagin, 2013; Chalfin y McCrary, 2017) indica que la certeza de ser detectado disuade más que la severidad de la sanción, pero las detenciones masivas por faltas menores pueden erosionar la legitimidad y abrir espacio al abuso (Magaloni y Rodriguez, 2020). Por eso el benchmark relaciona las puestas con la incidencia y con la cifra negra, en lugar de fijar un número."
+        },
+        {
+          "bloque": 554,
+          "texto": "Criterios de puntaje"
+        },
+        {
+          "bloque": 556,
+          "texto": "Nota de aplicación: Si la razón supera el doble de la estatal, no asignar 5: revisar si se trata de faltas administrativas o de detenciones arbitrarias. El dato no distingue entre Ministerio Público y juez cívico."
+        },
+        {
+          "bloque": 557,
+          "texto": ""
+        }
+      ],
+      "datos_requeridos": {
+        "personas_puestas_a_disposicion": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "delitos_fuero_comun_registrados": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "razon_puestas_a_disposicion_delitos": {
+          "tipo_dato": "number",
+          "formula": "personas_puestas_a_disposicion / delitos_fuero_comun_registrados"
+        },
+        "razon_estatal_comparable": {
+          "tipo_dato": "number"
+        },
+        "distincion_ministerio_publico_juez_civico": {
+          "tipo_dato": "string",
+          "debe_contener": "Aclaración de si la fuente permite separar ambos destinos."
+        },
+        "revision_recomendaciones_derechos_humanos": {
+          "tipo_dato": "string",
+          "debe_contener": "Resultado y alcance de la revisión documental pertinente."
+        }
+      },
+      "periodicidad": "anual",
+      "metodo": "revision_contextual",
+      "reglas_ejecutables": [],
+      "regla_especifica": "Si la razón supera el doble de la estatal, la ficha indica no asignar 5 y revisar la naturaleza de las puestas a disposición.",
+      "precauciones": [
+        "No dividir entre cero.",
+        "No interpretar esta razón como porcentaje de delitos resueltos.",
+        "No asumir ausencia de recomendaciones de derechos humanos si no se realizó la revisión.",
+        "Distinguir delitos, faltas administrativas y limitaciones de la fuente."
+      ]
+    }
+  ]
+}

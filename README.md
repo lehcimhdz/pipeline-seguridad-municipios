@@ -3,6 +3,15 @@
 Genera el diagnóstico municipal de seguridad a partir de cuatro documentos
 Word por municipio.
 
+Estado actual: extracción de tablas y cálculo de nueve indicadores para ambos
+periodos. Las 18 fichas y sus 90 criterios están en
+[reglas_calificacion.json](reglas_calificacion.json). La composición del Word
+final continúa pendiente.
+
+Para ejecutar la extracción y los cálculos disponibles:
+
+    python3 scripts/ejecutar_pipeline.py
+
 La especificación de entradas, extracción, validación, salidas y renderizado
 está en [PIPELINE.md](PIPELINE.md).
 
@@ -11,8 +20,9 @@ variables_documento usa el marcador canónico {{ clave_json }} y declara el
 número de veces que debe aparecer en la plantilla.
 
 La plantilla no se modifica durante una ejecución. Sus 62 variables canónicas
-permiten insertar contenido específico por contexto. Para cada municipio se
-genera un JSON trazable en output/json/ y un Word terminado en output/word/.
+permiten insertar contenido específico por contexto. Cada ejecución genera un
+JSON trazable en output/json/. El destino previsto del Word terminado es
+output/word/; toda inserción desde JSON deberá llevar resaltado amarillo.
 
 Para comprobar que el contrato entre el diccionario y el machote no se alteró:
 
