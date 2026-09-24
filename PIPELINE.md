@@ -103,7 +103,7 @@ modificación del diccionario base. Debe incluir, como mínimo:
       "validaciones": []
     }
 
-valores_plantilla contiene una clave por cada una de las 41 variables de
+valores_plantilla contiene una clave por cada una de las 62 variables de
 variables_documento; se usa directamente para sustituir {{ clave_json }}. Los
 objetos indicadores, calculos, evidencia y validaciones conservan la
 trazabilidad necesaria para auditar esas decisiones.
@@ -117,7 +117,10 @@ parciales.
 
 El renderizador crea una copia del machote y sólo la copia se guarda en
 output/word/. Sustituye los marcadores {{ clave_json }} usando
-valores_plantilla.
+valores_plantilla. Todo texto, cifra, tabla o bloque que se incorpore desde el
+JSON debe conservar el formato tipográfico circundante y llevar resaltado
+amarillo. El resaltado identifica con claridad el contenido generado para su
+revisión editorial; no se aplica al texto preexistente del machote.
 
 El machote actual también contiene guía de calificación, textos alternativos e
 instrucciones editoriales entre corchetes. Por ello el renderizado final tiene
@@ -129,9 +132,10 @@ dos partes:
    no elegidas.
 
 Un documento no se considera final mientras contenga un marcador {{ ... }},
-una instrucción [borrar al finalizar], una nota [Verificar ...] sin resolver o
-una variante incompatible con los datos. Esas condiciones deben quedar en
-validaciones y bloquear la salida final.
+una instrucción [borrar al finalizar], una nota [Verificar ...] sin resolver,
+una variante incompatible con los datos o contenido incorporado desde el JSON
+sin resaltado amarillo. Esas condiciones deben quedar en validaciones y
+bloquear la salida final.
 
 ## Controles operativos
 
@@ -147,9 +151,24 @@ validaciones y bloquear la salida final.
   faltantes relevantes, evidencia sólo visual, ajustes de puntuación o notas
   de verificación pendientes.
 
-## Próximo entregable técnico
+## Ejecución disponible
 
-Implementar un comando único que reciba la carpeta input/word/, valide el
-conjunto de cuatro archivos, produzca el JSON de salida y, sólo si su estado es
-validado, genere el Word final. El comando debe registrar los errores sin
-alterar el diccionario ni el machote.
+El comando de prevalidación y extracción inicial recibe la carpeta input/word/
+por defecto:
+
+    python3 scripts/ejecutar_pipeline.py
+
+Valida el conjunto de cuatro DOCX, identifica el municipio, registra las
+huellas SHA-256 de las fuentes, extrae las 18 calificaciones generales del
+paquete de seguridad y escribe el JSON de salida. Nunca altera el diccionario,
+el machote ni los Word de entrada.
+
+El renderizado a Word sólo se habilita cuando el JSON tenga estado validado.
+Una ejecución con requiere_revision conserva el JSON y sus errores, pero no
+crea un documento Word que pueda confundirse con un resultado final.
+
+## Siguiente paso técnico
+
+Completar el calculador reproducible para las calificaciones del último
+periodo. Una vez resuelto, el renderizador podrá generar el Word final sólo a
+partir de un JSON validado.

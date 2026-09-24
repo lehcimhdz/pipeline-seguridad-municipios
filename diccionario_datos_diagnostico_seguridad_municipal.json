@@ -8,7 +8,7 @@
     "descripcion": "Define los marcadores existentes, sus contenidos esperados, los campos auxiliares y las reglas de consistencia para completar el documento.",
     "fuente": "Documento activo: marcadores normalizados, guía de calificación, hoja de cómputo, textos base y fichas del Anexo 1.",
     "cobertura_verificada": {
-      "marcadores_de_variables_unicos": 41,
+      "marcadores_de_variables_unicos": 62,
       "apariciones_de_variables": 120,
       "indicadores": 18,
       "dimensiones": 3,
@@ -279,41 +279,6 @@
       "validaciones": [
         "Ser mayor o igual a año_inicial.",
         "No extender el periodo más allá de los datos efectivamente utilizados."
-      ]
-    },
-    "año": {
-      "marcador": "{{ año }}",
-      "apariciones": 12,
-      "tipo_dato": "integer",
-      "tipo_contenido": "año_contextual",
-      "alcance": "aparicion",
-      "debe_contener": "El año que corresponda a la posición del marcador en cada comparación.",
-      "contextos": [
-        {
-          "contexto": "tendencia_deterioro",
-          "aparicion_en_parrafo": 1,
-          "fuente_auxiliar": "año_inicial_tendencia"
-        },
-        {
-          "contexto": "tendencia_deterioro",
-          "aparicion_en_parrafo": 2,
-          "fuente_auxiliar": "año_final_tendencia"
-        },
-        {
-          "contexto": "apertura_ultimo_periodo",
-          "aparicion_en_parrafo": 1,
-          "fuente_auxiliar": "año_inicial_ultimo_periodo"
-        },
-        {
-          "contexto": "apertura_ultimo_periodo",
-          "aparicion_en_parrafo": 2,
-          "fuente_auxiliar": "año_final_ultimo_periodo"
-        }
-      ],
-      "validaciones": [
-        "No asignar un único año a todas las apariciones.",
-        "Mantener el orden cronológico.",
-        "Aclarar si se presentan años de edición o de referencia."
       ]
     },
     "años": {
@@ -756,57 +721,173 @@
       ],
       "nota": "Aunque su nombre contiene dimension, el valor es una frase sobre el ámbito afectado, no necesariamente el nombre literal de una de las tres dimensiones."
     },
-    "insertar_dos_a_tres_parrafos": {
-      "marcador": "{{ insertar_dos_a_tres_parrafos }}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "tipo_elemento": "string",
-      "tipo_contenido": "bloque_de_analisis",
-      "minimo_parrafos": 2,
-      "maximo_parrafos": 3,
-      "alcance": "bloque",
-      "contextos": {
-        "diagnostico_general": {
-          "debe_contener": [
-            "Interpretación global y bienes a proteger.",
-            "Comparación entre municipio y estado.",
-            "Tendencia durante el periodo completo."
-          ]
-        },
-        "diagnostico_ultimo_periodo": {
-          "debe_contener": [
-            "Calificación reciente y comparación con el periodo completo.",
-            "Síntesis de protección civil.",
-            "Síntesis de condiciones del personal.",
-            "Síntesis de inteligencia y eficiencia policial."
-          ],
-          "nota": "Integrar la apertura en los párrafos de las dimensiones para respetar el límite de dos a tres párrafos."
-        }
-      },
-      "validaciones": [
-        "Crear un bloque distinto para cada aparición.",
-        "No copiar todas las variantes de los textos base.",
-        "Incluir únicamente afirmaciones respaldadas por los resultados."
-      ]
+    "año_deterioro_inicial": {
+      "marcador": "{{ año_deterioro_inicial }}",
+      "apariciones": 1,
+      "tipo_dato": "integer",
+      "alcance": "tendencia_deterioro",
+      "debe_contener": "Año inicial del deterioro descrito."
     },
-    "insertar_analisis_e_intercalar_graficas_y_o_tablas": {
-      "marcador": "{{ insertar_analisis_e_intercalar_graficas_y_o_tablas }}",
-      "apariciones": 18,
-      "tipo_dato": "array",
-      "tipo_contenido": "secuencia_de_bloques_de_contenido",
-      "modelo_elemento": "bloque_contenido",
-      "alcance": "indicador",
-      "debe_contener": [
-        "Análisis interpretativo del indicador.",
-        "Datos y comparación con el criterio de referencia.",
-        "Gráficas o tablas pertinentes intercaladas.",
-        "Párrafo de cierre para cada visualización."
-      ],
-      "validaciones": [
-        "Crear contenido específico para cada uno de los 18 indicadores.",
-        "Mantener correspondencia entre texto, datos y visualizaciones.",
-        "No sustituir el marcador con una ruta de archivo o una descripción de una gráfica inexistente."
-      ]
+    "año_deterioro_final": {
+      "marcador": "{{ año_deterioro_final }}",
+      "apariciones": 1,
+      "tipo_dato": "integer",
+      "alcance": "tendencia_deterioro",
+      "debe_contener": "Año final del deterioro descrito."
+    },
+    "año_ultimo_periodo_inicial": {
+      "marcador": "{{ año_ultimo_periodo_inicial }}",
+      "apariciones": 5,
+      "tipo_dato": "integer",
+      "alcance": "ultimo_periodo",
+      "debe_contener": "Primer año del último periodo analizado."
+    },
+    "año_ultimo_periodo_final": {
+      "marcador": "{{ año_ultimo_periodo_final }}",
+      "apariciones": 5,
+      "tipo_dato": "integer",
+      "alcance": "ultimo_periodo",
+      "debe_contener": "Último año del último periodo analizado."
+    },
+    "resumen_general": {
+      "marcador": "{{ resumen_general }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "diagnostico_general",
+      "debe_contener": "Dos o tres párrafos de interpretación del periodo completo."
+    },
+    "resumen_ultimo_periodo": {
+      "marcador": "{{ resumen_ultimo_periodo }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "diagnostico_ultimo_periodo",
+      "debe_contener": "Dos o tres párrafos de interpretación del último periodo."
+    },
+    "analisis_indicador_01": {
+      "marcador": "{{ analisis_indicador_01 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_01",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 1."
+    },
+    "analisis_indicador_02": {
+      "marcador": "{{ analisis_indicador_02 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_02",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 2."
+    },
+    "analisis_indicador_03": {
+      "marcador": "{{ analisis_indicador_03 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_03",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 3."
+    },
+    "analisis_indicador_04": {
+      "marcador": "{{ analisis_indicador_04 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_04",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 4."
+    },
+    "analisis_indicador_05": {
+      "marcador": "{{ analisis_indicador_05 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_05",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 5."
+    },
+    "analisis_indicador_06": {
+      "marcador": "{{ analisis_indicador_06 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_06",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 6."
+    },
+    "analisis_indicador_07": {
+      "marcador": "{{ analisis_indicador_07 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_07",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 7."
+    },
+    "analisis_indicador_08": {
+      "marcador": "{{ analisis_indicador_08 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_08",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 8."
+    },
+    "analisis_indicador_09": {
+      "marcador": "{{ analisis_indicador_09 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_09",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 9."
+    },
+    "analisis_indicador_10": {
+      "marcador": "{{ analisis_indicador_10 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_10",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 10."
+    },
+    "analisis_indicador_11": {
+      "marcador": "{{ analisis_indicador_11 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_11",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 11."
+    },
+    "analisis_indicador_12": {
+      "marcador": "{{ analisis_indicador_12 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_12",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 12."
+    },
+    "analisis_indicador_13": {
+      "marcador": "{{ analisis_indicador_13 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_13",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 13."
+    },
+    "analisis_indicador_14": {
+      "marcador": "{{ analisis_indicador_14 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_14",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 14."
+    },
+    "analisis_indicador_15": {
+      "marcador": "{{ analisis_indicador_15 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_15",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 15."
+    },
+    "analisis_indicador_16": {
+      "marcador": "{{ analisis_indicador_16 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_16",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 16."
+    },
+    "analisis_indicador_17": {
+      "marcador": "{{ analisis_indicador_17 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_17",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 17."
+    },
+    "analisis_indicador_18": {
+      "marcador": "{{ analisis_indicador_18 }}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "alcance": "analisis_indicador_18",
+      "debe_contener": "Análisis y visualizaciones validadas del indicador 18."
     }
   },
   "campos_auxiliares": {

@@ -10,7 +10,8 @@ El diccionario JSON es el contrato de datos del machote. Cada clave de
 variables_documento usa el marcador canónico {{ clave_json }} y declara el
 número de veces que debe aparecer en la plantilla.
 
-La plantilla no se modifica durante una ejecución. Para cada municipio se
+La plantilla no se modifica durante una ejecución. Sus 62 variables canónicas
+permiten insertar contenido específico por contexto. Para cada municipio se
 genera un JSON trazable en output/json/ y un Word terminado en output/word/.
 
 Para comprobar que el contrato entre el diccionario y el machote no se alteró:
