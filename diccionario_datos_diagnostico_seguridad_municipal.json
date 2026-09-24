@@ -158,19 +158,40 @@
         "codigo": "proteccion_civil",
         "letra": "A",
         "nombre": "Protección civil",
-        "indicadores": [1, 2, 3]
+        "indicadores": [
+          1,
+          2,
+          3
+        ]
       },
       {
         "codigo": "condiciones_del_personal",
         "letra": "B",
         "nombre": "Condiciones del personal",
-        "indicadores": [4, 5, 6, 7, 8, 9, 10]
+        "indicadores": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
       },
       {
         "codigo": "inteligencia_y_eficiencia_policial",
         "letra": "C",
         "nombre": "Inteligencia y eficiencia policial",
-        "indicadores": [11, 12, 13, 14, 15, 16, 17, 18]
+        "indicadores": [
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18
+        ]
       }
     ],
     "tendencias": [
@@ -212,7 +233,7 @@
   },
   "variables_documento": {
     "municipio": {
-      "marcador": "[municipio]",
+      "marcador": "{{ municipio }}",
       "apariciones": 15,
       "tipo_dato": "string",
       "tipo_contenido": "nombre",
@@ -225,7 +246,7 @@
       ]
     },
     "estado": {
-      "marcador": "[estado]",
+      "marcador": "{{ estado }}",
       "apariciones": 5,
       "tipo_dato": "string",
       "tipo_contenido": "nombre",
@@ -237,7 +258,7 @@
       ]
     },
     "año_inicial": {
-      "marcador": "[año_inicial]",
+      "marcador": "{{ año_inicial }}",
       "apariciones": 5,
       "tipo_dato": "integer",
       "tipo_contenido": "año",
@@ -249,7 +270,7 @@
       ]
     },
     "año_final": {
-      "marcador": "[año_final]",
+      "marcador": "{{ año_final }}",
       "apariciones": 5,
       "tipo_dato": "integer",
       "tipo_contenido": "año",
@@ -261,7 +282,7 @@
       ]
     },
     "año": {
-      "marcador": "[año]",
+      "marcador": "{{ año }}",
       "apariciones": 12,
       "tipo_dato": "integer",
       "tipo_contenido": "año_contextual",
@@ -296,7 +317,7 @@
       ]
     },
     "años": {
-      "marcador": "[años]",
+      "marcador": "{{ años }}",
       "apariciones": 2,
       "tipo_dato": "array",
       "tipo_elemento": "integer",
@@ -314,7 +335,7 @@
       ]
     },
     "años_indicadores": {
-      "marcador": "[años_indicadores]",
+      "marcador": "{{ años_indicadores }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "texto_descriptivo",
@@ -326,7 +347,7 @@
       ]
     },
     "rubros": {
-      "marcador": "[rubros]",
+      "marcador": "{{ rubros }}",
       "apariciones": 4,
       "tipo_dato": "array",
       "tipo_elemento": "string",
@@ -342,7 +363,7 @@
       "validacion": "No reutilizar la misma lista automáticamente entre contextos positivos y negativos."
     },
     "rubro": {
-      "marcador": "[rubro]",
+      "marcador": "{{ rubro }}",
       "apariciones": 3,
       "tipo_dato": "string",
       "tipo_contenido": "area_o_componente",
@@ -355,7 +376,7 @@
       }
     },
     "condiciones_faltantes": {
-      "marcador": "[condiciones_faltantes]",
+      "marcador": "{{ condiciones_faltantes }}",
       "apariciones": 1,
       "tipo_dato": "array",
       "tipo_elemento": "string",
@@ -365,7 +386,7 @@
       "validacion": "No confundir falta de información con ausencia comprobada de una condición."
     },
     "n": {
-      "marcador": "[n]",
+      "marcador": "{{ n }}",
       "apariciones": 2,
       "tipo_dato": "integer",
       "tipo_contenido": "conteo",
@@ -380,7 +401,7 @@
       ]
     },
     "total": {
-      "marcador": "[total]",
+      "marcador": "{{ total }}",
       "apariciones": 2,
       "tipo_dato": "integer",
       "tipo_contenido": "conteo",
@@ -395,7 +416,7 @@
       ]
     },
     "indicadores": {
-      "marcador": "[indicadores]",
+      "marcador": "{{ indicadores }}",
       "apariciones": 6,
       "tipo_dato": "array",
       "tipo_elemento": "string",
@@ -409,7 +430,7 @@
       ]
     },
     "indicador": {
-      "marcador": "[indicador]",
+      "marcador": "{{ indicador }}",
       "apariciones": 2,
       "tipo_dato": "string",
       "tipo_contenido": "nombre_de_indicador",
@@ -418,7 +439,7 @@
       "validacion": "Identificar por separado el indicador de cada contexto."
     },
     "capacidad": {
-      "marcador": "[capacidad]",
+      "marcador": "{{ capacidad }}",
       "apariciones": 2,
       "tipo_dato": "string",
       "tipo_contenido": "descripcion_de_capacidad",
@@ -430,7 +451,7 @@
       "validacion": "No tratar ambas apariciones como una misma afirmación."
     },
     "x": {
-      "marcador": "[x]",
+      "marcador": "{{ x }}",
       "apariciones": 2,
       "tipo_dato": "number",
       "tipo_contenido": "valor_numerico_contextual",
@@ -451,7 +472,7 @@
       }
     },
     "y": {
-      "marcador": "[y]",
+      "marcador": "{{ y }}",
       "apariciones": 1,
       "tipo_dato": "number",
       "tipo_contenido": "valor_final_de_comparacion",
@@ -464,7 +485,7 @@
       ]
     },
     "situacion_inicial": {
-      "marcador": "[situacion_inicial]",
+      "marcador": "{{ situacion_inicial }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "descripcion_comparativa",
@@ -472,7 +493,7 @@
       "debe_contener": "Condición inicial de los indicadores, con referencia a los datos y al periodo correspondiente."
     },
     "situacion_final": {
-      "marcador": "[situacion_final]",
+      "marcador": "{{ situacion_final }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "descripcion_comparativa",
@@ -481,7 +502,7 @@
       "validacion": "No describir como sostenida una mejora que solo aparece en un punto aislado."
     },
     "cambio_administracion_fin_subsidio_otro": {
-      "marcador": "[cambio_administracion_fin_subsidio_otro]",
+      "marcador": "{{ cambio_administracion_fin_subsidio_otro }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "explicacion_contextual",
@@ -494,9 +515,12 @@
       ]
     },
     "nivel": {
-      "marcador": "[nivel]",
+      "marcador": "{{ nivel }}",
       "apariciones": 1,
-      "tipo_dato": ["string", "number"],
+      "tipo_dato": [
+        "string",
+        "number"
+      ],
       "tipo_contenido": "nivel_de_desempeño",
       "alcance": "tendencia_estancamiento",
       "debe_contener": "Valor, intervalo o condición en la que se mantienen los indicadores.",
@@ -506,18 +530,22 @@
       ]
     },
     "comparacion_con_periodo_completo": {
-      "marcador": "[comparacion_con_periodo_completo]",
+      "marcador": "{{ comparacion_con_periodo_completo }}",
       "apariciones": 5,
       "tipo_dato": "string",
       "tipo_contenido": "seleccion_derivada",
       "alcance": "apertura_ultimo_periodo",
-      "opciones": ["igual", "superior", "inferior"],
+      "opciones": [
+        "igual",
+        "superior",
+        "inferior"
+      ],
       "debe_contener": "Relación entre la calificación final del último periodo y la calificación final general.",
       "regla": "Comparar niveles ordinales de las calificaciones finales, después de aplicar los candados.",
       "validacion": "Una diferencia entre promedios dentro de la misma categoría no convierte por sí sola la calificación en superior o inferior."
     },
     "dimension": {
-      "marcador": "[dimension]",
+      "marcador": "{{ dimension }}",
       "apariciones": 2,
       "tipo_dato": "string",
       "tipo_contenido": "nombre_de_dimension",
@@ -529,7 +557,7 @@
       }
     },
     "dimensiones": {
-      "marcador": "[dimensiones]",
+      "marcador": "{{ dimensiones }}",
       "apariciones": 4,
       "tipo_dato": "array",
       "tipo_elemento": "string",
@@ -544,7 +572,7 @@
       ]
     },
     "temas": {
-      "marcador": "[temas]",
+      "marcador": "{{ temas }}",
       "apariciones": 1,
       "tipo_dato": "array",
       "tipo_elemento": "string",
@@ -553,7 +581,7 @@
       "debe_contener": "Temas de capacitación impartidos en el periodo reciente."
     },
     "temas_faltantes": {
-      "marcador": "[temas_faltantes]",
+      "marcador": "{{ temas_faltantes }}",
       "apariciones": 1,
       "tipo_dato": "array",
       "tipo_elemento": "string",
@@ -566,7 +594,7 @@
       ]
     },
     "situacion_programa_capacitacion": {
-      "marcador": "[situacion_programa_capacitacion]",
+      "marcador": "{{ situacion_programa_capacitacion }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "seleccion",
@@ -579,7 +607,7 @@
       "validacion": "Si ninguna opción está respaldada por los datos, no forzar la selección."
     },
     "situacion_desempeno_personal": {
-      "marcador": "[situacion_desempeno_personal]",
+      "marcador": "{{ situacion_desempeno_personal }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "seleccion",
@@ -592,7 +620,7 @@
       "validacion": "La opción sobre cobertura de turnos requiere evidencia suficiente sobre la capacidad operativa."
     },
     "carencia_relevante": {
-      "marcador": "[carencia_relevante]",
+      "marcador": "{{ carencia_relevante }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "seleccion",
@@ -605,7 +633,7 @@
       "validacion": "Precisar en el análisis cuál certificación, mínimo o equipo sustenta la selección."
     },
     "condicion_critica": {
-      "marcador": "[condicion_critica]",
+      "marcador": "{{ condicion_critica }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "seleccion",
@@ -619,7 +647,7 @@
       "validacion": "Sin datos no equivale a ausencia comprobada de certificación, equipo o capacitación."
     },
     "herramienta": {
-      "marcador": "[herramienta]",
+      "marcador": "{{ herramienta }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "nombre_de_herramienta_faltante",
@@ -628,7 +656,7 @@
       "validacion": "Este marcador representa una carencia, no una herramienta disponible."
     },
     "indicadores_de_eficiencia": {
-      "marcador": "[indicadores_de_eficiencia]",
+      "marcador": "{{ indicadores_de_eficiencia }}",
       "apariciones": 1,
       "tipo_dato": "array",
       "tipo_elemento": "string",
@@ -638,7 +666,7 @@
       "validacion": "La comparación debe utilizar datos compatibles y el sentido correcto de cada indicador."
     },
     "herramienta_aislada": {
-      "marcador": "[herramienta_aislada]",
+      "marcador": "{{ herramienta_aislada }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "seleccion",
@@ -650,7 +678,7 @@
       "debe_contener": "Herramienta disponible que no forma parte de un sistema integral documentado."
     },
     "problema_critico": {
-      "marcador": "[problema_critico]",
+      "marcador": "{{ problema_critico }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "seleccion",
@@ -663,7 +691,7 @@
       "validacion": "La selección debe estar sustentada y contextualizada en el análisis correspondiente."
     },
     "indicadores_con_4_o_5": {
-      "marcador": "[indicadores_con_4_o_5]",
+      "marcador": "{{ indicadores_con_4_o_5 }}",
       "apariciones": 1,
       "tipo_dato": "array",
       "tipo_elemento": "string",
@@ -676,7 +704,7 @@
       ]
     },
     "indicadores_con_1_o_2": {
-      "marcador": "[indicadores_con_1_o_2]",
+      "marcador": "{{ indicadores_con_1_o_2 }}",
       "apariciones": 1,
       "tipo_dato": "array",
       "tipo_elemento": "string",
@@ -690,7 +718,7 @@
       ]
     },
     "posicion_relativa": {
-      "marcador": "[posicion_relativa]",
+      "marcador": "{{ posicion_relativa }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "seleccion",
@@ -703,7 +731,7 @@
       "validacion": "No inferir una posición frente a la mayoría a partir del promedio estatal sin una justificación estadística."
     },
     "estandar": {
-      "marcador": "[estandar]",
+      "marcador": "{{ estandar }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "criterio_de_referencia",
@@ -716,7 +744,7 @@
       ]
     },
     "dimension_con_carencias": {
-      "marcador": "[dimension_con_carencias]",
+      "marcador": "{{ dimension_con_carencias }}",
       "apariciones": 1,
       "tipo_dato": "string",
       "tipo_contenido": "seleccion_del_ambito_afectado",
@@ -729,7 +757,7 @@
       "nota": "Aunque su nombre contiene dimension, el valor es una frase sobre el ámbito afectado, no necesariamente el nombre literal de una de las tres dimensiones."
     },
     "insertar_dos_a_tres_parrafos": {
-      "marcador": "[insertar_dos_a_tres_parrafos]",
+      "marcador": "{{ insertar_dos_a_tres_parrafos }}",
       "apariciones": 2,
       "tipo_dato": "array",
       "tipo_elemento": "string",
@@ -762,7 +790,7 @@
       ]
     },
     "insertar_analisis_e_intercalar_graficas_y_o_tablas": {
-      "marcador": "[insertar_analisis_e_intercalar_graficas_y_o_tablas]",
+      "marcador": "{{ insertar_analisis_e_intercalar_graficas_y_o_tablas }}",
       "apariciones": 18,
       "tipo_dato": "array",
       "tipo_contenido": "secuencia_de_bloques_de_contenido",
@@ -1159,7 +1187,13 @@
         },
         "puntaje_base": {
           "tipo_dato": "integer",
-          "opciones": [1, 2, 3, 4, 5],
+          "opciones": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "debe_contener": "Puntaje conforme a la rúbrica de la ficha, antes del ajuste por dato dudoso."
         },
         "criterio_aplicado": {
@@ -1173,7 +1207,11 @@
         },
         "ajuste_por_dato_dudoso": {
           "tipo_dato": "integer",
-          "opciones": [-1, 0, 1],
+          "opciones": [
+            -1,
+            0,
+            1
+          ],
           "debe_contener": "Modificación autorizada y justificada del puntaje."
         },
         "justificacion_ajuste": {
@@ -1188,7 +1226,13 @@
         },
         "puntaje_final": {
           "tipo_dato": "integer",
-          "opciones": [1, 2, 3, 4, 5],
+          "opciones": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
           "debe_contener": "Puntaje definitivo después de la rúbrica, ajustes y reglas específicas.",
           "destinos": [
             "Celda del indicador y periodo en la hoja de cómputo.",
@@ -1225,7 +1269,10 @@
         },
         "ambito_geografico": {
           "tipo_dato": "string",
-          "opciones": ["municipal", "estatal"]
+          "opciones": [
+            "municipal",
+            "estatal"
+          ]
         },
         "edicion_censo": {
           "tipo_dato": "integer",
@@ -1236,7 +1283,12 @@
           "admite_null": true
         },
         "valor": {
-          "tipo_dato": ["number", "boolean", "string", "null"],
+          "tipo_dato": [
+            "number",
+            "boolean",
+            "string",
+            "null"
+          ],
           "debe_contener": "Valor observado con el tipo correspondiente a la métrica."
         },
         "unidad": {
@@ -1317,7 +1369,10 @@
         },
         "categorias_o_eje_temporal": {
           "tipo_dato": "array",
-          "tipo_elemento": ["string", "integer"]
+          "tipo_elemento": [
+            "string",
+            "integer"
+          ]
         },
         "series_a_mostrar": {
           "tipo_dato": "array",
@@ -1689,7 +1744,11 @@
         },
         "naturaleza_del_dato": {
           "tipo_dato": "string",
-          "opciones": ["inventario", "dotacion_del_año", "pendiente_aclarar"]
+          "opciones": [
+            "inventario",
+            "dotacion_del_año",
+            "pendiente_aclarar"
+          ]
         }
       },
       "precauciones": [
@@ -2084,7 +2143,10 @@
       {
         "id": 5,
         "nombre": "ajuste_por_dato_dudoso",
-        "variacion_permitida": [-1, 1],
+        "variacion_permitida": [
+          -1,
+          1
+        ],
         "maximo_ajustes_segun_documento": 3,
         "unidad_del_limite_en_el_documento": "por_evaluacion",
         "requisito": "Justificación escrita en la hoja de cómputo.",
@@ -2150,7 +2212,13 @@
       "accion_en_esta_respuesta": "Ninguna."
     },
     "etiquetas_de_causas": {
-      "textos": ["[a]", "[b]", "[c]", "[d]", "[e]"],
+      "textos": [
+        "[a]",
+        "[b]",
+        "[c]",
+        "[d]",
+        "[e]"
+      ],
       "tratamiento": "Etiquetas de recursos, tamaño, continuidad, prioridades e información.",
       "regla": "No confundirlas con variables."
     },
