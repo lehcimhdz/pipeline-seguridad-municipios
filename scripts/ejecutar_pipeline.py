@@ -10,6 +10,7 @@ from uuid import uuid4
 
 from documentos import leer_docx, registros, seccion_seguridad, sha256
 from calificar import agregar, calificar_indicador, dependencias
+from datos_externos import fuente, leer_csv, seleccionar, serie, serie_estatal, validar_campos
 
 ROOT = Path(__file__).resolve().parents[1]
 SUFFIXES = (' Anexo.docx', ' PAQUETE SEGURIDAD.docx',
@@ -37,17 +38,53 @@ def discover(input_dir):
     return prefixes.pop(), documents
 
 
+def cargar_externos(args):
+    config_path = ROOT / 'config/fuentes_externas.json'
+    config = json.loads(config_path.read_text(encoding='utf-8'))
+    external = {}
+    provenance = []
+    supplied = [args.population_csv, args.incidence_csv]
+    if any(supplied) and (not args.cve_ent or not args.cve_mun):
+        raise ValueError('Las fuentes externas requieren --cve-ent y --cve-mun.')
+    if args.population_csv:
+        rows = leer_csv(args.population_csv)
+        definition = config['poblacion']
+        validar_campos(rows, definition['campos_normalizados'], 'población')
+        years = {int(row['año']) for row in rows}
+        municipal = seleccionar(rows, (args.cve_ent, args.cve_mun), years)
+        external['poblacion_municipal'] = serie(municipal, 'poblacion')
+        external['poblacion_estatal'] = serie_estatal(rows, args.cve_ent, 'poblacion')
+        provenance.append(fuente(args.population_csv, definition))
+    if args.incidence_csv:
+        rows = leer_csv(args.incidence_csv)
+        definition = config['incidencia_delictiva']
+        validar_campos(rows, definition['campos_normalizados'], 'incidencia delictiva')
+        years = {int(row['año']) for row in rows}
+        municipal = seleccionar(rows, (args.cve_ent, args.cve_mun), years)
+        external['incidencia_municipal'] = serie(municipal, 'delitos_fuero_comun')
+        external['incidencia_estatal'] = serie_estatal(rows, args.cve_ent, 'delitos_fuero_comun')
+        provenance.append(fuente(args.incidence_csv, definition))
+    return external, provenance, config_path
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', type=Path, default=ROOT / 'input/word')
     parser.add_argument('--output', type=Path, default=ROOT / 'output')
+    parser.add_argument('--population-csv', type=Path)
+    parser.add_argument('--incidence-csv', type=Path)
+    parser.add_argument('--cve-ent')
+    parser.add_argument('--cve-mun')
     args = parser.parse_args()
     municipality, documents = discover(args.input)
+    external, external_sources, external_config_path = cargar_externos(args)
     evidence = {suffix: leer_docx(path) for suffix, path in documents.items()}
     sections = seccion_seguridad(evidence[SUFFIXES[1]])
     annex_sections = seccion_seguridad(evidence[SUFFIXES[0]])
     rules_path = ROOT / 'reglas_calificacion.json'
     rules = json.loads(rules_path.read_text(encoding='utf-8'))
+    mappings_path = ROOT / 'config/normalizaciones.json'
+    mappings = json.loads(mappings_path.read_text(encoding='utf-8'))
     template = ROOT / rules['fuente']['archivo']
     if sha256(template) != rules['fuente']['sha256']:
         raise ValueError('El DOCX cambió: revisar y regenerar reglas_calificacion.json.')
@@ -64,7 +101,7 @@ def main():
         validations.append({'codigo': 'IDENTIDAD_NO_CONFIRMADA', 'nivel': 'bloqueante'})
     evaluations = {}
     for period in ('general', 'ultimo_periodo'):
-        calculations = {section['numero']: calificar_indicador(section, ficha, period)
+        calculations = {section['numero']: calificar_indicador(section, ficha, period, mappings, external)
                         for section, ficha in zip(sections, rules['fichas'])}
         dependencias(calculations)
         evaluations[period] = calculations
@@ -108,10 +145,11 @@ def main():
         'version': '1.1', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
         'estado_ejecucion': 'requiere_revision',
         'contrato': {'diccionario_sha256': sha256(dictionary_path), 'plantilla_sha256': sha256(template),
-                     'reglas_sha256': sha256(rules_path)},
+                     'reglas_sha256': sha256(rules_path), 'normalizaciones_sha256': sha256(mappings_path),
+                     'fuentes_externas_sha256': sha256(external_config_path)},
         'fuentes': [{'archivo': path.name, 'sha256': sha256(path),
                      'rol': 'primaria' if suffix == SUFFIXES[1] else 'control_cruzado_o_contexto'}
-                    for suffix, path in documents.items()],
+                    for suffix, path in documents.items()] + external_sources,
         'identidad_evidencia': title, 'valores_plantilla': values,
         'indicadores': sections, 'calculos': aggregates,
         'evidencia_documental': {documents[suffix].name: blocks for suffix, blocks in evidence.items()},

@@ -10,11 +10,19 @@ from calificar import agregar, calificar_indicador, categoria, dependencias
 from estructurar_reglas import construir
 
 RULES = json.loads((ROOT / 'reglas_calificacion.json').read_text())
+MAPPINGS = json.loads((ROOT / 'config/normalizaciones.json').read_text())
 
 
 def section(number, rows, header=None):
     return {'numero': number, 'tablas': [{'ambito': 'municipal', 'tabla': 1,
                                         'filas': [header or ['Año', 'Existencia']] + rows}]}
+
+
+def section_with_state(number, municipal, state, header):
+    return {'numero': number, 'tablas': [
+        {'ambito': 'municipal', 'tabla': 1, 'filas': [header] + municipal},
+        {'ambito': 'estatal', 'tabla': 2, 'filas': [header] + state},
+    ]}
 
 
 def score(number, rows, period='general', header=None):
@@ -62,6 +70,58 @@ class CalificacionTests(unittest.TestCase):
         rows = [['2020', '0', '0'], ['2022', '60', '2,451'], ['2024', '52', '2,553']]
         self.assertEqual(score(2, rows, header=header)['puntaje'], 3)
         self.assertEqual(score(2, rows, 'ultimo_periodo', header)['puntaje'], 5)
+
+    def test_protection_civil_topic_mapping(self):
+        rows = [
+            ['2022', 'Primeros auxilios'],
+            ['2022', 'Evacuación, búsqueda y rescate'],
+            ['2024', 'Prevención y combate de incendios, y manejo de extintores'],
+            ['2024', 'Identificación y análisis de riesgos'],
+        ]
+        result = calificar_indicador(section(3, rows, ['Año', 'Tema impartido']), RULES['fichas'][2], 'ultimo_periodo', MAPPINGS)
+        self.assertEqual(result['puntaje'], 4)
+
+    def test_police_topic_mapping(self):
+        rows = [
+            ['2022', 'Derechos humanos y uso legítimo de la fuerza', '100', '60'],
+            ['2022', 'Informe Policial Homologado', '100', '60'],
+            ['2024', 'Primer respondiente', '50', '60'],
+            ['2024', 'Informe Policial Homologado', '50', '60'],
+        ]
+        result = calificar_indicador(section(10, rows, ['Año', 'Tema', 'Total', 'Porcentaje']), RULES['fichas'][9], 'ultimo_periodo', MAPPINGS)
+        self.assertEqual(result['puntaje'], 4)
+
+    def test_calls_compare_state(self):
+        item = section_with_state(
+            15,
+            [['2022', '50', '10'], ['2024', '60', '10']],
+            [['2022', '40', '10'], ['2024', '50', '10']],
+            ['Año', 'Porcentaje', 'Llamadas procedentes'],
+        )
+        result = calificar_indicador(item, RULES['fichas'][14], 'ultimo_periodo', MAPPINGS)
+        self.assertEqual(result['puntaje'], 4)
+
+    def test_population_and_incidence_adapters(self):
+        external = {
+            'poblacion_municipal': {2022: Decimal('1000'), 2024: Decimal('1000')},
+            'poblacion_estatal': {2022: Decimal('10000'), 2024: Decimal('10000')},
+            'incidencia_municipal': {2022: Decimal('100'), 2024: Decimal('100')},
+            'incidencia_estatal': {2022: Decimal('1000'), 2024: Decimal('1000')},
+        }
+        personnel = section(4, [['2022', '2'], ['2024', '2']], ['Año', 'Total'])
+        self.assertEqual(calificar_indicador(personnel, RULES['fichas'][3], 'ultimo_periodo', MAPPINGS, external)['puntaje'], 4)
+        cameras = section_with_state(14, [['2022', '2'], ['2024', '2']], [['2022', '10'], ['2024', '10']], ['Año', 'Total'])
+        self.assertEqual(calificar_indicador(cameras, RULES['fichas'][13], 'ultimo_periodo', MAPPINGS, external)['puntaje'], 5)
+        referrals = {
+            'numero': 18,
+            'tablas': [
+                {'ambito': 'municipal', 'tabla': 1,
+                 'filas': [['Año', 'Total de personas'], ['2022', '20'], ['2024', '20']]},
+                {'ambito': 'estatal', 'tabla': 2,
+                 'filas': [['Año', 'Total'], ['2022', '100'], ['2024', '100']]},
+            ],
+        }
+        self.assertEqual(calificar_indicador(referrals, RULES['fichas'][17], 'ultimo_periodo', MAPPINGS, external)['puntaje'], 4)
 
     def test_specific_dependencies(self):
         results = {i: {'puntaje': 5} for i in range(1, 19)}

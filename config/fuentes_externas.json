@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "poblacion": {
+    "proveedor": "CONAPO",
+    "pagina_oficial": "https://www.gob.mx/conapo/articulos/reconstruccion-y-proyecciones-de-la-poblacion-de-los-municipios-de-mexico",
+    "uso": ["indicador_4", "indicador_14"],
+    "campos_normalizados": ["cve_ent", "cve_mun", "año", "poblacion"],
+    "cobertura_esperada": "1990-2040",
+    "archivo_de_entrada": "input/datos_externos/poblacion_municipal.csv"
+  },
+  "incidencia_delictiva": {
+    "proveedor": "SESNSP",
+    "pagina_oficial": "https://www.gob.mx/sesnsp/acciones-y-programas/datos-abiertos-de-incidencia-delictiva",
+    "uso": ["indicador_18"],
+    "campos_normalizados": ["cve_ent", "cve_mun", "año", "delitos_fuero_comun"],
+    "archivo_de_entrada": "input/datos_externos/incidencia_delictiva_municipal.csv"
+  },
+  "reglas_de_ingreso": [
+    "Conservar el archivo descargado sin modificar dentro de input/datos_externos.",
+    "Registrar URL, hash SHA-256, fecha de descarga, campos usados y filtros en el JSON de salida.",
+    "No mezclar series de metodologías incompatibles sin una conciliación documentada.",
+    "Una fuente externa faltante bloquea sólo los indicadores que la necesitan."
+  ]
+}

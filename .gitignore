@@ -4,5 +4,6 @@ __pycache__/
 # Archivos municipales de entrada y resultados generados.
 input/**/*.docx
 input/**/*.json
+input/**/*.csv
 output/**/*.docx
 output/**/*.json

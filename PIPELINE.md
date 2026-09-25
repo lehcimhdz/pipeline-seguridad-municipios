@@ -189,11 +189,15 @@ Para regenerarlo tras una revisión del documento base:
     python3 scripts/estructurar_reglas.py
 
 El motor de scripts/calificar.py interpreta las condiciones estructuradas
-del JSON. Hay automatización de existencia (1, 6, 11, 12, 13 y 16), continuidad
-de cursos (2) y porcentajes de evaluación y CUP (5 y 7). Las dependencias
-3→2, 6→10 y 12→11 se aplican antes de agregar resultados. Los otros nueve
-indicadores tienen criterios transcritos, pero requieren completar la
-normalización y automatización contextual; su puntaje permanece pendiente.
+del JSON. Automatiza existencia (1, 6, 11, 12, 13 y 16), cursos (2),
+temas de protección civil (3), porcentajes de evaluación y CUP (5 y 7),
+temas de capacitación policial (10) y llamadas procedentes (15). Las
+dependencias 3→2, 6→10 y 12→11 se aplican antes de agregar resultados.
+
+Las equivalencias están en config/normalizaciones.json: temas núcleo,
+prendas básicas, categorías de equipamiento y frecuencias. Cada patrón puede
+revisarse y cambiarse sin editar el motor. Para preservar evidencia, el JSON
+de salida registra temas o comparaciones que llevaron al puntaje.
 
 La agregación exige los 18 puntajes: promedia por dimensión y después entre
 las tres dimensiones, aplicando los candados generales 1–4. Los ajustes por
@@ -216,16 +220,40 @@ Criterios operativos explícitos de esta implementación:
   saltar vacíos. Debe confirmarse la relación entre edición y año de referencia,
   así como la cobertura de las ediciones ausentes, antes de cerrar el informe.
 
-Pruebas reproducibles de umbrales, faltantes, dependencias y candados:
+Pruebas reproducibles de umbrales, faltantes, dependencias, fuentes externas
+y candados:
 
     python3 -m unittest discover -s tests -v
 
 ## Siguiente paso técnico
 
-Completar las reglas contextuales de los indicadores 3, 4, 8, 9, 10, 14, 15,
-17 y 18. Las necesidades a comprobar incluyen homologación de temas/prendas,
-población para las tasas, naturaleza del equipamiento, consistencia entre
-fallecimientos y sus desgloses, e incidencia delictiva para puestas a disposición.
+## Fuentes externas y decisiones de revisión
+
+Los indicadores 4 y 14 requieren población; el 18 requiere incidencia
+delictiva. Sus contratos se encuentran en config/fuentes_externas.json.
+El proceso no descarga silenciosamente ni transforma una base oficial: se
+deposita la descarga original normalizada en input/datos_externos/ y se pasa
+en la corrida:
+
+    python3 scripts/ejecutar_pipeline.py \
+      --population-csv input/datos_externos/poblacion_municipal.csv \
+      --incidence-csv input/datos_externos/incidencia_delictiva_municipal.csv \
+      --cve-ent 00 --cve-mun 000
+
+Cada CSV debe tener los campos de su contrato. El JSON final registra
+proveedor, página oficial, ruta local, hash y campos utilizados. Las fuentes
+son CONAPO para población municipal y SESNSP para incidencia delictiva.
+
+Las celdas vacías, datos dudosos y excepciones se resuelven sólo mediante el
+archivo JSON descrito en input/revision/README.md. Una decisión debe señalar
+indicador, año, clasificación, justificación y coordenadas de evidencia. Sin
+esa decisión una celda vacía sigue bloqueando el indicador.
+
+## Siguiente paso técnico
+
+Completar los indicadores 4, 14 y 18 al ingresar sus CSV externos; completar
+el 8 y 9 con una decisión explícita sobre cobertura de la dotación e
+inventario; y resolver los vacíos de fallecimientos del 17 mediante revisión.
 No se declara ausente un dato sólo porque su extracción aún no esté implementada.
 
 Después corresponde componer los análisis con evidencia, seleccionar las

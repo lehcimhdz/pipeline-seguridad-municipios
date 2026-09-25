@@ -1,0 +1,38 @@
+{
+  "version": "1.0",
+  "regla_periodo": {
+    "cobertura": "El último periodo usa las dos etiquetas temporales más recientes sin omitir celdas vacías.",
+    "frecuencia": {
+      "semestral": "al_menos_anual",
+      "anual": "al_menos_anual",
+      "una_sola_vez": "aislada"
+    }
+  },
+  "proteccion_civil_temas_nucleo": {
+    "identificacion_y_analisis_de_riesgos": ["identificacion.*analisis.*riesgos"],
+    "sistema_de_comando_de_incidentes": ["sistema.*comando.*incidentes"],
+    "mapas_de_riesgo_y_alerta_temprana": ["mapas?.*riesgos?.*alerta"],
+    "evacuacion_busqueda_y_rescate": ["evacuacion.*busqueda.*rescate"],
+    "primeros_auxilios": ["primeros auxilios"],
+    "prevencion_y_combate_de_incendios": ["prevencion.*combate.*incendios"]
+  },
+  "uniformes_basicos": {
+    "camisola_o_camisa": ["camisola", "camisa"],
+    "pantalon": ["pantalon"],
+    "calzado": ["botas?", "zapatos? tipo choclo", "calzado"],
+    "chamarra": ["chamarra"],
+    "fornitura_o_cinturon_tactico": ["fornitura", "cinturon tactico"],
+    "chaleco_tactico": ["chaleco.*tactico"]
+  },
+  "equipamiento": {
+    "chaleco_balistico": ["chaleco balistico"],
+    "radio": ["radiocomunicacion"],
+    "menos_letal": ["incapacitantes? menos letales?"]
+  },
+  "capacitacion_policial_nucleo": {
+    "derechos_humanos_y_uso_de_la_fuerza": ["derechos humanos.*uso.*fuerza", "uso legitimo de la fuerza", "derechos humanos y garantias"],
+    "primer_respondiente": ["primer respondiente"],
+    "informe_policial_homologado": ["informe policial homologado", "\\biph\\b"],
+    "proximidad_o_solucion_de_problemas": ["proximidad social", "metodologia sara", "trabajo con la comunidad"]
+  }
+}

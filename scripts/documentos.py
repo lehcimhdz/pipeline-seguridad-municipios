@@ -75,11 +75,15 @@ def seccion_seguridad(blocks):
 
 def registros(table):
     headers = table['filas'][0]
+    try:
+        year_index = headers.index('Año')
+    except ValueError:
+        return
     for row_number, row in enumerate(table['filas'][1:], 2):
         if not any(cell.strip() for cell in row):
             continue
         record = dict(zip(headers, row))
-        year = record.get('Año', '').strip()
+        year = row[year_index].strip() if year_index < len(row) else ''
         if not re.fullmatch(r'\d{4}', year):
             continue
         yield {'año': int(year), 'celdas': record,

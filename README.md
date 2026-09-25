@@ -3,14 +3,19 @@
 Genera el diagnóstico municipal de seguridad a partir de cuatro documentos
 Word por municipio.
 
-Estado actual: extracción de tablas y cálculo de nueve indicadores para ambos
-periodos. Las 18 fichas y sus 90 criterios están en
+Estado actual: extracción de tablas y cálculo de doce indicadores para ambos
+periodos con los datos Word. Las 18 fichas y sus 90 criterios están en
 [reglas_calificacion.json](reglas_calificacion.json). La composición del Word
 final continúa pendiente.
 
 Para ejecutar la extracción y los cálculos disponibles:
 
     python3 scripts/ejecutar_pipeline.py
+
+Las equivalencias de temas, uniformes y equipo están versionadas en
+[config/normalizaciones.json](config/normalizaciones.json). Las fuentes
+externas requeridas y su formato están en
+[config/fuentes_externas.json](config/fuentes_externas.json).
 
 La especificación de entradas, extracción, validación, salidas y renderizado
 está en [PIPELINE.md](PIPELINE.md).
