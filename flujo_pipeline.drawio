@@ -1,0 +1,32 @@
+<mxfile host="app.diagrams.net" modified="2026-09-25T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="flujo-seguridad-municipios" name="Pipeline de seguridad municipal">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="in" value="INPUT / WORD&#xa;4 documentos con el mismo municipio&#xa;• Anexo&#xa;• Paquete Seguridad&#xa;• Gobierno Abierto&#xa;• Desarrollo Urbano" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1"><mxGeometry x="30" y="270" width="190" height="150" as="geometry"/></mxCell>
+        <mxCell id="validar" value="Validar conjunto&#xa;• exactamente 4 DOCX&#xa;• mismo municipio&#xa;• identidad y huellas SHA-256" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" vertex="1" parent="1"><mxGeometry x="270" y="285" width="185" height="115" as="geometry"/></mxCell>
+        <mxCell id="extraer" value="Extraer evidencia&#xa;párrafos, tablas, encabezados&#xa;y referencias trazables" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" vertex="1" parent="1"><mxGeometry x="505" y="285" width="185" height="115" as="geometry"/></mxCell>
+        <mxCell id="calcular" value="Normalizar y calificar&#xa;18 indicadores · 2 periodos&#xa;validaciones y control cruzado" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" vertex="1" parent="1"><mxGeometry x="740" y="285" width="190" height="115" as="geometry"/></mxCell>
+        <mxCell id="inegi" value="Opcional: INEGI&#xa;INEGI_TOKEN desde entorno&#xa;sin guardar secretos en Git" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1"><mxGeometry x="750" y="100" width="170" height="85" as="geometry"/></mxCell>
+        <mxCell id="json" value="OUTPUT / JSON&#xa;Fuente trazable de la corrida&#xa;incluye evidencia, cálculos&#xa;y validaciones" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;" vertex="1" parent="1"><mxGeometry x="980" y="275" width="190" height="130" as="geometry"/></mxCell>
+        <mxCell id="referencias" value="Referencias de contrato&#xa;• Diccionario de datos&#xa;• Reglas de calificación&#xa;• Machote DOCX" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1"><mxGeometry x="975" y="95" width="190" height="100" as="geometry"/></mxCell>
+        <mxCell id="componer" value="Componer contenido&#xa;resúmenes, análisis, hoja&#xa;de cómputo y perfiles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" vertex="1" parent="1"><mxGeometry x="1220" y="280" width="180" height="115" as="geometry"/></mxCell>
+        <mxCell id="word" value="OUTPUT / WORD&#xa;{municipio}_diagnostico_&#xa;seguridad_municipal_{modo}.docx&#xa;&#xa;Archivo Light + amarillo&#xa;para contenido del JSON" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="1450" y="260" width="180" height="150" as="geometry"/></mxCell>
+        <mxCell id="recibo" value="Recibo de renderizado&#xa;hash JSON + hash Word&#xa;modo, perfil y auditoría" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="1450" y="470" width="180" height="95" as="geometry"/></mxCell>
+        <mxCell id="limpiar" value="Limpieza automática&#xa;después de publicación exitosa&#xa;conserva sólo JSON + Word&#xa;+ recibo vigentes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce5cd;strokeColor=#d79b00;fontSize=13;" vertex="1" parent="1"><mxGeometry x="1230" y="500" width="190" height="110" as="geometry"/></mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="in" target="validar" style="endArrow=block;html=1;rounded=0;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="validar" target="extraer" style="endArrow=block;html=1;rounded=0;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="extraer" target="calcular" style="endArrow=block;html=1;rounded=0;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="calcular" target="json" style="endArrow=block;html=1;rounded=0;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="json" target="componer" style="endArrow=block;html=1;rounded=0;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="componer" target="word" style="endArrow=block;html=1;rounded=0;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="word" target="recibo" style="endArrow=block;html=1;rounded=0;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="recibo" target="limpiar" style="endArrow=block;html=1;rounded=0;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="inegi" target="calcular" style="endArrow=block;dashed=1;html=1;rounded=0;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="referencias" target="componer" style="endArrow=block;dashed=1;html=1;rounded=0;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="titulo" value="Pipeline de diagnóstico de seguridad municipal" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1f4e78;align=center;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="465" y="20" width="700" height="40" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

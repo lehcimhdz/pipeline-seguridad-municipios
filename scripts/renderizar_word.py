@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 from copy import deepcopy
-from datetime import datetime, timezone
 from decimal import Decimal
 import hashlib
 import json
@@ -13,7 +12,7 @@ import os
 from pathlib import Path
 import re
 import tempfile
-from uuid import uuid4
+import unicodedata
 import zipfile
 
 from lxml import etree as ET
@@ -21,6 +20,7 @@ from lxml import etree as ET
 from calificar import agregar
 from componer_documento import PERIODOS, decimal_corto
 from documentos import sha256
+from salidas import limpiar_salidas
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / 'templates/Machote_seguridad_general_con_calificacion.docx'
@@ -35,6 +35,12 @@ SELECTOR = '[ 1 · 2 · 3 · 4 · 5 ]'
 PARSER = ET.XMLParser(resolve_entities=False, no_network=True)
 
 
+def slug(value):
+    value = ''.join(char for char in unicodedata.normalize('NFD', value.lower())
+                    if unicodedata.category(char) != 'Mn')
+    return re.sub(r'[^a-z0-9]+', '_', value).strip('_')
+
+
 def texto(node):
     return ''.join(t.text or '' for t in node.iter(W + 't'))
 
@@ -47,13 +53,14 @@ def run(value, model=None, generated=True):
     element = ET.Element(W + 'r')
     props = deepcopy(model.find(W + 'rPr')) if model is not None and model.find(W + 'rPr') is not None else ET.Element(W + 'rPr')
     if generated:
-        for key in ('rStyle', 'highlight', 'color', 'rFonts'):
+        for key in ('rStyle', 'highlight', 'shd', 'color', 'rFonts'):
             for child in props.findall(W + key):
                 props.remove(child)
         props.insert(0, ET.Element(W + 'rFonts', {W + 'ascii': 'Archivo Light', W + 'hAnsi': 'Archivo Light',
                                                    W + 'eastAsia': 'Archivo Light', W + 'cs': 'Archivo Light'}))
         ET.SubElement(props, W + 'color', {W + 'val': '000000'})
         ET.SubElement(props, W + 'highlight', {W + 'val': 'yellow'})
+        ET.SubElement(props, W + 'shd', {W + 'val': 'clear', W + 'color': 'auto', W + 'fill': 'FFFF00'})
         props.insert(0, ET.Element(W + 'rStyle', {W + 'val': STYLE}))
     element.append(props)
     for i, line in enumerate(str(value).split('\n')):
@@ -424,6 +431,9 @@ def auditar(path, expected_generated=None):
                     highlight = r.find(W + 'rPr/' + W + 'highlight')
                     if highlight is None or highlight.get(W + 'val') != 'yellow':
                         raise ValueError('Contenido JSON sin resaltado amarillo.')
+                    shading = r.find(W + 'rPr/' + W + 'shd')
+                    if shading is None or shading.get(W + 'fill') != 'FFFF00':
+                        raise ValueError('Contenido JSON sin sombreado amarillo compatible.')
                     fonts = r.find(W + 'rPr/' + W + 'rFonts')
                     if fonts is None or fonts.get(W + 'ascii') != 'Archivo Light':
                         raise ValueError('Contenido JSON sin fuente Archivo Light.')
@@ -461,19 +471,23 @@ def renderizar(json_path, output_dir, mode='borrador', template=TEMPLATE):
         raise ValueError('La plantilla ya contiene el estilo reservado ContenidoJSON.')
     style = ET.SubElement(styles, W + 'style', {W + 'type': 'character', W + 'styleId': STYLE})
     ET.SubElement(style, W + 'name', {W + 'val': 'Contenido procedente del JSON'})
-    ET.SubElement(ET.SubElement(style, W + 'rPr'), W + 'highlight', {W + 'val': 'yellow'})
+    style_props = ET.SubElement(style, W + 'rPr')
+    ET.SubElement(style_props, W + 'highlight', {W + 'val': 'yellow'})
+    ET.SubElement(style_props, W + 'shd', {W + 'val': 'clear', W + 'color': 'auto', W + 'fill': 'FFFF00'})
     files['word/styles.xml'] = xml_bytes(styles)
     output_dir.mkdir(parents=True, exist_ok=True)
-    suffix = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8]
-    dest = output_dir / f'{json_path.stem}_{mode}_{suffix}.docx'
+    municipality = slug(result['municipio'])
+    if not municipality:
+        raise ValueError('El JSON no contiene un municipio válido para nombrar el Word.')
+    dest = output_dir / f'{municipality}_diagnostico_seguridad_municipal_{mode}.docx'
     with tempfile.TemporaryDirectory(prefix='.render-', dir=output_dir) as directory:
         temp = Path(directory) / 'documento.docx'
         with zipfile.ZipFile(temp, 'w') as archive:
             for info in infos:
                 archive.writestr(info, files[info.filename])
         audit = auditar(temp, generated)
-        # Publicación atómica y exclusiva dentro del mismo sistema de archivos.
-        os.link(temp, dest)
+        # Publicación atómica: una ejecución exitosa reemplaza la salida vigente.
+        os.replace(temp, dest)
     return {**audit, 'archivo': str(dest), 'sha256': sha256(dest), 'modo': mode,
             'json_fuente': str(json_path), 'json_sha256': hashlib.sha256(raw).hexdigest(),
             'plantilla_sha256': result['contrato']['plantilla_sha256'],
@@ -482,8 +496,17 @@ def renderizar(json_path, output_dir, mode='borrador', template=TEMPLATE):
 
 def guardar_recibo(report, receipt):
     receipt.parent.mkdir(parents=True, exist_ok=True)
-    with receipt.open('x', encoding='utf-8') as target:
-        json.dump(report, target, ensure_ascii=False, indent=2)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=receipt.parent,
+                                         prefix=f'.{receipt.name}.', suffix='.tmp', delete=False) as target:
+            temporary = Path(target.name)
+            json.dump(report, target, ensure_ascii=False, indent=2)
+            target.write('\n')
+        os.replace(temporary, receipt)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def main():
@@ -499,8 +522,11 @@ def main():
     # El recibo vincula el Word al JSON exacto sin modificar la entrada auditada.
     receipt = args.output.parent / 'json' / (Path(report['archivo']).stem + '_renderizado.json')
     guardar_recibo(report, receipt)
+    removidos = limpiar_salidas(receipt.parent, args.output, json_actual=args.json,
+                                word_actual=Path(report['archivo']), recibo_actual=receipt)
     print(f"Word ({args.modo}): {report['archivo']}")
     print(f"Resaltado amarillo verificado: {report['segmentos_json']} segmentos. Recibo: {receipt}")
+    print(f"Limpieza de salidas: {removidos['json']} JSON y {removidos['word']} Word anteriores eliminados.")
 
 
 if __name__ == '__main__':

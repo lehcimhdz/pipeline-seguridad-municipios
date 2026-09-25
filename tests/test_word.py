@@ -63,6 +63,7 @@ class WordTests(unittest.TestCase):
         self.assertIsNone(runs[0].find(W + 'rPr/' + W + 'highlight'))
         self.assertIsNone(runs[2].find(W + 'rPr/' + W + 'highlight'))
         self.assertEqual(runs[1].find(W + 'rPr/' + W + 'highlight').get(W + 'val'), 'yellow')
+        self.assertEqual(runs[1].find(W + 'rPr/' + W + 'shd').get(W + 'fill'), 'FFFF00')
 
     def test_composition_keeps_missing_scores_and_inactive_variables(self):
         result = ejemplo()
@@ -75,7 +76,7 @@ class WordTests(unittest.TestCase):
         self.assertIn('INDICADOR_PENDIENTE', codes)
         self.assertIn('REVISION_EDITORIAL_WORD', codes)
 
-    def test_draft_roundtrip_highlight_hashes_and_no_overwrite(self):
+    def test_draft_roundtrip_highlight_hashes_and_replaces_current_output(self):
         result = ejemplo()
         before = sha256(TEMPLATE)
         with tempfile.TemporaryDirectory() as directory:
@@ -83,6 +84,7 @@ class WordTests(unittest.TestCase):
             path.write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')
             report = renderizar(path, Path(directory) / 'word')
             word = Path(report['archivo'])
+            self.assertEqual(word.name, 'municipio_de_prueba_diagnostico_seguridad_municipal_borrador.docx')
             self.assertEqual(report['json_sha256'], sha256(path))
             self.assertEqual(report['sha256'], sha256(word))
             self.assertTrue(report['resaltado_amarillo_verificado'])
@@ -103,10 +105,11 @@ class WordTests(unittest.TestCase):
                     style = r.find(W + 'rPr/' + W + 'rStyle')
                     if style is not None and style.get(W + 'val') == STYLE:
                         self.assertEqual(r.find(W + 'rPr/' + W + 'highlight').get(W + 'val'), 'yellow')
+                        self.assertEqual(r.find(W + 'rPr/' + W + 'shd').get(W + 'fill'), 'FFFF00')
                         self.assertEqual(r.find(W + 'rPr/' + W + 'rFonts').get(W + 'ascii'), 'Archivo Light')
             again = renderizar(path, word.parent)
-            self.assertNotEqual(report['archivo'], again['archivo'])
-            self.assertEqual(report['sha256'], sha256(word))
+            self.assertEqual(report['archivo'], again['archivo'])
+            self.assertEqual(again['sha256'], sha256(word))
         self.assertEqual(before, sha256(TEMPLATE))
 
     def test_final_refuses_partial_data_even_if_state_is_changed(self):

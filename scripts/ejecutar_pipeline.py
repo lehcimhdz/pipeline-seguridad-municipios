@@ -14,6 +14,7 @@ from calificar import agregar, calificar_indicador, dependencias
 from datos_externos import fuente, leer_csv, seleccionar, serie, serie_estatal, validar_campos
 from inegi import consultar_poblacion, guardar_respuestas
 from componer_documento import componer
+from salidas import limpiar_salidas
 
 ROOT = Path(__file__).resolve().parents[1]
 SUFFIXES = (' Anexo.docx', ' PAQUETE SEGURIDAD.docx',
@@ -207,6 +208,11 @@ def main():
             parser.error(f'JSON conservado; no se completó la salida Word: {error}')
         print(f"Word ({args.word}): {report['archivo']}")
         print(f"Resaltado amarillo verificado: {report['segmentos_json']} segmentos. Recibo: {receipt}")
+        removidos = limpiar_salidas(directory, args.output / 'word', json_actual=dest,
+                                    word_actual=Path(report['archivo']), recibo_actual=receipt)
+    else:
+        removidos = limpiar_salidas(directory, args.output / 'word', json_actual=dest)
+    print(f"Limpieza de salidas: {removidos['json']} JSON y {removidos['word']} Word anteriores eliminados.")
 
 
 if __name__ == '__main__':

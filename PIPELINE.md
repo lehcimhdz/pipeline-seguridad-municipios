@@ -43,6 +43,8 @@ para revisión. El agente no debe inventar un valor para resolverla.
 
 ## Flujo
 
+El diagrama editable para draw.io está en [flujo_pipeline.drawio](flujo_pipeline.drawio).
+
     input/word (4 DOCX)
             |
             +-- 1. Validar conjunto y detectar municipio
@@ -53,8 +55,8 @@ para revisión. El agente no debe inventar un valor para resolverla.
             +-- 6. Componer y renderizar el Word final
                      |
                      +-- output/json/{municipio}_diagnostico_seguridad_municipal_{corrida}.json
-                     +-- output/word/{municipio}_diagnostico_seguridad_municipal_{corrida}_{modo}_{id}.docx
-                     +-- output/json/{municipio}_diagnostico_seguridad_municipal_{corrida}_renderizado.json
+                     +-- output/word/{municipio}_diagnostico_seguridad_municipal_{modo}.docx
+                     +-- output/json/{municipio}_diagnostico_seguridad_municipal_{modo}_renderizado.json
 
 ### 1. Extracción
 
@@ -177,14 +179,17 @@ párrafos compuestos y las tablas ajustan espaciado y alineación en la copia
 para facilitar la lectura. El renderer soporta marcadores fragmentados entre
 segmentos de Word, escapa caracteres XML y resalta todo texto nuevo procedente
 del JSON, incluidas las celdas y sus encabezados. Los segmentos generados usan
-el estilo `ContenidoJSON` y resaltado directo `yellow`; una reapertura del
-DOCX comprueba esos atributos y la ausencia de marcadores pendientes.
+el estilo `ContenidoJSON`, resaltado directo `yellow` y sombreado `FFFF00`.
+La doble marca mantiene el amarillo visible tanto en Word como en visores que
+interpretan el resaltado de manera distinta. Una reapertura del DOCX comprueba
+ambos atributos y la ausencia de marcadores pendientes.
 
 ## Controles operativos
 
 - El proceso debe ejecutarse para un solo municipio por corrida.
-- Las salidas nunca reemplazan otra corrida; se usa el nombre de municipio y,
-  si hace falta, una marca de tiempo o identificador de ejecución.
+- El Word vigente usa el nombre estable
+  `{municipio}_diagnostico_seguridad_municipal_{modo}.docx`; una publicación
+  exitosa lo reemplaza atómicamente y la limpieza elimina las salidas previas.
 - Cada archivo de entrada se identifica con SHA-256 en el JSON de salida.
 - Los cambios al diccionario o al machote se validan con el comando siguiente:
 
@@ -208,12 +213,13 @@ SHA-256 y conserva párrafos y tablas con coordenadas de bloque, tabla y fila.
 Extrae los 18 indicadores, compara sus tablas con el Anexo y calcula por
 separado el periodo general y el reciente en los casos implementados.
 
-Cada corrida escribe un archivo nuevo con municipio e identificador de
-ejecución; conserva las salidas anteriores. Los años se extraen de las tablas
-y se registra la cobertura de cada indicador. Las calificaciones reportadas
-en la fuente se conservan separadas de las calculadas. La ausencia de una
-calificación reciente en la fuente no constituye un bloqueo: se calcula a
-partir de los datos cuando el criterio lo permite.
+Cada corrida identifica el JSON de extracción con un identificador de ejecución
+para su trazabilidad, pero publica un Word y recibo de nombre estable para el
+municipio y modo. Los años se extraen de las tablas y se registra la cobertura
+de cada indicador. Las calificaciones reportadas en la fuente se conservan
+separadas de las calculadas. La ausencia de una calificación reciente en la
+fuente no constituye un bloqueo: se calcula a partir de los datos cuando el
+criterio lo permite.
 
 El JSON incluye las tablas originales de los cuatro documentos para auditar
 la extracción. Todavía no extrae contenido exclusivo de imágenes o gráficas.
@@ -245,14 +251,15 @@ la suficiencia de esa justificación humana. Los ajustes metodológicos especial
 requieren extender primero el motor y su auditoría; el renderer no acepta
 agregaciones que difieran del cálculo vigente.
 
-Cada renderizado crea un DOCX nuevo sin sobrescribir la plantilla ni salidas
-anteriores. Su recibo `*_renderizado.json` registra el hash del JSON fuente
-exacto, el del Word, modo, perfil, plantilla y auditoría de resaltado. El JSON
-fuente conserva `salida_word.modo_solicitado` y la ruta del recibo esperado;
-el recibo sólo existe al completar el Word correctamente. En el comando
-independiente el recibo usa el nombre único del Word y se informa en consola.
-Esto evita modificar el JSON después de calcular su hash. Los JSON de versiones
-anteriores sin `contenido_word` deben regenerarse con el pipeline actual.
+Cada ejecución exitosa publica un único conjunto vigente: JSON fuente, recibo
+`*_renderizado.json` y DOCX. Al terminar, elimina los JSON y Word generados por
+corridas anteriores de `output/json/` y `output/word/`; por tanto esas carpetas
+no son un archivo histórico. No sobrescribe la plantilla ni modifica el JSON
+después de calcular su hash. Los bloqueos temporales `~$` de Word se omiten de
+la limpieza porque Word los administra mientras el documento está abierto.
+El recibo registra el hash del JSON fuente exacto, el del Word, modo, perfil,
+plantilla y auditoría de resaltado. Los JSON de versiones anteriores sin
+`contenido_word` deben regenerarse con el pipeline actual.
 
 ## Reglas de calificación versionadas
 
