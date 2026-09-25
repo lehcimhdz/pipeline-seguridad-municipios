@@ -52,8 +52,9 @@ para revisión. El agente no debe inventar un valor para resolverla.
             +-- 5. Escribir JSON trazable
             +-- 6. Componer y renderizar el Word final
                      |
-                     +-- output/json/{municipio}_diagnostico_seguridad_municipal.json
-                     +-- output/word/{municipio}_diagnostico_seguridad_municipal.docx
+                     +-- output/json/{municipio}_diagnostico_seguridad_municipal_{corrida}.json
+                     +-- output/word/{municipio}_diagnostico_seguridad_municipal_{corrida}_{modo}_{id}.docx
+                     +-- output/json/{municipio}_diagnostico_seguridad_municipal_{corrida}_renderizado.json
 
 ### 1. Extracción
 
@@ -137,6 +138,46 @@ una variante incompatible con los datos o contenido incorporado desde el JSON
 sin resaltado amarillo. Esas condiciones deben quedar en validaciones y
 bloquear la salida final.
 
+El modo `borrador` permite revisar resultados incompletos en un Word claramente
+identificado. Se escribe «Pendiente» para un puntaje no calculado y se conserva
+la explicación de su causa. Esta salida no cambia el estado `requiere_revision`
+ni autoriza una calificación global parcial.
+
+### Perfil editorial implementado
+
+El perfil `diagnostico_desde_evidencia` utiliza los marcadores de resumen y
+los 18 análisis específicos para componer prosa descriptiva a partir de los
+resultados. Los bloques genéricos de alternativas se descartan en favor de
+esa prosa. La selección queda registrada en `contenido_word.decision_editorial`.
+
+La copia de salida incluye:
+
+- Identidad y periodo documental, calificaciones general y reciente.
+- Resumen de ambos periodos y hoja de cómputo completa.
+- Las 18 secciones del documento base, sus benchmarks, puntajes y análisis.
+- Tablas municipales y estatales originales, con ámbito y número de tabla.
+- Pendientes de revisión en el borrador y el Anexo 1 metodológico.
+
+Se excluyen la guía de captura, textos alternativos genéricos, variantes de
+producto de gobierno/electoral, bancos de fuentes sugeridas y Anexo 2. La
+exclusión es una decisión de alcance editorial, no una validación de referencias
+o una resolución de las notas que contenían. La revisión de criterios y
+referencias conservados en el Anexo 1 sigue siendo obligatoria antes del cierre.
+
+`valores_plantilla` conserva las 62 claves del contrato: las variantes
+descartadas pueden quedar en null y se enumeran en
+`contenido_word.variables_no_aplicables`. Sólo las variables activas bloquean
+el renderizado final. Los resúmenes y análisis automáticos describen puntajes,
+criterios y evidencia; no deducen causalidad ni vigencia jurídica.
+
+Se conserva la tipografía y el énfasis del contexto en las sustituciones. Los
+párrafos compuestos y las tablas ajustan espaciado y alineación en la copia
+para facilitar la lectura. El renderer soporta marcadores fragmentados entre
+segmentos de Word, escapa caracteres XML y resalta todo texto nuevo procedente
+del JSON, incluidas las celdas y sus encabezados. Los segmentos generados usan
+el estilo `ContenidoJSON` y resaltado directo `yellow`; una reapertura del
+DOCX comprueba esos atributos y la ausencia de marcadores pendientes.
+
 ## Controles operativos
 
 - El proceso debe ejecutarse para un solo municipio por corrida.
@@ -156,6 +197,8 @@ bloquear la salida final.
 El comando de prevalidación y extracción inicial recibe la carpeta input/word/
 por defecto:
 
+    python3 -m pip install -r requirements.txt
+
     python3 scripts/ejecutar_pipeline.py
 
 Valida los cuatro DOCX, identifica municipio y estado, registra las huellas
@@ -173,9 +216,41 @@ partir de los datos cuando el criterio lo permite.
 El JSON incluye las tablas originales de los cuatro documentos para auditar
 la extracción. Todavía no extrae contenido exclusivo de imágenes o gráficas.
 
-El renderizador todavía está pendiente de implementación. Su contrato exige
-JSON validado y resaltado amarillo para toda inserción, conforme a la sección
-Word de salida. Las corridas actuales conservan estado requiere_revision.
+El comando genera por defecto un Word de revisión (`--word borrador`).
+`--word ninguno` conserva el uso de extracción y JSON sin cargar el renderizador.
+Las corridas de extracción mantienen `requiere_revision` hasta resolver las
+revisiones de evidencia, cobertura temporal y composición editorial.
+
+Para renderizar nuevamente un JSON compuesto, sin repetir la extracción:
+
+    python3 scripts/renderizar_word.py output/json/{archivo}.json --modo borrador
+
+Para emitir la versión final desde un JSON revisado:
+
+    python3 scripts/renderizar_word.py output/json/{archivo_validado}.json --modo final
+
+El cierre requiere `estado_ejecucion: validado`, ausencia de validaciones de
+nivel `bloqueante` o `revision`, 18 puntajes por periodo, ambas calificaciones
+completas y variables activas resueltas. El renderizador recalcula la agregación
+y contrasta la hoja de cómputo y los promedios; también exige que los hashes de
+plantilla, diccionario y reglas correspondan al contrato actual. Cambiar sólo
+el estado no habilita una versión final con puntajes faltantes.
+
+La revisión debe corregir o resolver cada hallazgo en una nueva copia del JSON,
+con evidencia y justificación conservadas; quitar una validación sin resolver
+su causa no constituye una revisión. El sistema no verifica automáticamente
+la suficiencia de esa justificación humana. Los ajustes metodológicos especiales
+requieren extender primero el motor y su auditoría; el renderer no acepta
+agregaciones que difieran del cálculo vigente.
+
+Cada renderizado crea un DOCX nuevo sin sobrescribir la plantilla ni salidas
+anteriores. Su recibo `*_renderizado.json` registra el hash del JSON fuente
+exacto, el del Word, modo, perfil, plantilla y auditoría de resaltado. El JSON
+fuente conserva `salida_word.modo_solicitado` y la ruta del recibo esperado;
+el recibo sólo existe al completar el Word correctamente. En el comando
+independiente el recibo usa el nombre único del Word y se informa en consola.
+Esto evita modificar el JSON después de calcular su hash. Los JSON de versiones
+anteriores sin `contenido_word` deben regenerarse con el pipeline actual.
 
 ## Reglas de calificación versionadas
 
@@ -202,8 +277,9 @@ de salida registra temas o comparaciones que llevaron al puntaje.
 La agregación exige los 18 puntajes: promedia por dimensión y después entre
 las tres dimensiones, aplicando los candados generales 1–4. Los ajustes por
 dato dudoso son decisiones del evaluador y no se aplican automáticamente.
-La composición narrativa y su comprobación de divergencia entre periodos
-siguen pendientes.
+La composición descriptiva ya está implementada. La explicación causal de
+divergencias entre periodos continúa siendo una revisión editorial respaldada
+por evidencia.
 
 Criterios operativos explícitos de esta implementación:
 
@@ -224,8 +300,6 @@ Pruebas reproducibles de umbrales, faltantes, dependencias, fuentes externas
 y candados:
 
     python3 -m unittest discover -s tests -v
-
-## Siguiente paso técnico
 
 ## Fuentes externas y decisiones de revisión
 
@@ -281,7 +355,8 @@ el 8 y 9 con una decisión explícita sobre cobertura de la dotación e
 inventario; y resolver los vacíos de fallecimientos del 17 mediante revisión.
 No se declara ausente un dato sólo porque su extracción aún no esté implementada.
 
-Después corresponde componer los análisis con evidencia, seleccionar las
-variantes narrativas y completar el renderizador con verificación del resaltado
-amarillo. Las variables de variantes descartadas no deben exigirse como si
-fueran campos obligatorios del informe final.
+Después corresponde resolver la revisión de evidencia y referencias para
+cerrar los diagnósticos finales. La composición descriptiva y el renderizador
+con resaltado amarillo ya permiten revisar el flujo completo mediante un
+borrador. Las variables de variantes descartadas no se exigen como campos
+obligatorios del informe final.

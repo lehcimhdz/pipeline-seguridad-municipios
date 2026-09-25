@@ -13,6 +13,7 @@ from documentos import leer_docx, registros, seccion_seguridad, sha256
 from calificar import agregar, calificar_indicador, dependencias
 from datos_externos import fuente, leer_csv, seleccionar, serie, serie_estatal, validar_campos
 from inegi import consultar_poblacion, guardar_respuestas
+from componer_documento import componer
 
 ROOT = Path(__file__).resolve().parents[1]
 SUFFIXES = (' Anexo.docx', ' PAQUETE SEGURIDAD.docx',
@@ -99,6 +100,8 @@ def main():
                         help='Destino ignorado por Git para respuestas originales de INEGI.')
     parser.add_argument('--cve-ent')
     parser.add_argument('--cve-mun')
+    parser.add_argument('--word', choices=('borrador', 'final', 'ninguno'), default='borrador',
+                        help='Genera Word de revisión por defecto; final exige un JSON validado.')
     args = parser.parse_args()
     municipality, documents = discover(args.input)
     run = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8]
@@ -161,15 +164,9 @@ def main():
         values.update({'año_ultimo_periodo_inicial': census_years[-2], 'año_ultimo_periodo_final': census_years[-1]})
     validations.append({'nivel': 'revision', 'codigo': 'COBERTURA_EDICIONES',
                         'detalle': 'Los años son etiquetas de las tablas. Confirmar su relación con edición censal y años no observados antes de cerrar el diagnóstico.'})
-    unresolved = [key for key, value in values.items() if value is None]
-    if unresolved:
-        validations.append({'nivel': 'bloqueante', 'codigo': 'VARIABLES_PENDIENTES', 'variables': unresolved,
-                            'detalle': 'Separar variables de variantes descartadas de campos necesarios antes de validar el Word.'})
     aggregates = {period: agregar(results, rules) for period, results in evaluations.items()}
-    validations.append({'nivel': 'bloqueante', 'codigo': 'COMPOSICION_WORD_PENDIENTE',
-                        'detalle': 'Falta composición editorial y renderizado con resaltado amarillo verificado.'})
     result = {
-        'version': '1.1', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
+        'version': '1.2', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
         'estado_ejecucion': 'requiere_revision',
         'contrato': {'diccionario_sha256': sha256(dictionary_path), 'plantilla_sha256': sha256(template),
                      'reglas_sha256': sha256(rules_path), 'normalizaciones_sha256': sha256(mappings_path),
@@ -180,11 +177,15 @@ def main():
         'identidad_evidencia': title, 'valores_plantilla': values,
         'indicadores': sections, 'calculos': aggregates,
         'evidencia_documental': {documents[suffix].name: blocks for suffix, blocks in evidence.items()},
-        'validaciones': validations, 'salida_word_generada': False,
+        'validaciones': validations,
     }
+    componer(result, dictionary, rules)
     directory = args.output / 'json'
     directory.mkdir(parents=True, exist_ok=True)
     dest = directory / f'{slug(municipality)}_diagnostico_seguridad_municipal_{run}.json'
+    receipt = directory / f'{dest.stem}_renderizado.json'
+    result['salida_word'] = {'modo_solicitado': args.word,
+                            'recibo_renderizado': str(receipt) if args.word != 'ninguno' else None}
     temporary = dest.with_suffix('.json.tmp')
     try:
         with temporary.open('x', encoding='utf-8') as target:
@@ -197,6 +198,15 @@ def main():
     for period, results in evaluations.items():
         print(f'{period}: {sum(value["puntaje"] is not None for value in results.values())}/18 indicadores calculados.')
     print('Estado: requiere_revision. Los motivos específicos constan en validaciones.')
+    if args.word != 'ninguno':
+        from renderizar_word import renderizar, guardar_recibo
+        try:
+            report = renderizar(dest, args.output / 'word', args.word)
+            guardar_recibo(report, receipt)
+        except (ValueError, OSError) as error:
+            parser.error(f'JSON conservado; no se completó la salida Word: {error}')
+        print(f"Word ({args.word}): {report['archivo']}")
+        print(f"Resaltado amarillo verificado: {report['segmentos_json']} segmentos. Recibo: {receipt}")
 
 
 if __name__ == '__main__':

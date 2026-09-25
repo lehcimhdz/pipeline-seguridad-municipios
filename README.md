@@ -4,13 +4,32 @@ Genera el diagnóstico municipal de seguridad a partir de cuatro documentos
 Word por municipio.
 
 Estado actual: extracción de tablas y cálculo de doce indicadores para ambos
-periodos con los datos Word. Las 18 fichas y sus 90 criterios están en
-[reglas_calificacion.json](reglas_calificacion.json). La composición del Word
-final continúa pendiente.
+periodos con los datos Word y generación de un Word de revisión con el contenido
+del JSON resaltado en amarillo. Las 18 fichas y sus 90 criterios están en
+[reglas_calificacion.json](reglas_calificacion.json). La versión final requiere
+datos completos y revisión editorial resuelta.
 
-Para ejecutar la extracción y los cálculos disponibles:
+Instala la dependencia del renderizador (Python 3.11+):
+
+    python3 -m pip install -r requirements.txt
+
+Para ejecutar extracción, cálculos, JSON y Word de revisión:
 
     python3 scripts/ejecutar_pipeline.py
+
+El comando genera archivos nuevos en `output/json/` y `output/word/`. El Word
+lleva la leyenda **BORRADOR DE REVISIÓN**, incluye las tablas fuente de los
+18 indicadores y señala las puntuaciones pendientes sin inventarlas. Un
+recibo JSON vincula ambos archivos mediante SHA-256 y registra la comprobación
+del resaltado amarillo. Usa `--word ninguno` para obtener sólo el JSON.
+
+Para renderizar un JSON existente, ya compuesto por la versión actual:
+
+    python3 scripts/renderizar_word.py output/json/{archivo}.json --modo borrador
+
+Tras resolver los pendientes y validar el JSON, `--modo final` exige ambas
+calificaciones completas, coherencia de cálculos y ninguna revisión abierta.
+El renderizador rechaza JSON antiguos sin `contenido_word`; deben regenerarse.
 
 Las equivalencias de temas, uniformes y equipo están versionadas en
 [config/normalizaciones.json](config/normalizaciones.json). Las fuentes
@@ -33,13 +52,14 @@ número de veces que debe aparecer en la plantilla.
 
 La plantilla no se modifica durante una ejecución. Sus 62 variables canónicas
 permiten insertar contenido específico por contexto. Cada ejecución genera un
-JSON trazable en output/json/. El destino previsto del Word terminado es
-output/word/; toda inserción desde JSON deberá llevar resaltado amarillo.
+JSON trazable en output/json/. El Word se guarda en output/word/; toda inserción
+desde JSON lleva resaltado amarillo, verificado al volver a abrir el DOCX.
 
 Para comprobar que el contrato entre el diccionario y el machote no se alteró:
 
     python3 scripts/validar_plantilla.py
 
-Los marcadores entre corchetes que permanecen en el Word son instrucciones
-editoriales, selectores de puntaje o notas de verificación. Están declarados en
-marcadores_no_tratados_como_variables y no se sustituyen como datos.
+Los marcadores entre corchetes de la plantilla están declarados en
+marcadores_no_tratados_como_variables. En la copia de salida se completan los
+selectores de puntaje y se excluye el material editorial del perfil elegido;
+no se considera resuelta una verificación por haber excluido su texto.
