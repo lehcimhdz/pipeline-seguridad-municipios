@@ -95,11 +95,15 @@ class WordTests(unittest.TestCase):
                 self.assertNotIn('TEXTOS BASE', text)
                 self.assertNotIn('{{', text)
                 self.assertIn('Anexo 1.', text)
-                self.assertNotIn('Anexo 2.', text)
+                self.assertIn('Anexo 2.', text)
+                sections = root.findall('.//' + W + 'sectPr')
+                self.assertEqual(len(sections), 2)
+                self.assertEqual(sections[-1].find(W + 'pgSz').get(W + 'orient'), 'landscape')
                 for r in root.iter(W + 'r'):
                     style = r.find(W + 'rPr/' + W + 'rStyle')
                     if style is not None and style.get(W + 'val') == STYLE:
                         self.assertEqual(r.find(W + 'rPr/' + W + 'highlight').get(W + 'val'), 'yellow')
+                        self.assertEqual(r.find(W + 'rPr/' + W + 'rFonts').get(W + 'ascii'), 'Archivo Light')
             again = renderizar(path, word.parent)
             self.assertNotEqual(report['archivo'], again['archivo'])
             self.assertEqual(report['sha256'], sha256(word))

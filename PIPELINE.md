@@ -156,13 +156,15 @@ La copia de salida incluye:
 - Resumen de ambos periodos y hoja de cómputo completa.
 - Las 18 secciones del documento base, sus benchmarks, puntajes y análisis.
 - Tablas municipales y estatales originales, con ámbito y número de tabla.
-- Pendientes de revisión en el borrador y el Anexo 1 metodológico.
+- Pendientes de revisión en el borrador, el Anexo 1 metodológico y el Anexo 2
+  en su sección apaisada original.
 
 Se excluyen la guía de captura, textos alternativos genéricos, variantes de
-producto de gobierno/electoral, bancos de fuentes sugeridas y Anexo 2. La
-exclusión es una decisión de alcance editorial, no una validación de referencias
-o una resolución de las notas que contenían. La revisión de criterios y
-referencias conservados en el Anexo 1 sigue siendo obligatoria antes del cierre.
+producto de gobierno/electoral y bancos de fuentes sugeridas. Los Anexos 1 y 2
+se conservan: el segundo mantiene su sección apaisada y tabla de referencias.
+Esta selección editorial no valida referencias ni resuelve las notas que
+contienen. La revisión de criterios y referencias sigue siendo obligatoria antes
+del cierre.
 
 `valores_plantilla` conserva las 62 claves del contrato: las variantes
 descartadas pueden quedar en null y se enumeran en

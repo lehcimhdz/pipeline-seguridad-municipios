@@ -47,9 +47,11 @@ def run(value, model=None, generated=True):
     element = ET.Element(W + 'r')
     props = deepcopy(model.find(W + 'rPr')) if model is not None and model.find(W + 'rPr') is not None else ET.Element(W + 'rPr')
     if generated:
-        for key in ('rStyle', 'highlight', 'color'):
+        for key in ('rStyle', 'highlight', 'color', 'rFonts'):
             for child in props.findall(W + key):
                 props.remove(child)
+        props.insert(0, ET.Element(W + 'rFonts', {W + 'ascii': 'Archivo Light', W + 'hAnsi': 'Archivo Light',
+                                                   W + 'eastAsia': 'Archivo Light', W + 'cs': 'Archivo Light'}))
         ET.SubElement(props, W + 'color', {W + 'val': '000000'})
         ET.SubElement(props, W + 'highlight', {W + 'val': 'yellow'})
         props.insert(0, ET.Element(W + 'rStyle', {W + 'val': STYLE}))
@@ -67,6 +69,18 @@ def parrafo(value, model=None, generated=True):
         p.append(deepcopy(model.find(W + 'pPr')))
     p.append(run(value, model.find('.//' + W + 'r') if model is not None else None, generated))
     formato_parrafo(p)
+    return p
+
+
+def color_generado(p, color='2F5496'):
+    """Aplica la jerarquía azul del machote sin quitar el resaltado amarillo."""
+    for r in p.iter(W + 'r'):
+        props = r.find(W + 'rPr')
+        if props is None:
+            continue
+        for node in props.findall(W + 'color'):
+            props.remove(node)
+        props.append(ET.Element(W + 'color', {W + 'val': color}))
     return p
 
 
@@ -127,6 +141,7 @@ def tabla_evidencia(rows):
         raise ValueError('Tabla de evidencia sin columnas.')
     table = ET.Element(W + 'tbl')
     props = ET.SubElement(table, W + 'tblPr')
+    ET.SubElement(props, W + 'tblStyle', {W + 'val': 'Tablanormal'})
     ET.SubElement(props, W + 'tblW', {W + 'w': '5000', W + 'type': 'pct'})
     borders = ET.SubElement(props, W + 'tblBorders')
     for edge in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
@@ -140,7 +155,12 @@ def tabla_evidencia(rows):
             ET.SubElement(ET.SubElement(row, W + 'trPr'), W + 'tblHeader')
         for value in list(values) + [''] * (columns - len(values)):
             cell = ET.SubElement(row, W + 'tc')
-            ET.SubElement(ET.SubElement(cell, W + 'tcPr'), W + 'tcW', {W + 'w': str(9000 // columns), W + 'type': 'dxa'})
+            cell_props = ET.SubElement(cell, W + 'tcPr')
+            ET.SubElement(cell_props, W + 'tcW', {W + 'w': str(9000 // columns), W + 'type': 'dxa'})
+            if index == 0:
+                ET.SubElement(cell_props, W + 'shd', {W + 'val': 'clear', W + 'fill': '1F4E78'})
+            elif index % 2 == 0:
+                ET.SubElement(cell_props, W + 'shd', {W + 'val': 'clear', W + 'fill': 'EAF0F8'})
             p = parrafo(value)
             formato_parrafo(p, compact=True)
             rpr = p.find(W + 'r/' + W + 'rPr')
@@ -238,7 +258,7 @@ def seleccionar_documento(root, result, mode):
     selected = []
     if mode == 'borrador':
         selected.append(parrafo(content['aviso_borrador']))
-    selected.append(parrafo(content['titulo'], original[0]))
+    selected.append(color_generado(parrafo(content['titulo'], original[0])))
     selected.append(parrafo(content['periodo']))
     for period, prefix in [('general', 'CALIFICACIÓN GENERAL:'), ('ultimo_periodo', 'CALIFICACIÓN DEL ÚLTIMO PERIODO:')]:
         index = _unique(original, lambda t: t.startswith(prefix), prefix)
@@ -249,7 +269,7 @@ def seleccionar_documento(root, result, mode):
     for key, heading in [('resumen_general', 'Síntesis del periodo general'),
                          ('resumen_ultimo_periodo', 'Síntesis del último periodo')]:
         index = _unique(original, lambda t: MARKER.fullmatch(t) and MARKER.fullmatch(t)[1] == key, key)
-        selected.extend([parrafo(heading, generated=False), deepcopy(original[index])])
+        selected.extend([color_generado(parrafo(heading)), deepcopy(original[index])])
     index = _unique(original, lambda t: t == 'HOJA DE CÓMPUTO', 'HOJA DE CÓMPUTO')
     selected.append(deepcopy(original[index]))
     worksheet = deepcopy(original[index + 1])
@@ -265,7 +285,7 @@ def seleccionar_documento(root, result, mode):
         key = f'analisis_indicador_{number:02d}'
         index = _unique(original, lambda t: MARKER.fullmatch(t) and MARKER.fullmatch(t)[1] == key, key)
         if number in dimensions:
-            selected.append(parrafo(dimensions[number], generated=False))
+            selected.append(color_generado(parrafo(dimensions[number])))
         heading, rating, benchmark, analysis = deepcopy(original[index-3:index+1])
         if texto(rating).count(SELECTOR) != 2 or not texto(benchmark).startswith('Benchmark:'):
             raise ValueError(f'Cambió la estructura del indicador {number}.')
@@ -285,7 +305,7 @@ def seleccionar_documento(root, result, mode):
             reemplazar(rating, SELECTOR, str(value) if value is not None else 'Pendiente', first_only=True)
         selected.extend([heading, rating, benchmark, analysis])
         for table in section['tablas']:
-            selected.append(parrafo(f"Evidencia {table['ambito']} — PAQUETE SEGURIDAD, tabla {table['tabla']}"))
+            selected.append(color_generado(parrafo(f"Evidencia {table['ambito']} — PAQUETE SEGURIDAD, tabla {table['tabla']}")))
             selected.append(tabla_evidencia(table['filas']))
         selected.append(parrafo(next(a['cierre'] for a in content['analisis'] if a['indicador'] == number)))
     if mode == 'borrador':
@@ -296,12 +316,9 @@ def seleccionar_documento(root, result, mode):
             context += f" — {validation['periodo']}" if 'periodo' in validation else ''
             selected.append(parrafo(f"{validation['codigo']}{context}: {detail}"))
     start = _unique(original, lambda t: t.startswith('Anexo 1. Fichas de calificación'), 'Anexo 1')
-    end = _unique(original, lambda t: t.startswith('Anexo 2.'), 'Anexo 2')
-    selected.extend(deepcopy(original[start:end]))
-    sections = [b for b in original if b.tag == W + 'sectPr']
-    if len(sections) != 1:
-        raise ValueError('La plantilla debe tener una sección final única.')
-    selected.append(deepcopy(sections[0]))
+    # El Anexo 2 inicia la sección apaisada final. Conservarlo completo evita
+    # dejar una sección horizontal vacía o cortar su tabla de referencias.
+    selected.extend(deepcopy(original[start:]))
     for node in original:
         body.remove(node)
     for node in selected:
@@ -407,6 +424,9 @@ def auditar(path, expected_generated=None):
                     highlight = r.find(W + 'rPr/' + W + 'highlight')
                     if highlight is None or highlight.get(W + 'val') != 'yellow':
                         raise ValueError('Contenido JSON sin resaltado amarillo.')
+                    fonts = r.find(W + 'rPr/' + W + 'rFonts')
+                    if fonts is None or fonts.get(W + 'ascii') != 'Archivo Light':
+                        raise ValueError('Contenido JSON sin fuente Archivo Light.')
     if not count or (expected_generated is not None and count != expected_generated):
         raise ValueError('El contenido generado no coincide con la auditoría de inserciones.')
     return {'segmentos_json': count, 'caracteres_json': characters,
