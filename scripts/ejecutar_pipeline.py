@@ -2,6 +2,7 @@
 """Extrae tablas y calcula los criterios implementados de ambos periodos."""
 import argparse
 import json
+import os
 import re
 import unicodedata
 from datetime import datetime, timezone
@@ -11,6 +12,7 @@ from uuid import uuid4
 from documentos import leer_docx, registros, seccion_seguridad, sha256
 from calificar import agregar, calificar_indicador, dependencias
 from datos_externos import fuente, leer_csv, seleccionar, serie, serie_estatal, validar_campos
+from inegi import consultar_poblacion, guardar_respuestas
 
 ROOT = Path(__file__).resolve().parents[1]
 SUFFIXES = (' Anexo.docx', ' PAQUETE SEGURIDAD.docx',
@@ -38,14 +40,16 @@ def discover(input_dir):
     return prefixes.pop(), documents
 
 
-def cargar_externos(args):
+def cargar_externos(args, run):
     config_path = ROOT / 'config/fuentes_externas.json'
     config = json.loads(config_path.read_text(encoding='utf-8'))
     external = {}
     provenance = []
-    supplied = [args.population_csv, args.incidence_csv]
+    supplied = [args.population_csv, args.incidence_csv, args.inegi_population]
     if any(supplied) and (not args.cve_ent or not args.cve_mun):
         raise ValueError('Las fuentes externas requieren --cve-ent y --cve-mun.')
+    if args.population_csv and args.inegi_population:
+        raise ValueError('Elige una sola fuente de población: --population-csv o --inegi-population.')
     if args.population_csv:
         rows = leer_csv(args.population_csv)
         definition = config['poblacion']
@@ -55,6 +59,21 @@ def cargar_externos(args):
         external['poblacion_municipal'] = serie(municipal, 'poblacion')
         external['poblacion_estatal'] = serie_estatal(rows, args.cve_ent, 'poblacion')
         provenance.append(fuente(args.population_csv, definition))
+    if args.inegi_population:
+        definition = config['poblacion']['inegi_api']
+        token = os.environ.get('INEGI_TOKEN', '')
+        population, source, responses = consultar_poblacion(
+            token=token,
+            cve_ent=args.cve_ent,
+            cve_mun=args.cve_mun,
+            definition=definition,
+            timeout=args.inegi_timeout,
+        )
+        external.update(population)
+        source['archivos_respuesta_original'] = guardar_respuestas(
+            responses, args.inegi_raw_dir, run, args.cve_ent, args.cve_mun
+        )
+        provenance.append(source)
     if args.incidence_csv:
         rows = leer_csv(args.incidence_csv)
         definition = config['incidencia_delictiva']
@@ -73,11 +92,20 @@ def main():
     parser.add_argument('--output', type=Path, default=ROOT / 'output')
     parser.add_argument('--population-csv', type=Path)
     parser.add_argument('--incidence-csv', type=Path)
+    parser.add_argument('--inegi-population', action='store_true',
+                        help='Consulta población total en la API INEGI usando INEGI_TOKEN.')
+    parser.add_argument('--inegi-timeout', type=float, default=30.0)
+    parser.add_argument('--inegi-raw-dir', type=Path, default=ROOT / 'input/datos_externos',
+                        help='Destino ignorado por Git para respuestas originales de INEGI.')
     parser.add_argument('--cve-ent')
     parser.add_argument('--cve-mun')
     args = parser.parse_args()
     municipality, documents = discover(args.input)
-    external, external_sources, external_config_path = cargar_externos(args)
+    run = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8]
+    try:
+        external, external_sources, external_config_path = cargar_externos(args, run)
+    except (RuntimeError, ValueError) as error:
+        parser.error(str(error))
     evidence = {suffix: leer_docx(path) for suffix, path in documents.items()}
     sections = seccion_seguridad(evidence[SUFFIXES[1]])
     annex_sections = seccion_seguridad(evidence[SUFFIXES[0]])
@@ -140,7 +168,6 @@ def main():
     aggregates = {period: agregar(results, rules) for period, results in evaluations.items()}
     validations.append({'nivel': 'bloqueante', 'codigo': 'COMPOSICION_WORD_PENDIENTE',
                         'detalle': 'Falta composición editorial y renderizado con resaltado amarillo verificado.'})
-    run = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8]
     result = {
         'version': '1.1', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
         'estado_ejecucion': 'requiere_revision',

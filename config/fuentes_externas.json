@@ -6,7 +6,17 @@
     "uso": ["indicador_4", "indicador_14"],
     "campos_normalizados": ["cve_ent", "cve_mun", "año", "poblacion"],
     "cobertura_esperada": "1990-2040",
-    "archivo_de_entrada": "input/datos_externos/poblacion_municipal.csv"
+    "archivo_de_entrada": "input/datos_externos/poblacion_municipal.csv",
+    "inegi_api": {
+      "proveedor": "INEGI",
+      "pagina_oficial": "https://www.inegi.org.mx/servicios/api_indicadores.html",
+      "indicador_id": "1002000001",
+      "descripcion_indicador": "Población total",
+      "fuente_datos": "BISE",
+      "version": "2.0",
+      "uso": ["indicador_4", "indicador_14"],
+      "restriccion": "Sólo se usan años devueltos por la API. El pipeline no interpola años censales ni mezcla esta serie con proyecciones CONAPO."
+    }
   },
   "incidencia_delictiva": {
     "proveedor": "SESNSP",
@@ -16,8 +26,9 @@
     "archivo_de_entrada": "input/datos_externos/incidencia_delictiva_municipal.csv"
   },
   "reglas_de_ingreso": [
-    "Conservar el archivo descargado sin modificar dentro de input/datos_externos.",
+    "Conservar el archivo descargado o la respuesta original de la API sin modificar dentro de input/datos_externos.",
     "Registrar URL, hash SHA-256, fecha de descarga, campos usados y filtros en el JSON de salida.",
+    "Los tokens de API sólo viven en variables de entorno; no se guardan en configuración, URLs de salida, respuestas ni Git.",
     "No mezclar series de metodologías incompatibles sin una conciliación documentada.",
     "Una fuente externa faltante bloquea sólo los indicadores que la necesitan."
   ]

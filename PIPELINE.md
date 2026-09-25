@@ -230,10 +230,13 @@ y candados:
 ## Fuentes externas y decisiones de revisión
 
 Los indicadores 4 y 14 requieren población; el 18 requiere incidencia
-delictiva. Sus contratos se encuentran en config/fuentes_externas.json.
-El proceso no descarga silenciosamente ni transforma una base oficial: se
-deposita la descarga original normalizada en input/datos_externos/ y se pasa
-en la corrida:
+delictiva. Sus contratos se encuentran en config/fuentes_externas.json. La
+población puede provenir de un CSV trazable de CONAPO o, de forma explícita,
+de la API oficial del Banco de Indicadores de INEGI. La incidencia delictiva
+continúa teniendo como fuente primaria al SESNSP.
+
+Para CSV, se deposita la descarga original normalizada en
+input/datos_externos/ y se pasa en la corrida:
 
     python3 scripts/ejecutar_pipeline.py \
       --population-csv input/datos_externos/poblacion_municipal.csv \
@@ -243,6 +246,28 @@ en la corrida:
 Cada CSV debe tener los campos de su contrato. El JSON final registra
 proveedor, página oficial, ruta local, hash y campos utilizados. Las fuentes
 son CONAPO para población municipal y SESNSP para incidencia delictiva.
+
+### Población mediante la API de INEGI
+
+La alternativa INEGI consulta la serie histórica de `1002000001` (Población
+total) para la clave municipal de cinco dígitos y para su entidad. El token es
+un secreto de entorno, no un parámetro del comando ni un archivo del proyecto:
+
+    export INEGI_TOKEN
+    python3 scripts/ejecutar_pipeline.py \
+      --inegi-population \
+      --cve-ent 00 --cve-mun 000
+
+Cada respuesta original se conserva en `input/datos_externos/`, carpeta
+ignorada por Git. El JSON de salida registra indicador, área geográfica,
+metadatos de serie, fecha, años y SHA-256; la URL se conserva con el token
+redactado. Una corrida rechaza combinar `--inegi-population` y
+`--population-csv`, pues mezclar una serie censal con proyecciones requiere
+una conciliación metodológica documentada.
+
+La API puede devolver sólo años censales. El motor usa únicamente años
+publicados por INEGI y no interpola ni proyecta; por tanto, los indicadores 4
+y 14 siguen pendientes cuando faltan años que aparecen en sus tablas fuente.
 
 Las celdas vacías, datos dudosos y excepciones se resuelven sólo mediante el
 archivo JSON descrito en input/revision/README.md. Una decisión debe señalar

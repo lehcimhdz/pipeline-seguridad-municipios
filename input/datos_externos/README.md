@@ -16,3 +16,23 @@ pero no lo combines con filas municipales para evitar doble conteo.
 
 Los CSV de datos se ignoran en Git. El JSON de salida conserva su hash,
 proveedor y campos utilizados.
+
+## API de INEGI para población
+
+Como alternativa al CSV de CONAPO, el pipeline puede consultar el indicador
+INEGI 1002000001, Población total, para el municipio y su entidad. Define el
+token sólo en el entorno y ejecuta:
+
+    export INEGI_TOKEN
+    python3 scripts/ejecutar_pipeline.py --inegi-population --cve-ent 00 --cve-mun 000
+
+La corrida guarda las respuestas JSON originales, con fecha y hash, en esta
+carpeta. Estos archivos están ignorados por Git. El JSON del diagnóstico sólo
+registra URL con token redactado, metadatos, años y hashes. No se acepta un
+token como argumento de línea de comandos, archivo de configuración ni dato
+de salida.
+
+La serie de Población total puede tener únicamente años censales. Se usan
+exclusivamente los años que INEGI entrega; no se interpolan años faltantes ni
+se combinan automáticamente con las proyecciones de CONAPO. Si los años de un
+indicador no están cubiertos, dicho indicador permanece pendiente de revisión.

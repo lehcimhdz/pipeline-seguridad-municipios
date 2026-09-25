@@ -17,6 +17,13 @@ Las equivalencias de temas, uniformes y equipo están versionadas en
 externas requeridas y su formato están en
 [config/fuentes_externas.json](config/fuentes_externas.json).
 
+La población para los indicadores 4 y 14 puede ingresarse como CSV de CONAPO
+o consultarse desde la API oficial del Banco de Indicadores de INEGI. Esta
+segunda vía se activa sólo con `--inegi-population` y el secreto de entorno
+`INEGI_TOKEN`; el token nunca se guarda ni se muestra en las salidas. La API
+aporta únicamente los años que publica: el pipeline no interpola ni mezcla
+esa serie con proyecciones.
+
 La especificación de entradas, extracción, validación, salidas y renderizado
 está en [PIPELINE.md](PIPELINE.md).
 

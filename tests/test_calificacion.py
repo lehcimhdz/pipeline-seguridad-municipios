@@ -2,12 +2,14 @@ import json
 from decimal import Decimal
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from calificar import agregar, calificar_indicador, categoria, dependencias
 from estructurar_reglas import construir
+from inegi import consultar_poblacion, guardar_respuestas
 
 RULES = json.loads((ROOT / 'reglas_calificacion.json').read_text())
 MAPPINGS = json.loads((ROOT / 'config/normalizaciones.json').read_text())
@@ -122,6 +124,50 @@ class CalificacionTests(unittest.TestCase):
             ],
         }
         self.assertEqual(calificar_indicador(referrals, RULES['fichas'][17], 'ultimo_periodo', MAPPINGS, external)['puntaje'], 4)
+
+    def test_inegi_population_adapter_keeps_token_out_of_provenance(self):
+        definition = json.loads((ROOT / 'config/fuentes_externas.json').read_text())['poblacion']['inegi_api']
+
+        def payload(area, values):
+            return {'Series': [{'INDICADOR': '1002000001', 'FREQ': '7', 'UNIT': '96',
+                                'LASTUPDATE': '2026-09-24', 'OBSERVATIONS': [
+                                    {'TIME_PERIOD': str(year), 'OBS_VALUE': str(value), 'OBS_EXCEPTION': None}
+                                    for year, value in values.items()
+                                ]}]}
+
+        responses = {
+            '19006': payload('19006', {2020: 656464, 2025: 700000}),
+            '19': payload('19', {2020: 5784442, 2025: 6200000}),
+        }
+
+        class Response:
+            def __init__(self, data):
+                self.data = data
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self):
+                return json.dumps(self.data).encode('utf-8')
+
+        def opener(request, timeout):
+            area = request.full_url.split('/es/', 1)[1].split('/', 1)[0]
+            return Response(responses[area])
+
+        external, provenance, raw = consultar_poblacion(
+            token='only-for-test', cve_ent='19', cve_mun='006', definition=definition, opener=opener
+        )
+        self.assertEqual(external['poblacion_municipal'][2020], Decimal('656464'))
+        self.assertEqual(external['poblacion_estatal'][2025], Decimal('6200000'))
+        self.assertNotIn('only-for-test', json.dumps(provenance))
+        self.assertTrue(all('[TOKEN_REDACTED]' in item['url_sin_secreto'] for item in provenance['consultas']))
+        with tempfile.TemporaryDirectory() as directory:
+            paths = guardar_respuestas(raw, Path(directory), 'run_test', '19', '006')
+            self.assertEqual(set(paths), {'municipal', 'estatal'})
+            self.assertTrue(all(Path(path).is_file() for path in paths.values()))
 
     def test_specific_dependencies(self):
         results = {i: {'puntaje': 5} for i in range(1, 19)}
