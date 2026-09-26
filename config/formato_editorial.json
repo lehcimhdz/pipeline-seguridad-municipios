@@ -1,9 +1,12 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "unidad": "puntos",
   "interlineado": "exacto_en_cuerpo_minimo_en_titulos_menores_que_la_fuente",
   "sangria_mm": 5,
   "logo_ancho_cm": 5,
+  "decision_interlineado_titulos": "Mínimo de 14 pt para títulos de 24 pt, aprobado por el usuario para evitar recortes; los demás interlineados del manual son exactos.",
+  "alcance": "Medición normalizada en la salida; Anexo configurado pero no habilitado como producto.",
+  "excepciones_estructura": "Listas conservan su numeración con sangría francesa de 5 mm; párrafos vacíos del original se conservan ocultos, sin renglones visibles.",
   "medicion": {
     "titulo": ["Archivo", 26, 40, "center"],
     "capitulo": ["Archivo Light", 24, 14, "center"],

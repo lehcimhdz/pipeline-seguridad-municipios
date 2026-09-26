@@ -18,7 +18,9 @@ from calificacion_documental import agregar_documental
 from componer_documento import PERIODOS, decimal_corto, nota_documental, textos_metodologia
 from contrato import ROOT, CONTRACT, cargar_contrato, huellas
 from documentos import sha256
-from editorial import configurar
+from editorial import configurar, incorporar_estilos, normalizar_seccion, rol_estilo
+from auditoria_editorial import preparar_base, normalizar_notas, validar_editorial
+from logo_editorial import construir_portada
 from graficas_word import agregar_grafica
 from salidas import limpiar_salidas
 from fidelidad_machote import controles, retirar_resaltado_amarillo, validar as validar_fidelidad
@@ -81,7 +83,7 @@ def parrafo(value, model=None, generated=True, perfil='medicion', rol='cuerpo', 
 
 
 def parrafo_del_machote(value, model, continuation=False):
-    """Rellena respetando sangría, listas, color y formato local del original."""
+    """Rellena conservando color y listas, con el rol y formato del manual."""
     p = ET.Element(W + 'p')
     if model.find(W + 'pPr') is not None:
         p.append(deepcopy(model.find(W + 'pPr')))
@@ -89,7 +91,8 @@ def parrafo_del_machote(value, model, continuation=False):
     if continuation and p.find(W + 'pPr') is not None:
         for node in p.find(W + 'pPr').findall(W + 'numPr'):
             node.getparent().remove(node)
-    return p
+    role = rol_estilo(model)
+    return configurar(p, rol=role[0] if role else 'cuerpo', inicial=not continuation)
 
 
 def reemplazar(p, token, replacement, first_only=False):
@@ -305,15 +308,14 @@ def seleccionar_documento(root, result, mode, perfil, files):
             replacements = []
             if isinstance(value, list):
                 for item in value:
-                    replacements.append(parrafo(item['titulo'], perfil=perfil, rol='nota'))
                     if key.startswith('graficas_'):
                         chart_number += 1
-                        drawing = configurar(agregar_grafica(files, item, chart_number), perfil, 'cuerpo')
-                        drawing.find(W + 'pPr/' + W + 'spacing').set(W + 'lineRule', 'atLeast')
+                        drawing = configurar(agregar_grafica(files, item, chart_number), perfil, 'figura')
                         replacements.append(drawing)
                         missing = [c for c, v in zip(item['categorias'], item['valores']) if v is None]
                         replacements.append(parrafo(item['fuente'] + (' No representado por dato pendiente: ' + ', '.join(missing) + '.' if missing else ''), perfil=perfil, rol='nota'))
                     else:
+                        replacements.append(parrafo(item['titulo'], perfil=perfil, rol='nota'))
                         replacements.append(tabla_evidencia(item['filas'], perfil))
             else:
                 value = f'Pendiente de revisión: {key}' if value is None else value
@@ -330,6 +332,7 @@ def seleccionar_documento(root, result, mode, perfil, files):
                             italic = run(title + '. ')
                             ET.SubElement(italic.find(W + 'rPr'), W + 'i')
                             replacement.extend([italic, run('SHA-256: ' + checksum)])
+                        configurar(replacement, rol='bibliografia', inicial=i == 0)
             parent = p.getparent(); index = parent.index(p); parent.remove(p)
             for offset, replacement in enumerate(replacements):
                 parent.insert(index + offset, replacement)
@@ -345,6 +348,8 @@ def seleccionar_documento(root, result, mode, perfil, files):
                                 rpr.remove(n)
                             grade = str(value).rsplit(' — ', 1)[-1]
                             ET.SubElement(rpr, W + 'color', {W + 'val': format_config['colores_calificacion'].get(grade, '666666')})
+            role, initial = rol_estilo(p)
+            configurar(p, rol=role, inicial=initial)
     if mode == 'borrador':
         appendix = positions['adicional_fuentes']
         appendix.append(parrafo('Pendientes de revisión', generated=False, perfil=perfil, rol='subcapitulo'))
@@ -354,7 +359,7 @@ def seleccionar_documento(root, result, mode, perfil, files):
             appendix.append(parrafo(f"{v['codigo']}: {detail}", perfil=perfil, rol='nota'))
 
 
-def auditar(path, expected_generated=None):
+def auditar(path, expected_generated=None, editorial_manifest=None):
     count = 0; characters = 0
     with zipfile.ZipFile(path) as archive:
         if archive.testzip():
@@ -393,7 +398,11 @@ def auditar(path, expected_generated=None):
                     raise ValueError('Contenido JSON sin fuente editorial Archivo.')
     if not count or (expected_generated is not None and count != expected_generated):
         raise ValueError('Inserciones distintas a la auditoría.')
-    return {'segmentos_json': count, 'caracteres_json': characters,
+    editorial = {}
+    if editorial_manifest is not None:
+        with zipfile.ZipFile(path) as archive:
+            editorial = validar_editorial({n: archive.read(n) for n in archive.namelist()}, editorial_manifest)
+    return {**editorial, 'segmentos_json': count, 'caracteres_json': characters,
             'resaltado_amarillo': False, 'sin_resaltado_amarillo_verificado': True,
             'marcadores_pendientes': 0}
 
@@ -422,7 +431,13 @@ def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='me
     target = Counter({k: v['apariciones_por_documento'][perfil] for k, v in dictionary['variables_documento'].items() if v['apariciones_por_documento'][perfil]})
     if found != target:
         raise ValueError('Marcadores distintos al contrato del perfil.')
+    preparar_base(root, contract['fidelidad'])
     seleccionar_documento(root, result, mode, perfil, files)
+    body = root.find(W + 'body')
+    section = body.find(W + 'sectPr')
+    state = 'Pendiente' if result['estado'] is None else result['estado']
+    body.insert(0, construir_portada(files, result['municipio'], state, section))
+    normalizar_seccion(section)
     generated = len(root.xpath('.//w:r[w:rPr/w:rStyle[@w:val="ContenidoJSON"]]', namespaces=NS))
     files['word/document.xml'] = xml_bytes(root)
     styles = ET.fromstring(files['word/styles.xml'], PARSER)
@@ -431,6 +446,8 @@ def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='me
     style = ET.SubElement(styles, W + 'style', {W + 'type': 'character', W + 'styleId': STYLE})
     ET.SubElement(style, W + 'name', {W + 'val': 'Contenido procedente del JSON'})
     files['word/styles.xml'] = xml_bytes(styles)
+    incorporar_estilos(files)
+    normalizar_notas(files)
     # La petición editorial incluye el amarillo que ya venía en el original.
     # Sólo se retira de la salida, no del original ni de la base parametrizada.
     for name, data in list(files.items()):
@@ -449,7 +466,7 @@ def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='me
         with zipfile.ZipFile(temporary, 'w', zipfile.ZIP_DEFLATED) as archive:
             for name, data in files.items():
                 archive.writestr(name, data)
-        audit = auditar(temporary, generated)
+        audit = auditar(temporary, generated, contract['fidelidad'])
         os.replace(temporary, dest)
     return {**audit, **fidelity, 'archivo': str(dest), 'sha256': sha256(dest), 'modo': mode, 'perfil': perfil,
             'json_fuente': str(json_path), 'json_sha256': hashlib.sha256(raw).hexdigest(),

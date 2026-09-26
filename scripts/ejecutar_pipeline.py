@@ -191,7 +191,7 @@ def main():
                         'detalle': 'Los años son etiquetas de las tablas. El último periodo exige los mismos dos años calendario consecutivos en los 18 indicadores. Confirmar la relación entre esas etiquetas y los años de referencia de cada edición censal antes de cerrar el diagnóstico.'})
     aggregates = {period: agregar_documental(results, rules) for period, results in evaluations.items()}
     result = {
-        'version': '3.2', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
+        'version': '3.3', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
         'estado_ejecucion': 'requiere_revision',
         'contrato': {**huellas(), 'normalizaciones_sha256': sha256(mappings_path),
                      'fuentes_externas_sha256': sha256(external_config_path)},

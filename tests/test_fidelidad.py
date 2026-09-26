@@ -17,6 +17,9 @@ class FidelidadTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.contract = json.loads((ROOT / 'config/contrato_documental.json').read_text())
+        # Regresiones del modo estricto original y su excepción amarilla.
+        # La salida normalizada v3.3 se comprueba en test_editorial.py.
+        cls.contract['fidelidad'].pop('normalizacion_editorial', None)
         definition = cls.contract['plantillas']['medicion']
         with zipfile.ZipFile(ROOT / definition['origen']) as z:
             cls.original = {n: z.read(n) for n in z.namelist()}

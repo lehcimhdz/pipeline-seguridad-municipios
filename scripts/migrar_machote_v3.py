@@ -65,6 +65,16 @@ def texto(node):
     return ''.join(t.text or '' for t in node.iter(W + 't'))
 
 
+def rol_editorial(index, block):
+    if index in {0, *(group[0] for group in GROUPS)}:
+        return 'capitulo'
+    if index in (1, 2) or index in SLOTS:
+        return 'calificacion'
+    if index in {slot - 1 for slot in SLOTS} | {i for _, _, _, topics in GROUPS for i, _ in topics}:
+        return 'subcapitulo'
+    return 'cuerpo' if texto(block).strip() else 'separador'
+
+
 def validar_encabezados(blocks, catalog):
     """Evita asociar datos a otro indicador si cambian títulos sin mover slots."""
     names = {item['id']: item['nombre'] for item in catalog}
@@ -171,10 +181,14 @@ def migrar(source):
     order = [i for i in range(len(blocks) - 1) if i not in (50, 51)]
     insertion = order.index(55) + 1
     order[insertion:insertion] = [50, 51]
-    manifest = {'version': '1.0', 'orden_bloques': order, 'bloques': [],
+    manifest = {'version': '1.1', 'orden_bloques': order, 'bloques': [],
+        'normalizacion_editorial': True,
         'adaptaciones_explicitas': [
             'Trasladar bloques 50/51 (personal duplicado) después de 55; título cambia a CUP.',
-            'Identidad municipal bajo SEGURIDAD y bibliografía al final; sin portada añadida.',
+            'Identidad municipal bajo SEGURIDAD y bibliografía al final; portada editorial sólo en la salida.',
+            'Salida: estilos del manual según rol; títulos de 24 pt con mínimo de 14 pt aprobado. Colores y numeración conservados.',
+            'Salida: sección de portada centrada verticalmente con logo de 5 cm; cuerpo en una columna y alineación vertical superior, conservando tamaño y márgenes.',
+            'Salida: listas con sangría francesa de 5 mm y separadores originales ocultos de 1 pt, sin renglones visibles.',
             'Instrucciones de redacción sustituidas por variables en la misma posición.',
             'Metodología, cobertura y sensibilidad en el bloque inicial; dos calificaciones documentales explícitas por indicador.',
             'Temas de investigación y encabezados conservados con su desarrollo inmediatamente después.']}
@@ -216,7 +230,8 @@ def migrar(source):
                     content.append(copiar_texto(blocks[33], '{' + key + '}'))
             action = 'ampliar'
         controls[i] = control
-        manifest['bloques'].append({'indice': i, 'accion': action, 'variables': keys})
+        manifest['bloques'].append({'indice': i, 'accion': action, 'variables': keys,
+                                   'rol_editorial': rol_editorial(i, source_block)})
     # Reemplazar cada nodo por su control de procedencia: no reconstruir títulos,
     # listas, márgenes ni secciones. La excepción CUP queda descrita arriba.
     for i in range(len(blocks) - 1):
@@ -256,7 +271,7 @@ def migrar(source):
             variables[key]['descripcion'] = (
                 'Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado.')
     dictionary['variables_documento'] = variables
-    dictionary['metadatos'].update(version='3.2', fuente=str(source.relative_to(ROOT)), documento_modificado=False,
+    dictionary['metadatos'].update(version='3.3', fuente=str(source.relative_to(ROOT)), documento_modificado=False,
         alcance_activo='SEGURIDAD parametrizada sobre el original: estructura conservada y cada instrucción trazable.')
     dictionary['metadatos']['cobertura_verificada'] = {'marcadores_de_variables_unicos': len(variables),
         'apariciones_de_variables': sum(counts.values()), 'indicadores': 18, 'dimensiones': 3,
@@ -321,11 +336,11 @@ def migrar(source):
     dump(rules_path, rules)
     research_path = ROOT / 'config/investigacion_seguridad.json'
     dump(research_path, research)
-    contract = {'version': '3.2', 'alcance': 'seguridad_investigacion', 'marcador': '{snake_case}',
+    contract = {'version': '3.3', 'alcance': 'seguridad_investigacion', 'marcador': '{snake_case}',
         'politica_calificacion': {'archivo': 'reglas_calificacion.json', 'seccion': 'calificacion_documental',
                                  'puntajes_documentales_siempre': True, 'puntajes_observados_admiten_null': True},
         'contenido_generado': {'resaltado_amarillo': False, 'trazabilidad_estilo': 'ContenidoJSON',
-                              'excepcion_fidelidad_salida': 'Eliminar exclusivamente resaltado/sombreado amarillo, también heredado del original; no modificar el DOCX de origen.'},
+                              'excepcion_fidelidad_salida': 'Retirar amarillo y normalizar formato por rol según el manual; añadir portada y logo. Preservar texto fijo, colores, numeración, geometría del cuerpo y DOCX de origen.'},
         'plantillas': {'medicion': {'archivo': str(target.relative_to(ROOT)), 'sha256': sha256(target),
                                   'origen': str(source.relative_to(ROOT)), 'origen_sha256': sha256(source)}},
         'diccionario': {'archivo': str(dictionary_path.relative_to(ROOT)), 'sha256': sha256(dictionary_path)},
@@ -334,10 +349,12 @@ def migrar(source):
         'investigacion': {'archivo': str(research_path.relative_to(ROOT)), 'sha256': sha256(research_path)},
         'metodologia': {'archivo': str(methodology.relative_to(ROOT)), 'sha256': sha256(methodology)},
         'tipografias': [{'archivo': f'assets/fonts/{filename}', 'sha256': sha256(ROOT / 'assets/fonts' / filename)} for _, filename, _ in FONTS],
+        'logotipo': [{'archivo': filename, 'sha256': sha256(ROOT / filename)}
+                     for filename in ('assets/institutionworks.jpeg', 'assets/institutionworks_logo.xml')],
         'fidelidad': manifest, 'orden_indicadores': list(range(1, 19)),
         'verificar_origen_en_cada_ejecucion': True,
         'correcciones': ['La segunda aparición de personal se traslada después del instituto y se convierte en CUP.'],
-        'observaciones': ['Se conservan títulos, listas, estilos, párrafos vacíos y sección del machote; no se añade portada ni logo ausentes.']}
+        'observaciones': ['La base conserva íntegros los estilos originales; sólo la salida usa estilos editoriales explícitos, portada, logo y dos secciones. El perfil Anexo no está habilitado como producto.']}
     dump(ROOT / 'config/contrato_documental.json', contract)
     print(f'Parametrización fiel: {len(variables)} variables, {sum(counts.values())} apariciones, {len(manifest["bloques"])} bloques de origen.')
     return contract

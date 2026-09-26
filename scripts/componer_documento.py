@@ -155,7 +155,7 @@ def componer(result, dictionary, rules):
         for source in sources) or 'Referencias documentales registradas en el JSON fuente.'
     active = list(dictionary['variables_documento'])
     result['contenido_word'] = {
-        'version': '3.2', 'perfil': 'seguridad_investigacion_v3',
+        'version': '3.3', 'perfil': 'seguridad_investigacion_v3',
         'titulo': title,
         'aviso_borrador': 'BORRADOR DE REVISIÓN — evaluación pendiente de validación; no es un diagnóstico final.',
         'periodo': (f"Periodo documental: {values.get('año_inicial', 'pendiente')}–{values.get('año_final', 'pendiente')}. "

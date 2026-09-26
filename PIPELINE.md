@@ -1,4 +1,4 @@
-# Pipeline de seguridad municipal — v3.2
+# Pipeline de seguridad municipal — v3.3
 
 ## Alcance y origen
 
@@ -7,10 +7,12 @@ Sólo se completa SEGURIDAD. El nuevo origen es
 `templates/Machote general medicion version final rzg investigación.docx`
 (Unicode descompuesto en macOS). Se conserva intacto y se parametriza una
 copia en [seguridad_medicion_v3.docx](templates/seguridad_medicion_v3.docx).
-La copia conserva los 101 bloques de contenido originales, sus títulos,
-listas, colores, espacios, márgenes y única sección. Cada bloque mantiene
+La copia estructural conserva los 101 bloques de contenido originales, sus
+títulos, listas, colores y configuración de página. Cada bloque mantiene
 su origen en un control de contenido Word (`w:sdt`); el documento no se
-reconstruye desde cero.
+reconstruye desde cero. Al renderizar, la salida aplica el manual editorial
+a todo el texto y añade una portada con logotipo. Esta normalización fue
+autorizada explícitamente; no modifica el archivo original.
 
 El original añade investigación, no nuevos umbrales. Se conservan
 **18 indicadores, 90 criterios, tres dimensiones de puntuación y dos periodos**.
@@ -64,7 +66,8 @@ compatibles con las tablas municipales y estatales.
 [config/contrato_documental.json](config/contrato_documental.json) vincula con
 SHA-256 original, base, diccionario, reglas, formato, investigación,
 metodología histórica y tipografías. Incluye el manifiesto de fidelidad
-con acciones y orden de los bloques originales.
+con acciones y orden de los bloques originales y las adaptaciones de salida
+autorizadas: normalización editorial, portada y retirada de amarillo.
 
     python3 scripts/migrar_machote_v3.py
     python3 scripts/validar_plantilla.py
@@ -84,17 +87,20 @@ Todas las instrucciones originales se conservan localizables por bloque en
 [config/investigacion_seguridad.json](config/investigacion_seguridad.json).
 
 [scripts/fidelidad_machote.py](scripts/fidelidad_machote.py) comprueba el
-orden y la presencia de los 101 bloques, texto fijo, propiedades de
-párrafo y listas, estilos originales, numeración, encabezados/pies y configuración de página.
-Se valida al parametrizar, revisar la base y auditar el Word rellenado.
+orden y la presencia de los 101 bloques, texto fijo y numeración. La base
+se contrasta con el original; la salida se contrasta después de aplicar
+la normalización editorial autorizada. Se valida al parametrizar, revisar
+la base y auditar el Word rellenado. No se permite perder contenido o
+reordenarlo bajo el pretexto de corregir formato.
 La base conserva los 35 párrafos con numeración/listas del original.
-Se agregan únicamente identidad y aviso de borrador en sus posiciones
-documentadas, desarrollo de cada campo y fuentes/pendientes al final.
-No se incorpora portada ni logotipo ausentes en el nuevo machote.
+Se agregan identidad y aviso de borrador en sus posiciones documentadas,
+desarrollo de cada campo, fuentes/pendientes al final y la portada editorial.
+La portada y su sección son adiciones explícitas de salida; no alteran los
+101 bloques de origen ni crean nuevos indicadores.
 
 [config/metodologia_seguridad.json](config/metodologia_seguridad.json) conserva
 los criterios históricos. [reglas_calificacion.json](reglas_calificacion.json)
-es la configuración activa v3.2: conserva las fichas y añade la política
+es la configuración activa: conserva las fichas y la política
 `calificacion_documental`. La migración conserva las decisiones activas,
 sin restablecer parámetros desde la referencia histórica. Cambiar reglas
 obliga a migrar de nuevo, actualizar el contrato y regenerar resultados.
@@ -107,7 +113,7 @@ Una observación anterior no reemplaza al año faltante.
 automáticamente. Una modificación metodológica requiere decisión explícita.
 
 `normalizar_plantilla.py` y `contextualizar_variables.py` remiten a la
-migración v3.2. Repetirla con los mismos insumos y reglas produce la misma base y contrato.
+migración v3.3. Repetirla con los mismos insumos y reglas produce la misma base y contrato.
 
 ## Variables y composición
 
@@ -262,7 +268,8 @@ No requiere API de IA ni ejecuta investigación web automática.
 Flujo: validar contrato y base → validar cuatro Word → extraer →
 fijar intervalos comunes → puntuar evidencia y asignar notas documentales → componer análisis específicos e
 integrar investigación por tema → JSON → rellenar las posiciones del
-machote y auditar fidelidad/ausencia de amarillo → recibo → limpiar.
+machote → normalizar formato y añadir portada → auditar fidelidad,
+formato editorial y ausencia de amarillo → recibo → limpiar.
 Diagrama editable: [flujo_pipeline.drawio](flujo_pipeline.drawio).
 
     output/json/{municipio}_diagnostico_seguridad_municipal_{corrida}.json
@@ -272,7 +279,7 @@ Diagrama editable: [flujo_pipeline.drawio](flujo_pipeline.drawio).
 El JSON es una instancia municipal, no una copia del diccionario:
 contiene evidencia, cálculos, validaciones, investigación, contrato y
 `valores_plantilla`. El recibo vincula SHA-256 de JSON/Word y registra
-las auditorías de ausencia de amarillo y fidelidad. El nombre del Word es estable por municipio,
+las auditorías de formato, ausencia de amarillo y fidelidad. El nombre del Word es estable por municipio,
 documento y modo; el ID de corrida sólo aparece en el JSON trazable.
 
 El modo predeterminado es borrador. `--word ninguno` genera únicamente JSON.
@@ -286,44 +293,62 @@ deben regenerarse desde la evidencia.
 ## Formato editorial sin resaltado amarillo
 
 [config/formato_editorial.json](config/formato_editorial.json) conserva el
-perfil del manual de Mediciones de Funcionamiento Municipal. En v3.2,
-el texto que sustituye una variable hereda la sangría, lista, color y
-formato local de su posición en el original. Los títulos y contenido fijo
-se conservan; los párrafos adicionales, tablas y gráficas usan el perfil
-editorial correspondiente. La configuración de referencia incluye:
+perfil del manual de Mediciones de Funcionamiento Municipal. Desde v3.3,
+se aplica a todo el texto de salida, incluido el contenido fijo que antes
+podía heredar Calibri u otro formato. La regla por función editorial
+prevalece sobre el formato arbitrario del original. Los títulos, texto
+fijo, listas y colores permanecen; cambian las propiedades necesarias para
+cumplir el manual. Detalle y justificación en [FORMATO_EDITORIAL.md](FORMATO_EDITORIAL.md).
 
-- Portada: Archivo Regular 26 pt / 40 pt, centrada; este machote no
-  contiene portada y esta opción no añade una.
-- Capítulos: Light 24 pt / 14 pt, altas y centrados.
-- Subcapítulos: Light 24 pt / 14 pt, izquierda.
+- Portada: Archivo Regular 26 pt / 40 pt exactos, título centrado horizontal
+  y verticalmente; logotipo InstitutionWorks existente, 5 cm de ancho,
+  altura proporcional, centrado en la parte baja.
+- Capítulos: Light 24 pt / mínimo 14 pt, altas y centrados.
+- Subcapítulos: Light 24 pt / mínimo 14 pt, altas y bajas, izquierda.
 - Cuerpo: Light 12 pt / 16 pt, columna sencilla, justificado;
-  sangría 5 mm excepto al inicio y sin espacio entre párrafos.
+  sangría 5 mm excepto en el primer párrafo de cada bloque y sin espacio
+  anterior ni posterior. El interlineado es exacto.
 - Calificaciones: Light 9 pt / 10 pt, centradas y con color por grado.
-- Tablas: Medium 12 pt / 14 pt en títulos, Light 11 pt / 14 pt en contenido.
-- Gráficas: títulos/ejes Medium 12 pt, categorías Medium 9 pt,
-  datos Light 9 pt.
-- Notas: Light 9 pt / 11 pt. Bibliografía: Light 12 pt / 16 pt,
-  sangría 5 mm excepto al inicio.
+- Tablas: Medium 12 pt / 14 pt exactos en títulos, Light 11 pt / 14 pt exactos en contenido.
+- Gráficas: títulos/ejes Medium 12 pt / 14 pt, categorías Medium 9 pt,
+  datos Light 9 pt; categorías y datos tienen interlineado explícito de 10 pt.
+- Notas: Light 9 pt / 11 pt exactos, izquierda, sin espacio entre párrafos.
+- Bibliografía: Light 12 pt y Light Italic en cursivas / 16 pt exactos;
+  sangría 5 mm salvo el primer párrafo.
 
-Si el interlineado de un título es menor que su fuente se usa como mínimo,
-no como altura exacta que recorte las letras. Se incrustan Regular, Light,
+El interlineado **mínimo de 14 pt en los títulos de 24 pt** fue aprobado
+expresamente para evitar recortes; no se presenta como una aplicación literal
+de altura exacta de 14 pt. Se incrustan Regular, Light,
 Medium, Light Italic y Bold, con licencia OFL en [assets/fonts](assets/fonts).
-Bold permite representar la negrita del original sin sustituirla por una
-familia serif; cinco archivos se vinculan mediante seis relaciones de fuentes.
+Bold se conserva como recurso de compatibilidad; no impone negrita al texto
+normalizado. Cinco archivos se vinculan mediante seis relaciones de fuentes.
 
-El nuevo original no contiene logo. No se introduce uno ni se crea una
-portada; los recursos históricos de `assets/` no alteran la estructura activa.
-La fidelidad es estructural: la paginación final puede crecer al incorporar
-análisis, investigación, tablas y gráficas.
+Los estilos `Editorial_` identifican la función del párrafo y se verifican
+junto con sus propiedades efectivas. Las listas mantienen su numeración y
+usan sangría francesa de 5 mm. Los párrafos vacíos originales se conservan
+ocultos a 1 pt; el párrafo de una gráfica permite una altura mínima de 16 pt
+para no recortar el objeto. Estas excepciones están descritas en
+[FORMATO_EDITORIAL.md](FORMATO_EDITORIAL.md).
+
+El logo existente se reutiliza, no se rediseña. El perfil de anexo permanece
+configurado como referencia, pero esta ejecución no habilita un Word de
+anexo. La fidelidad conserva estructura y contenido con transformaciones
+editoriales declaradas; no exige conservar errores tipográficos del origen.
+La paginación puede crecer al incorporar portada, análisis, tablas y gráficas.
+
+Las referencias bibliográficas no se convierten automáticamente en notas
+al pie. Si existen notas al pie reales, se aplica su perfil; no se inventan
+notas ni referencias para aparentar cumplimiento editorial.
 
 El Word de salida no contiene resaltado amarillo en texto, celdas ni fondo
 de gráficas. También se retiran en la salida las marcas amarillas heredadas
 del original; es una excepción de fidelidad explícita, junto con las
 adaptaciones editoriales documentadas. No se cambian los demás colores ni
 se borra la identificación técnica de contenido procedente del JSON.
-La auditoría reabre el DOCX y rechaza marcas amarillas, bloques
-perdidos/reordenados fuera de la adaptación declarada o cambios de formato
-fijo y configuración de página.
+La auditoría del Word temporal, previa a publicar la salida, rechaza marcas amarillas, bloques
+perdidos/reordenados fuera de las adaptaciones declaradas y propiedades
+editoriales incorrectas. Se verifican las fuentes y medidas efectivas,
+no sólo la existencia de estilos con el nombre correcto.
 La plantilla original no se modifica al procesar municipios.
 
 ## Revisión, final y limpieza
@@ -339,6 +364,8 @@ Cambiar el estado o borrar avisos no sustituye la revisión humana: el
 software comprueba coherencia y declaraciones, pero no certifica que esa
 revisión realmente ocurrió. Tener 18 notas asignadas no cierra las fuentes
 ni las revisiones editoriales pendientes.
+Cumplir el manual editorial tampoco modifica los puntajes ni acredita
+evidencia: las notas general 3.12/5 y reciente 1.00/5 conservan su metodología.
 
 Con el conjunto local disponible, el periodo general tiene 12 de 18
 puntajes observados; siguen pendientes 4, 8, 9, 14, 17 y 18.
@@ -383,7 +410,7 @@ La investigación puede guardarse en `input/revision/`; no versionar tokens.
     python3 -m unittest discover -s tests -v
 
 Cubren reglas, limpieza, contrato y cambios del original, conservación
-de bloques/formato/listas/sección, alteraciones de fidelidad, selección
+de bloques/listas, normalización editorial y portada autorizadas, alteraciones de fidelidad, selección
 del intervalo reciente, análisis de evidencia, tablas/gráficas, tipografías,
 ausencia de amarillo, apartados de investigación y rechazo de finales con
 incoherencias, fuentes incompletas o revisiones abiertas. Un final documental

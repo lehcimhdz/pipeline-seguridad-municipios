@@ -49,7 +49,7 @@ def controles(root):
     return result
 
 
-def validar_estilos(original_files, actual_files, salida=False):
+def validar_estilos(original_files, actual_files, salida=False, editorial=False):
     source = ET.fromstring(original_files['word/styles.xml'])
     current = ET.fromstring(actual_files['word/styles.xml'])
     if source.attrib != current.attrib or [firma_esperada(n, salida) for n in source if n.tag != W + 'style'] != [
@@ -63,6 +63,9 @@ def validar_estilos(original_files, actual_files, salida=False):
         if firma_esperada(node, salida) != firma(current_styles.get(style_id)):
             raise ValueError(f'Cambió el estilo original del machote: {style_id}.')
     allowed = {'ContenidoJSON'} if salida else set()
+    if editorial:
+        from editorial import estilos_permitidos
+        allowed |= estilos_permitidos()
     if set(current_styles) - set(original_styles) - allowed:
         raise ValueError('Se añadieron estilos ajenos al contenido JSON.')
 
@@ -73,14 +76,21 @@ def validar(original_files, actual_files, manifest, salida=False):
     original_body = original.find(W + 'body')
     actual_body = actual.find(W + 'body')
     controls = controles(actual)
+    editorial = salida and manifest.get('normalizacion_editorial', False)
     expected = [f'origen_{i:03d}' for i in manifest['orden_bloques']]
+    if editorial:
+        expected.insert(0, 'adicional_portada')
     if list(controls) != expected + ['adicional_fuentes']:
         raise ValueError('El Word cambió el orden o perdió bloques del machote original.')
     if any(n.tag not in (W + 'sdt', W + 'sectPr') for n in actual_body):
         raise ValueError('Contenido agregado fuera de las posiciones del machote.')
-    if firma_esperada(original_body.find(W + 'sectPr'), salida) != firma(actual_body.find(W + 'sectPr')):
+    expected_section = deepcopy(original_body.find(W + 'sectPr'))
+    if editorial:
+        from editorial import configurar, normalizar_seccion
+        normalizar_seccion(expected_section)
+    if firma_esperada(expected_section, salida) != firma(actual_body.find(W + 'sectPr')):
         raise ValueError('Cambió la configuración de página del machote original.')
-    validar_estilos(original_files, actual_files, salida)
+    validar_estilos(original_files, actual_files, salida, editorial)
     for name, data in original_files.items():
         if name == 'word/numbering.xml' or name.startswith(('word/header', 'word/footer')):
             current = actual_files.get(name)
@@ -89,7 +99,9 @@ def validar(original_files, actual_files, manifest, salida=False):
                 raise ValueError(f'Cambió el formato de origen: {name}.')
     for item in manifest['bloques']:
         index = item['indice']
-        source = original_body[index]
+        source = deepcopy(original_body[index])
+        if editorial:
+            configurar(source, rol=item['rol_editorial'])
         content = controls[f'origen_{index:03d}']
         if len(content) == 0:
             raise ValueError(f'Bloque del machote vacío: {index}.')

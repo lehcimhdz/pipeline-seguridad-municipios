@@ -1,5 +1,9 @@
 """Gráficas nativas de Word con caché de valores y fuentes del manual editorial."""
+import json
+from pathlib import Path
 from lxml import etree as ET
+
+FORMATO = Path(__file__).resolve().parents[1] / 'config/formato_editorial.json'
 
 C = '{http://schemas.openxmlformats.org/drawingml/2006/chart}'
 A = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
@@ -14,29 +18,36 @@ def node(parent, name, val=None, ns=C):
     return ET.SubElement(parent, ns + name, {} if val is None else {'val': str(val)})
 
 
-def rich(parent, text=None, size=12, font='Archivo Medium'):
+def rich(parent, definition, text=None):
+    font, size, line = definition
     node(parent, 'bodyPr', ns=A)
     node(parent, 'lstStyle', ns=A)
     p = node(parent, 'p', ns=A)
-    props = node(node(p, 'pPr', ns=A), 'defRPr', ns=A)
+    paragraph_props = node(p, 'pPr', ns=A)
+    node(node(paragraph_props, 'lnSpc', ns=A), 'spcPts', int(line * 100), ns=A)
+    props = node(paragraph_props, 'defRPr', ns=A)
     props.set('sz', str(size * 100))
+    props.set('b', '0')
+    props.set('i', '0')
     ET.SubElement(props, A + 'latin', {'typeface': font})
     if text is not None:
         r = node(p, 'r', ns=A)
         rpr = node(r, 'rPr', ns=A); rpr.set('sz', str(size * 100))
+        rpr.set('b', '0'); rpr.set('i', '0')
         ET.SubElement(rpr, A + 'latin', {'typeface': font})
         node(r, 't', ns=A).text = text
     return parent
 
 
 def agregar_grafica(files, spec, number):
+    format_config = json.loads(FORMATO.read_text(encoding='utf-8'))['grafica']
     pairs = [(category, value) for category, value in zip(spec['categorias'], spec['valores']) if value is not None]
     if not pairs:
         raise ValueError('Gráfica sin valores calculados.')
     root = ET.Element(C + 'chartSpace', nsmap={'c': C[1:-1], 'a': A[1:-1], 'r': R[1:-1]})
     chart = node(root, 'chart')
     title = node(chart, 'title')
-    rich(node(node(title, 'tx'), 'rich'), spec['titulo'])
+    rich(node(node(title, 'tx'), 'rich'), format_config['titulo'], spec['titulo'])
     plot = node(chart, 'plotArea')
     node(plot, 'layout')
     bar = node(plot, 'barChart')
@@ -55,7 +66,7 @@ def agregar_grafica(files, spec, number):
         p = node(cat, 'pt'); p.set('idx', str(i)); node(p, 'v').text = category
         p = node(vals, 'pt'); p.set('idx', str(i)); node(p, 'v').text = str(value)
     labels = node(bar, 'dLbls')
-    rich(node(labels, 'txPr'), size=9, font='Archivo Light')
+    rich(node(labels, 'txPr'), format_config['datos'])
     node(labels, 'dLblPos', 'outEnd')
     for field in ('showLegendKey', 'showVal', 'showCatName', 'showSerName', 'showPercent', 'showBubbleSize'):
         node(labels, field, int(field == 'showVal'))
@@ -70,7 +81,7 @@ def agregar_grafica(files, spec, number):
         if kind == 'valAx':
             fmt = node(axis, 'numFmt'); fmt.set('formatCode', '0'); fmt.set('sourceLinked', '0')
         node(axis, 'tickLblPos', 'nextTo')
-        rich(node(axis, 'txPr'), size=9 if kind == 'catAx' else 12)
+        rich(node(axis, 'txPr'), format_config['categorias' if kind == 'catAx' else 'ejes'])
         node(axis, 'crossAx', cross_id); node(axis, 'crosses', 'autoZero')
         if kind == 'catAx':
             node(axis, 'auto', 1); node(axis, 'lblAlgn', 'ctr'); node(axis, 'lblOffset', 100)
@@ -79,7 +90,7 @@ def agregar_grafica(files, spec, number):
     node(chart, 'plotVisOnly', 1)
     node(chart, 'dispBlanksAs', 'gap')
     node(node(root, 'spPr'), 'noFill', ns=A)
-    rich(node(root, 'txPr'), size=12)
+    rich(node(root, 'txPr'), format_config['ejes'])
     chart_name = f'word/charts/pipeline_{number}.xml'
     files[chart_name] = ET.tostring(root, encoding='UTF-8', xml_declaration=True, standalone=True)
     relations = ET.fromstring(files['word/_rels/document.xml.rels'])
@@ -100,3 +111,46 @@ def agregar_grafica(files, spec, number):
     data = ET.SubElement(graphic, A + 'graphicData', {'uri': C[1:-1]})
     ET.SubElement(data, C + 'chart', {R + 'id': rid})
     return p
+
+
+def validar_graficas(files):
+    """Comprueba el XML efectivo, no sólo la existencia de la configuración."""
+    config = json.loads(FORMATO.read_text(encoding='utf-8'))['grafica']
+    count = 0
+    for name, data in files.items():
+        if not name.startswith('word/charts/pipeline_') or not name.endswith('.xml'):
+            continue
+        root = ET.fromstring(data)
+        paths = (
+            ('titulo', './' + C + 'chart/' + C + 'title/' + C + 'tx/' + C + 'rich'),
+            ('ejes', './/' + C + 'valAx/' + C + 'txPr'),
+            ('categorias', './/' + C + 'catAx/' + C + 'txPr'),
+            ('datos', './/' + C + 'dLbls/' + C + 'txPr'),
+            ('ejes', './' + C + 'txPr'),
+        )
+        for role, path in paths:
+            boxes = root.findall(path)
+            if len(boxes) != 1:
+                raise ValueError(f'Gráfica {name}: falta formato único de {role}.')
+            paragraphs = boxes[0].findall(A + 'p')
+            if not paragraphs:
+                raise ValueError(f'Gráfica {name}: texto de {role} sin párrafo.')
+            font, size, line = config[role]
+            for paragraph in paragraphs:
+                props = paragraph.find(A + 'pPr')
+                spacing = None if props is None else props.find(A + 'lnSpc/' + A + 'spcPts')
+                if spacing is None or spacing.get('val') != str(int(line * 100)):
+                    raise ValueError(f'Gráfica {name}: interlineado de {role} distinto al manual.')
+                char_props = [None if props is None else props.find(A + 'defRPr')]
+                char_props.extend(r.find(A + 'rPr') for r in paragraph.findall(A + 'r'))
+                for properties in char_props:
+                    family = None if properties is None else properties.find(A + 'latin')
+                    if (properties is None or properties.get('sz') != str(int(size * 100))
+                            or properties.get('b') != '0' or properties.get('i') != '0'
+                            or family is None or family.get('typeface') != font):
+                        raise ValueError(f'Gráfica {name}: fuente o tamaño de {role} distinto al manual.')
+        if root.find('.//' + A + 'highlight') is not None or any(
+                n.get('val', '').upper() == 'FFFF00' for n in root.iter(A + 'srgbClr')):
+            raise ValueError(f'Gráfica {name}: conserva resaltado amarillo.')
+        count += 1
+    return {'graficas_editoriales_verificadas': count, 'formato_graficas_verificado': True}

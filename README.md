@@ -1,4 +1,4 @@
-# Pipeline de seguridad municipal — v3.2
+# Pipeline de seguridad municipal — v3.3
 
 Genera una medición de SEGURIDAD desde los mismos cuatro Word por municipio.
 Incorpora el machote **rzg investigación**, conserva los 18 indicadores y sus
@@ -10,10 +10,12 @@ La base activa [seguridad_medicion_v3.docx](templates/seguridad_medicion_v3.docx
 parametriza una copia del original recibido en sus posiciones existentes:
 **157 variables snake_case**, cuatro benchmarks, quince apartados de
 investigación y tres mínimos de protección civil. Conserva los 101 bloques
-de origen, títulos, listas, colores, márgenes y una sección. La corrección
+de origen, texto fijo, títulos, listas y colores. La corrección
 documentada del personal duplicado restituye CUP como indicador 7.
-La identidad se incorpora bajo SEGURIDAD y las fuentes al final; no se
-añade portada ni logotipo. El original permanece intacto.
+La identidad se incorpora bajo SEGURIDAD y las fuentes al final. La salida
+añade una portada editorial con el logotipo InstitutionWorks existente y
+normaliza el formato de todo el texto según el manual autorizado. El archivo
+original permanece intacto; estas adaptaciones se auditan explícitamente.
 
 ## Ejecutar
 
@@ -25,10 +27,16 @@ Python 3.11+:
 
 Produce JSON trazable, Word **BORRADOR DE REVISIÓN** y recibo de renderizado.
 El Word de salida no lleva resaltado amarillo, ni en el contenido incorporado
-ni en las marcas heredadas del original. El texto
-hereda el formato local del machote; los elementos nuevos usan el perfil
-editorial y se incrustan las tipografías Archivo. La auditoría comprueba
-estructura, posiciones y ausencia de amarillo del resultado.
+ni en las marcas heredadas del original. Todo el contenido usa tipografías
+Archivo y el perfil editorial por función: títulos, cuerpo, notas, tablas,
+gráficas y bibliografía. La auditoría comprueba estructura, posiciones,
+formato editorial y ausencia de amarillo antes de publicar la salida.
+
+Las medidas, la portada y la excepción de interlineado mínimo de 14 pt en
+títulos de 24 pt están en [FORMATO_EDITORIAL.md](FORMATO_EDITORIAL.md).
+Pasar esta auditoría de formato no valida los datos ni sustituye la revisión humana.
+El perfil del manual de anexo se conserva en la configuración; no se genera
+un documento de anexo en este flujo.
 
 Después de una ejecución exitosa, se eliminan las salidas anteriores de
 `output/json/` y `output/word/`; sólo se conservan las vigentes.
@@ -82,6 +90,8 @@ Esta nota es interna: no certifica cumplimiento legal ni aprobación oficial.
 
 La migración actualiza base, diccionario, reglas y contrato; conserva
 101 bloques mediante controles de contenido y verifica su fidelidad.
+El resultado se compara con la normalización editorial autorizada, no con
+los estilos arbitrarios que pudiera traer el original.
 Una modificación del original bloquea el pipeline hasta migrar.
 Si cambia el inventario de indicadores, se exige revisar su correspondencia.
 Los JSON anteriores deben regenerarse. Los 90 criterios históricos quedan

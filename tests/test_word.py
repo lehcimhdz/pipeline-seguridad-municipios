@@ -151,11 +151,12 @@ class WordTests(unittest.TestCase):
                 self.assertIn('Certificado', text)
                 self.assertTrue(report['fidelidad_machote_verificada'])
                 self.assertEqual(report['bloques_origen_verificados'], 101)
-                self.assertTrue(text.startswith('SEGURIDAD'))
-                self.assertNotIn('Mediciones de Funcionamiento Municipal — SEGURIDAD', text)
+                self.assertTrue(text.startswith('Mediciones de Funcionamiento Municipal'))
+                self.assertTrue(report['formato_editorial_verificado'])
+                self.assertTrue(report['portada_editorial_verificada'])
                 self.assertEqual(len(root.findall('.//' + W + 'numPr')), 35)
                 sections = root.findall('.//' + W + 'sectPr')
-                self.assertEqual(len(sections), 1)
+                self.assertEqual(len(sections), 2)
                 for r in root.iter(W + 'r'):
                     style = r.find(W + 'rPr/' + W + 'rStyle')
                     if style is not None and style.get(W + 'val') == STYLE:
@@ -179,6 +180,19 @@ class WordTests(unittest.TestCase):
         self.assertEqual(result['calculos']['general']['cobertura']['asignados'], 18)
         self.assertEqual(result['calculos']['general']['cobertura']['observados'], 17)
         self.assertIsNone(result['calculos']['general']['categoria_desempeno'])
+
+    def test_draft_cover_does_not_invent_missing_state(self):
+        result = ejemplo()
+        result['estado'] = None
+        result['valores_plantilla']['estado'] = None
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'municipio.json'
+            path.write_text(json.dumps(result), encoding='utf-8')
+            report = renderizar(path, Path(directory) / 'word')
+            with zipfile.ZipFile(report['archivo']) as archive:
+                root = ET.fromstring(archive.read('word/document.xml'))
+            self.assertIn('Municipio de prueba, Pendiente', texto(root))
+            self.assertNotIn('Municipio de prueba, None', texto(root))
 
     def test_final_requires_review_and_accepts_complete_validated_json(self):
         result = ejemplo(pending=False)
