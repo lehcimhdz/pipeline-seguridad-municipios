@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "origen": "templates/Machote general medicion version final rzg investigación.docx",
   "origen_sha256": "ac7402dbf1e06061570934aea41fa7798b296abeed376886b61b70b9a98662b3",
   "instrucciones_originales": [
@@ -326,9 +326,22 @@
         3
       ],
       "temas_requeridos": [
-        "Tratados y leyes en materia de protección civil y prevención de desastres",
-        "Recomendaciones de Naciones Unidas",
-        "Mínimos necesarios para los indicadores 1, 2 y 3"
+        "Tratados y leyes en materia protección civil y prevención de desastres",
+        "Recomendaciones de Naciones Unidas"
+      ],
+      "apartados": [
+        {
+          "id": "tratados_leyes",
+          "variable": "investigacion_proteccion_civil_tratados_leyes",
+          "bloque_origen": 28,
+          "instruccion": "Tratados y leyes en materia protección civil y prevención de desastres"
+        },
+        {
+          "id": "recomendaciones_onu",
+          "variable": "investigacion_proteccion_civil_recomendaciones_onu",
+          "bloque_origen": 29,
+          "instruccion": "Recomendaciones de Naciones Unidas"
+        }
       ],
       "estado_inicial": "pendiente",
       "fuentes_iniciales": []
@@ -346,9 +359,29 @@
         10
       ],
       "temas_requeridos": [
-        "Leyes nacionales y condiciones laborales mínimas",
-        "Reportes de UNODC (UNDOC en el original)",
-        "Revisiones sistemáticas: condiciones laborales de la policía y seguridad pública"
+        "Leyes nacionales.",
+        "Reportes de UNDOC",
+        "Revisiones sistemáticas de la literatura sobre la relación de condiciones laborales de la policía y seguridad pública"
+      ],
+      "apartados": [
+        {
+          "id": "leyes_nacionales",
+          "variable": "investigacion_condiciones_personal_leyes_nacionales",
+          "bloque_origen": 44,
+          "instruccion": "Leyes nacionales."
+        },
+        {
+          "id": "reportes_unodc",
+          "variable": "investigacion_condiciones_personal_reportes_unodc",
+          "bloque_origen": 45,
+          "instruccion": "Reportes de UNDOC"
+        },
+        {
+          "id": "revisiones_laborales",
+          "variable": "investigacion_condiciones_personal_revisiones_laborales",
+          "bloque_origen": 46,
+          "instruccion": "Revisiones sistemáticas de la literatura sobre la relación de condiciones laborales de la policía y seguridad pública"
+        }
       ],
       "estado_inicial": "pendiente",
       "fuentes_iniciales": []
@@ -366,12 +399,56 @@
       ],
       "temas_requeridos": [
         "Revisiones sistemáticas de patrullaje policial",
-        "Hotspots",
-        "Policía comunitaria",
-        "Evaluación policial",
-        "Policía y derechos humanos",
-        "CCTV",
+        "Hotspots en policing",
+        "Policing comunitario",
+        "Evaluación y policing",
+        "Policing y derechos humanos",
+        "CCTV y policing",
         "Mediación de conflictos"
+      ],
+      "apartados": [
+        {
+          "id": "patrullaje",
+          "variable": "investigacion_inteligencia_policial_patrullaje",
+          "bloque_origen": 65,
+          "instruccion": "Revisiones sistemáticas de patrullaje policial"
+        },
+        {
+          "id": "hotspots",
+          "variable": "investigacion_inteligencia_policial_hotspots",
+          "bloque_origen": 66,
+          "instruccion": "Hotspots en policing"
+        },
+        {
+          "id": "policia_comunitaria",
+          "variable": "investigacion_inteligencia_policial_policia_comunitaria",
+          "bloque_origen": 67,
+          "instruccion": "Policing comunitario"
+        },
+        {
+          "id": "evaluacion_policial",
+          "variable": "investigacion_inteligencia_policial_evaluacion_policial",
+          "bloque_origen": 68,
+          "instruccion": "Evaluación y policing"
+        },
+        {
+          "id": "derechos_humanos",
+          "variable": "investigacion_inteligencia_policial_derechos_humanos",
+          "bloque_origen": 69,
+          "instruccion": "Policing y derechos humanos"
+        },
+        {
+          "id": "cctv",
+          "variable": "investigacion_inteligencia_policial_cctv",
+          "bloque_origen": 70,
+          "instruccion": "CCTV y policing"
+        },
+        {
+          "id": "mediacion",
+          "variable": "investigacion_inteligencia_policial_mediacion",
+          "bloque_origen": 71,
+          "instruccion": "Mediación de conflictos"
+        }
       ],
       "estado_inicial": "pendiente",
       "fuentes_iniciales": []
@@ -384,13 +461,33 @@
         18
       ],
       "temas_requeridos": [
-        "Estándares de derechos humanos: México, Naciones Unidas y sistema interamericano",
+        "Estándares de derechos humanos (México, sentencias, Naciones Unidas, COIDH OEA)",
         "Letalidad policial",
-        "Detenciones, seguridad, cifra negra, eficiencia y abuso policial"
+        "Problematización: detenciones vs seguridad, cifra negra, eficiencia general, abuso policial"
+      ],
+      "apartados": [
+        {
+          "id": "derechos_humanos",
+          "variable": "investigacion_eficiencia_policial_derechos_humanos",
+          "bloque_origen": 90,
+          "instruccion": "Estándares de derechos humanos (México, sentencias, Naciones Unidas, COIDH OEA)"
+        },
+        {
+          "id": "letalidad",
+          "variable": "investigacion_eficiencia_policial_letalidad",
+          "bloque_origen": 91,
+          "instruccion": "Letalidad policial"
+        },
+        {
+          "id": "detenciones_seguridad",
+          "variable": "investigacion_eficiencia_policial_detenciones_seguridad",
+          "bloque_origen": 92,
+          "instruccion": "Problematización: detenciones vs seguridad, cifra negra, eficiencia general, abuso policial"
+        }
       ],
       "estado_inicial": "pendiente",
       "fuentes_iniciales": []
     }
   ],
-  "regla": "Los benchmarks deben sustentarse con referencias verificadas; no modifican los puntajes ni los candados."
+  "regla": "Cada tema conserva su posición y requiere evidencia citada. Los benchmarks no modifican puntajes."
 }

@@ -1,22 +1,22 @@
 {
-  "version": "3.0",
+  "version": "3.1",
   "alcance": "seguridad_investigacion",
   "marcador": "{snake_case}",
   "plantillas": {
     "medicion": {
       "archivo": "templates/seguridad_medicion_v3.docx",
-      "sha256": "d87a0854370eac3d60f008c5a167d249e96e75b0f9c64fb5f35851c82bc26643",
+      "sha256": "2d993ee0b8856d069f6b2b67fc596a0b426eebec95e3f3730125401003109ffc",
       "origen": "templates/Machote general medicion version final rzg investigación.docx",
       "origen_sha256": "ac7402dbf1e06061570934aea41fa7798b296abeed376886b61b70b9a98662b3"
     }
   },
   "diccionario": {
     "archivo": "diccionario_datos_diagnostico_seguridad_municipal.json",
-    "sha256": "0dea892469470bad6e02e673d0b0855fa9eccc04fb8cd6c7c691740b1886680b"
+    "sha256": "f0f6ae08a95f920e6ea36b1d37695b509fcab2a872cbf29a6a3b5554c15e9f90"
   },
   "reglas": {
     "archivo": "reglas_calificacion.json",
-    "sha256": "83926c774c515af4658e0e260904f926ae6fae9ac8ba2a9bd59259bc6aec9ee7"
+    "sha256": "fb0559f172e27cb35eb778de83dbb52a200ccf5c65843f38984c6c42479d34b7"
   },
   "formato": {
     "archivo": "config/formato_editorial.json",
@@ -24,7 +24,7 @@
   },
   "investigacion": {
     "archivo": "config/investigacion_seguridad.json",
-    "sha256": "33f63b46fa1d0dd345e8f23f327284416ca4172a2374cf3ce51876a2a50214aa"
+    "sha256": "43600063fa48a4dd918bcb4755e2bbf16a8a450d26cfd2ee2e15eeef4f6c7a15"
   },
   "metodologia": {
     "archivo": "config/metodologia_seguridad.json",
@@ -46,18 +46,810 @@
     {
       "archivo": "assets/fonts/Archivo-LightItalic.ttf",
       "sha256": "1cd2e59510f36ba11015e6efc6e5f08e0506dfea7a59056f0a495e673992f39f"
-    }
-  ],
-  "logotipo": [
-    {
-      "archivo": "assets/institutionworks.jpeg",
-      "sha256": "dde94dd7c8b2b3488cb713ad27fc644ecad82731a8cc684ca923231b70dcf2e3"
     },
     {
-      "archivo": "assets/institutionworks_logo.xml",
-      "sha256": "d2ece901eb83adeb3649b5d59600be92234621eda1862dedcebb4a8a708bf6d8"
+      "archivo": "assets/fonts/Archivo-Bold.ttf",
+      "sha256": "951a0ebab63b1bb0d90a26c27625bda803d570dace3851fa2f1eea65852d8983"
+    },
+    {
+      "archivo": "assets/fonts/Archivo-Bold.ttf",
+      "sha256": "951a0ebab63b1bb0d90a26c27625bda803d570dace3851fa2f1eea65852d8983"
     }
   ],
+  "fidelidad": {
+    "version": "1.0",
+    "orden_bloques": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      52,
+      53,
+      54,
+      55,
+      50,
+      51,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100
+    ],
+    "bloques": [
+      {
+        "indice": 0,
+        "accion": "ampliar",
+        "variables": [
+          "municipio",
+          "estado"
+        ]
+      },
+      {
+        "indice": 1,
+        "accion": "parametrizar",
+        "variables": [
+          "calificacion_general"
+        ]
+      },
+      {
+        "indice": 2,
+        "accion": "parametrizar",
+        "variables": [
+          "calificacion_ultimo_periodo"
+        ]
+      },
+      {
+        "indice": 3,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 4,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 5,
+        "accion": "parametrizar",
+        "variables": [
+          "introduccion_periodo_general"
+        ]
+      },
+      {
+        "indice": 6,
+        "accion": "parametrizar",
+        "variables": [
+          "bienes_a_proteger"
+        ]
+      },
+      {
+        "indice": 7,
+        "accion": "parametrizar",
+        "variables": [
+          "comparacion_estatal_municipal"
+        ]
+      },
+      {
+        "indice": 8,
+        "accion": "parametrizar",
+        "variables": [
+          "avances_municipales"
+        ]
+      },
+      {
+        "indice": 9,
+        "accion": "parametrizar",
+        "variables": [
+          "resumen_general"
+        ]
+      },
+      {
+        "indice": 10,
+        "accion": "parametrizar",
+        "variables": [
+          "introduccion_ultimo_periodo"
+        ]
+      },
+      {
+        "indice": 11,
+        "accion": "parametrizar",
+        "variables": [
+          "resumen_ultimo_periodo"
+        ]
+      },
+      {
+        "indice": 12,
+        "accion": "parametrizar",
+        "variables": [
+          "resumen_proteccion_civil"
+        ]
+      },
+      {
+        "indice": 13,
+        "accion": "parametrizar",
+        "variables": [
+          "resumen_condiciones_personal"
+        ]
+      },
+      {
+        "indice": 14,
+        "accion": "parametrizar",
+        "variables": [
+          "resumen_inteligencia_eficiencia"
+        ]
+      },
+      {
+        "indice": 15,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 16,
+        "accion": "parametrizar",
+        "variables": [
+          "enfoque_gobierno"
+        ]
+      },
+      {
+        "indice": 17,
+        "accion": "parametrizar",
+        "variables": [
+          "tendencia_general"
+        ]
+      },
+      {
+        "indice": 18,
+        "accion": "parametrizar",
+        "variables": [
+          "recomendaciones_gobierno"
+        ]
+      },
+      {
+        "indice": 19,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 20,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 21,
+        "accion": "parametrizar",
+        "variables": [
+          "justificacion_prioridades"
+        ]
+      },
+      {
+        "indice": 22,
+        "accion": "parametrizar",
+        "variables": [
+          "fortalezas_seguridad"
+        ]
+      },
+      {
+        "indice": 23,
+        "accion": "parametrizar",
+        "variables": [
+          "areas_mejora_seguridad"
+        ]
+      },
+      {
+        "indice": 24,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 25,
+        "accion": "parametrizar",
+        "variables": [
+          "criterio_lectura_graficas"
+        ]
+      },
+      {
+        "indice": 26,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 27,
+        "accion": "ampliar",
+        "variables": [
+          "benchmark_proteccion_civil"
+        ]
+      },
+      {
+        "indice": 28,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_proteccion_civil_tratados_leyes"
+        ]
+      },
+      {
+        "indice": 29,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_proteccion_civil_recomendaciones_onu"
+        ]
+      },
+      {
+        "indice": 30,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 31,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 32,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 33,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_01",
+          "graficas_indicador_01",
+          "tablas_indicador_01",
+          "cierre_indicador_01"
+        ]
+      },
+      {
+        "indice": 34,
+        "accion": "parametrizar",
+        "variables": [
+          "minimos_indicador_01"
+        ]
+      },
+      {
+        "indice": 35,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 36,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_02",
+          "graficas_indicador_02",
+          "tablas_indicador_02",
+          "cierre_indicador_02"
+        ]
+      },
+      {
+        "indice": 37,
+        "accion": "parametrizar",
+        "variables": [
+          "minimos_indicador_02"
+        ]
+      },
+      {
+        "indice": 38,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 39,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 40,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_03",
+          "graficas_indicador_03",
+          "tablas_indicador_03",
+          "cierre_indicador_03"
+        ]
+      },
+      {
+        "indice": 41,
+        "accion": "parametrizar",
+        "variables": [
+          "minimos_indicador_03"
+        ]
+      },
+      {
+        "indice": 42,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 43,
+        "accion": "ampliar",
+        "variables": [
+          "benchmark_condiciones_personal"
+        ]
+      },
+      {
+        "indice": 44,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_condiciones_personal_leyes_nacionales"
+        ]
+      },
+      {
+        "indice": 45,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_condiciones_personal_reportes_unodc"
+        ]
+      },
+      {
+        "indice": 46,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_condiciones_personal_revisiones_laborales"
+        ]
+      },
+      {
+        "indice": 47,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 48,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 49,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_04",
+          "graficas_indicador_04",
+          "tablas_indicador_04",
+          "cierre_indicador_04"
+        ]
+      },
+      {
+        "indice": 52,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 53,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_05",
+          "graficas_indicador_05",
+          "tablas_indicador_05",
+          "cierre_indicador_05"
+        ]
+      },
+      {
+        "indice": 54,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 55,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_06",
+          "graficas_indicador_06",
+          "tablas_indicador_06",
+          "cierre_indicador_06"
+        ]
+      },
+      {
+        "indice": 50,
+        "accion": "corregir_catalogo",
+        "variables": []
+      },
+      {
+        "indice": 51,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_07",
+          "graficas_indicador_07",
+          "tablas_indicador_07",
+          "cierre_indicador_07"
+        ]
+      },
+      {
+        "indice": 56,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 57,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_08",
+          "graficas_indicador_08",
+          "tablas_indicador_08",
+          "cierre_indicador_08"
+        ]
+      },
+      {
+        "indice": 58,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 59,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 60,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_09",
+          "graficas_indicador_09",
+          "tablas_indicador_09",
+          "cierre_indicador_09"
+        ]
+      },
+      {
+        "indice": 61,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 62,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_10",
+          "graficas_indicador_10",
+          "tablas_indicador_10",
+          "cierre_indicador_10"
+        ]
+      },
+      {
+        "indice": 63,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 64,
+        "accion": "ampliar",
+        "variables": [
+          "benchmark_inteligencia_policial"
+        ]
+      },
+      {
+        "indice": 65,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_inteligencia_policial_patrullaje"
+        ]
+      },
+      {
+        "indice": 66,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_inteligencia_policial_hotspots"
+        ]
+      },
+      {
+        "indice": 67,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_inteligencia_policial_policia_comunitaria"
+        ]
+      },
+      {
+        "indice": 68,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_inteligencia_policial_evaluacion_policial"
+        ]
+      },
+      {
+        "indice": 69,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_inteligencia_policial_derechos_humanos"
+        ]
+      },
+      {
+        "indice": 70,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_inteligencia_policial_cctv"
+        ]
+      },
+      {
+        "indice": 71,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_inteligencia_policial_mediacion"
+        ]
+      },
+      {
+        "indice": 72,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 73,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 74,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 75,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_11",
+          "graficas_indicador_11",
+          "tablas_indicador_11",
+          "cierre_indicador_11"
+        ]
+      },
+      {
+        "indice": 76,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 77,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 78,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_12",
+          "graficas_indicador_12",
+          "tablas_indicador_12",
+          "cierre_indicador_12"
+        ]
+      },
+      {
+        "indice": 79,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 80,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 81,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_13",
+          "graficas_indicador_13",
+          "tablas_indicador_13",
+          "cierre_indicador_13"
+        ]
+      },
+      {
+        "indice": 82,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 83,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_14",
+          "graficas_indicador_14",
+          "tablas_indicador_14",
+          "cierre_indicador_14"
+        ]
+      },
+      {
+        "indice": 84,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 85,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 86,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_15",
+          "graficas_indicador_15",
+          "tablas_indicador_15",
+          "cierre_indicador_15"
+        ]
+      },
+      {
+        "indice": 87,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 88,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_16",
+          "graficas_indicador_16",
+          "tablas_indicador_16",
+          "cierre_indicador_16"
+        ]
+      },
+      {
+        "indice": 89,
+        "accion": "ampliar",
+        "variables": [
+          "benchmark_eficiencia_policial"
+        ]
+      },
+      {
+        "indice": 90,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_eficiencia_policial_derechos_humanos"
+        ]
+      },
+      {
+        "indice": 91,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_eficiencia_policial_letalidad"
+        ]
+      },
+      {
+        "indice": 92,
+        "accion": "ampliar",
+        "variables": [
+          "investigacion_eficiencia_policial_detenciones_seguridad"
+        ]
+      },
+      {
+        "indice": 93,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 94,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 95,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_17",
+          "graficas_indicador_17",
+          "tablas_indicador_17",
+          "cierre_indicador_17"
+        ]
+      },
+      {
+        "indice": 96,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 97,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 98,
+        "accion": "parametrizar",
+        "variables": [
+          "analisis_indicador_18",
+          "graficas_indicador_18",
+          "tablas_indicador_18",
+          "cierre_indicador_18"
+        ]
+      },
+      {
+        "indice": 99,
+        "accion": "conservar",
+        "variables": []
+      },
+      {
+        "indice": 100,
+        "accion": "conservar",
+        "variables": []
+      }
+    ],
+    "adaptaciones_explicitas": [
+      "Trasladar bloques 50/51 (personal duplicado) después de 55; título cambia a CUP.",
+      "Identidad municipal bajo SEGURIDAD y bibliografía al final; sin portada añadida.",
+      "Instrucciones de redacción sustituidas por variables en la misma posición.",
+      "Temas de investigación y encabezados conservados con su desarrollo inmediatamente después."
+    ]
+  },
   "orden_indicadores": [
     1,
     2,
@@ -80,9 +872,9 @@
   ],
   "verificar_origen_en_cada_ejecucion": true,
   "correcciones": [
-    "Duplicado de personal sustituido por el indicador 7 CUP, conservando orden 1–18."
+    "La segunda aparición de personal se traslada después del instituto y se convierte en CUP."
   ],
   "observaciones": [
-    "El machote nuevo no incluye logo; la base reutiliza el logo de InstitutionWorks aprobado en pipeline-v2, a 5 cm y altura proporcional."
+    "Se conservan títulos, listas, estilos, párrafos vacíos y sección del machote; no se añade portada ni logo ausentes."
   ]
 }

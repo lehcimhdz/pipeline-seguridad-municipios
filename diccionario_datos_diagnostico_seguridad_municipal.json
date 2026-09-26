@@ -1,6 +1,6 @@
 {
   "metadatos": {
-    "version": "3.0",
+    "version": "3.1",
     "nombre": "diccionario_variables_diagnostico_seguridad_municipal",
     "idioma": "es",
     "tipo_documento": "diccionario_de_datos_y_especificacion_de_contenido",
@@ -8,17 +8,18 @@
     "descripcion": "Define los marcadores existentes, sus contenidos esperados, los campos auxiliares y las reglas de consistencia para completar el documento.",
     "fuente": "templates/Machote general medicion version final rzg investigación.docx",
     "cobertura_verificada": {
-      "marcadores_de_variables_unicos": 97,
-      "apariciones_de_variables": 97,
+      "marcadores_de_variables_unicos": 116,
+      "apariciones_de_variables": 116,
       "indicadores": 18,
       "dimensiones": 3,
       "lineas_de_investigacion": 4,
+      "apartados_de_investigacion": 15,
       "periodos_de_evaluacion": 2
     },
     "documento_modificado": false,
     "verificacion_externa_de_fuentes_realizada": false,
     "advertencia_metodologica": "Los criterios descritos proceden del documento. Su inclusión no acredita la vigencia externa de referencias legales, técnicas o bibliográficas.",
-    "alcance_activo": "Sólo medición de SEGURIDAD, con investigación explícita y separada de la puntuación."
+    "alcance_activo": "SEGURIDAD parametrizada sobre el original: estructura conservada y cada instrucción trazable."
   },
   "convenciones": {
     "nombres_de_variables": {
@@ -36,7 +37,7 @@
     "marcadores": {
       "formato_en_word": "{nombre_variable}",
       "formato_de_clave_json": "nombre_variable",
-      "regla": "Llaves simples y snake_case ASCII; identificar indicador y contexto."
+      "regla": "Llaves simples, snake_case ASCII y posición del original."
     },
     "tipos_de_dato": {
       "string": "Texto.",
@@ -239,7 +240,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        0
+      ],
       "obligatorio": true
     },
     "estado": {
@@ -251,7 +254,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        0
+      ],
       "obligatorio": true
     },
     "calificacion_general": {
@@ -263,7 +268,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        1
+      ],
       "obligatorio": true
     },
     "calificacion_ultimo_periodo": {
@@ -275,7 +282,23 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        2
+      ],
+      "obligatorio": true
+    },
+    "introduccion_periodo_general": {
+      "marcador": "{introduccion_periodo_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "bloques_origen": [
+        5
+      ],
       "obligatorio": true
     },
     "bienes_a_proteger": {
@@ -287,7 +310,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        6
+      ],
       "obligatorio": true
     },
     "comparacion_estatal_municipal": {
@@ -299,7 +324,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        7
+      ],
       "obligatorio": true
     },
     "avances_municipales": {
@@ -311,7 +338,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        8
+      ],
       "obligatorio": true
     },
     "resumen_general": {
@@ -323,7 +352,23 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        9
+      ],
+      "obligatorio": true
+    },
+    "introduccion_ultimo_periodo": {
+      "marcador": "{introduccion_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "bloques_origen": [
+        10
+      ],
       "obligatorio": true
     },
     "resumen_ultimo_periodo": {
@@ -335,7 +380,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        11
+      ],
       "obligatorio": true
     },
     "resumen_proteccion_civil": {
@@ -347,7 +394,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        12
+      ],
       "obligatorio": true
     },
     "resumen_condiciones_personal": {
@@ -359,7 +408,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        13
+      ],
       "obligatorio": true
     },
     "resumen_inteligencia_eficiencia": {
@@ -371,7 +422,23 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        14
+      ],
+      "obligatorio": true
+    },
+    "enfoque_gobierno": {
+      "marcador": "{enfoque_gobierno}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "bloques_origen": [
+        16
+      ],
       "obligatorio": true
     },
     "tendencia_general": {
@@ -383,7 +450,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        17
+      ],
       "obligatorio": true
     },
     "recomendaciones_gobierno": {
@@ -395,31 +464,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
-      "obligatorio": true
-    },
-    "fortalezas_seguridad": {
-      "marcador": "{fortalezas_seguridad}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1
-      },
-      "tipo_contenido": "texto",
-      "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
-      "obligatorio": true
-    },
-    "areas_mejora_seguridad": {
-      "marcador": "{areas_mejora_seguridad}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1
-      },
-      "tipo_contenido": "texto",
-      "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        18
+      ],
       "obligatorio": true
     },
     "justificacion_prioridades": {
@@ -431,7 +478,51 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        21
+      ],
+      "obligatorio": true
+    },
+    "fortalezas_seguridad": {
+      "marcador": "{fortalezas_seguridad}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "bloques_origen": [
+        22
+      ],
+      "obligatorio": true
+    },
+    "areas_mejora_seguridad": {
+      "marcador": "{areas_mejora_seguridad}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "bloques_origen": [
+        23
+      ],
+      "obligatorio": true
+    },
+    "criterio_lectura_graficas": {
+      "marcador": "{criterio_lectura_graficas}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "bloques_origen": [
+        25
+      ],
       "obligatorio": true
     },
     "benchmark_proteccion_civil": {
@@ -443,7 +534,37 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "investigacion_verificada",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        27
+      ],
+      "obligatorio": true
+    },
+    "investigacion_proteccion_civil_tratados_leyes": {
+      "marcador": "{investigacion_proteccion_civil_tratados_leyes}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        28
+      ],
+      "obligatorio": true
+    },
+    "investigacion_proteccion_civil_recomendaciones_onu": {
+      "marcador": "{investigacion_proteccion_civil_recomendaciones_onu}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        29
+      ],
       "obligatorio": true
     },
     "analisis_indicador_01": {
@@ -455,19 +576,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
-      "obligatorio": true
-    },
-    "minimos_indicador_01": {
-      "marcador": "{minimos_indicador_01}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1
-      },
-      "tipo_contenido": "texto",
-      "origen_contenido": "investigacion_verificada",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        33
+      ],
       "obligatorio": true
     },
     "graficas_indicador_01": {
@@ -479,7 +590,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        33
+      ],
       "obligatorio": false
     },
     "tablas_indicador_01": {
@@ -491,7 +604,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        33
+      ],
       "obligatorio": true
     },
     "cierre_indicador_01": {
@@ -503,7 +618,23 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        33
+      ],
+      "obligatorio": true
+    },
+    "minimos_indicador_01": {
+      "marcador": "{minimos_indicador_01}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        34
+      ],
       "obligatorio": true
     },
     "analisis_indicador_02": {
@@ -515,19 +646,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
-      "obligatorio": true
-    },
-    "minimos_indicador_02": {
-      "marcador": "{minimos_indicador_02}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1
-      },
-      "tipo_contenido": "texto",
-      "origen_contenido": "investigacion_verificada",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        36
+      ],
       "obligatorio": true
     },
     "graficas_indicador_02": {
@@ -539,7 +660,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        36
+      ],
       "obligatorio": false
     },
     "tablas_indicador_02": {
@@ -551,7 +674,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        36
+      ],
       "obligatorio": true
     },
     "cierre_indicador_02": {
@@ -563,7 +688,23 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        36
+      ],
+      "obligatorio": true
+    },
+    "minimos_indicador_02": {
+      "marcador": "{minimos_indicador_02}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        37
+      ],
       "obligatorio": true
     },
     "analisis_indicador_03": {
@@ -575,19 +716,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
-      "obligatorio": true
-    },
-    "minimos_indicador_03": {
-      "marcador": "{minimos_indicador_03}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1
-      },
-      "tipo_contenido": "texto",
-      "origen_contenido": "investigacion_verificada",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        40
+      ],
       "obligatorio": true
     },
     "graficas_indicador_03": {
@@ -599,7 +730,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        40
+      ],
       "obligatorio": false
     },
     "tablas_indicador_03": {
@@ -611,7 +744,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        40
+      ],
       "obligatorio": true
     },
     "cierre_indicador_03": {
@@ -623,7 +758,23 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        40
+      ],
+      "obligatorio": true
+    },
+    "minimos_indicador_03": {
+      "marcador": "{minimos_indicador_03}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        41
+      ],
       "obligatorio": true
     },
     "benchmark_condiciones_personal": {
@@ -635,7 +786,51 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "investigacion_verificada",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        43
+      ],
+      "obligatorio": true
+    },
+    "investigacion_condiciones_personal_leyes_nacionales": {
+      "marcador": "{investigacion_condiciones_personal_leyes_nacionales}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        44
+      ],
+      "obligatorio": true
+    },
+    "investigacion_condiciones_personal_reportes_unodc": {
+      "marcador": "{investigacion_condiciones_personal_reportes_unodc}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        45
+      ],
+      "obligatorio": true
+    },
+    "investigacion_condiciones_personal_revisiones_laborales": {
+      "marcador": "{investigacion_condiciones_personal_revisiones_laborales}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        46
+      ],
       "obligatorio": true
     },
     "analisis_indicador_04": {
@@ -647,7 +842,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        49
+      ],
       "obligatorio": true
     },
     "graficas_indicador_04": {
@@ -659,7 +856,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        49
+      ],
       "obligatorio": false
     },
     "tablas_indicador_04": {
@@ -671,7 +870,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        49
+      ],
       "obligatorio": true
     },
     "cierre_indicador_04": {
@@ -683,7 +884,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        49
+      ],
       "obligatorio": true
     },
     "analisis_indicador_05": {
@@ -695,7 +898,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        53
+      ],
       "obligatorio": true
     },
     "graficas_indicador_05": {
@@ -707,7 +912,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        53
+      ],
       "obligatorio": false
     },
     "tablas_indicador_05": {
@@ -719,7 +926,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        53
+      ],
       "obligatorio": true
     },
     "cierre_indicador_05": {
@@ -731,7 +940,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        53
+      ],
       "obligatorio": true
     },
     "analisis_indicador_06": {
@@ -743,7 +954,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        55
+      ],
       "obligatorio": true
     },
     "graficas_indicador_06": {
@@ -755,7 +968,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        55
+      ],
       "obligatorio": false
     },
     "tablas_indicador_06": {
@@ -767,7 +982,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        55
+      ],
       "obligatorio": true
     },
     "cierre_indicador_06": {
@@ -779,7 +996,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        55
+      ],
       "obligatorio": true
     },
     "analisis_indicador_07": {
@@ -791,7 +1010,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        51
+      ],
       "obligatorio": true
     },
     "graficas_indicador_07": {
@@ -803,7 +1024,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        51
+      ],
       "obligatorio": false
     },
     "tablas_indicador_07": {
@@ -815,7 +1038,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        51
+      ],
       "obligatorio": true
     },
     "cierre_indicador_07": {
@@ -827,7 +1052,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        51
+      ],
       "obligatorio": true
     },
     "analisis_indicador_08": {
@@ -839,7 +1066,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        57
+      ],
       "obligatorio": true
     },
     "graficas_indicador_08": {
@@ -851,7 +1080,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        57
+      ],
       "obligatorio": false
     },
     "tablas_indicador_08": {
@@ -863,7 +1094,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        57
+      ],
       "obligatorio": true
     },
     "cierre_indicador_08": {
@@ -875,7 +1108,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        57
+      ],
       "obligatorio": true
     },
     "analisis_indicador_09": {
@@ -887,7 +1122,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        60
+      ],
       "obligatorio": true
     },
     "graficas_indicador_09": {
@@ -899,7 +1136,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        60
+      ],
       "obligatorio": false
     },
     "tablas_indicador_09": {
@@ -911,7 +1150,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        60
+      ],
       "obligatorio": true
     },
     "cierre_indicador_09": {
@@ -923,7 +1164,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        60
+      ],
       "obligatorio": true
     },
     "analisis_indicador_10": {
@@ -935,7 +1178,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        62
+      ],
       "obligatorio": true
     },
     "graficas_indicador_10": {
@@ -947,7 +1192,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        62
+      ],
       "obligatorio": false
     },
     "tablas_indicador_10": {
@@ -959,7 +1206,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        62
+      ],
       "obligatorio": true
     },
     "cierre_indicador_10": {
@@ -971,7 +1220,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        62
+      ],
       "obligatorio": true
     },
     "benchmark_inteligencia_policial": {
@@ -983,7 +1234,107 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "investigacion_verificada",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        64
+      ],
+      "obligatorio": true
+    },
+    "investigacion_inteligencia_policial_patrullaje": {
+      "marcador": "{investigacion_inteligencia_policial_patrullaje}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        65
+      ],
+      "obligatorio": true
+    },
+    "investigacion_inteligencia_policial_hotspots": {
+      "marcador": "{investigacion_inteligencia_policial_hotspots}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        66
+      ],
+      "obligatorio": true
+    },
+    "investigacion_inteligencia_policial_policia_comunitaria": {
+      "marcador": "{investigacion_inteligencia_policial_policia_comunitaria}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        67
+      ],
+      "obligatorio": true
+    },
+    "investigacion_inteligencia_policial_evaluacion_policial": {
+      "marcador": "{investigacion_inteligencia_policial_evaluacion_policial}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        68
+      ],
+      "obligatorio": true
+    },
+    "investigacion_inteligencia_policial_derechos_humanos": {
+      "marcador": "{investigacion_inteligencia_policial_derechos_humanos}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        69
+      ],
+      "obligatorio": true
+    },
+    "investigacion_inteligencia_policial_cctv": {
+      "marcador": "{investigacion_inteligencia_policial_cctv}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        70
+      ],
+      "obligatorio": true
+    },
+    "investigacion_inteligencia_policial_mediacion": {
+      "marcador": "{investigacion_inteligencia_policial_mediacion}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        71
+      ],
       "obligatorio": true
     },
     "analisis_indicador_11": {
@@ -995,7 +1346,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        75
+      ],
       "obligatorio": true
     },
     "graficas_indicador_11": {
@@ -1007,7 +1360,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        75
+      ],
       "obligatorio": false
     },
     "tablas_indicador_11": {
@@ -1019,7 +1374,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        75
+      ],
       "obligatorio": true
     },
     "cierre_indicador_11": {
@@ -1031,7 +1388,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        75
+      ],
       "obligatorio": true
     },
     "analisis_indicador_12": {
@@ -1043,7 +1402,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        78
+      ],
       "obligatorio": true
     },
     "graficas_indicador_12": {
@@ -1055,7 +1416,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        78
+      ],
       "obligatorio": false
     },
     "tablas_indicador_12": {
@@ -1067,7 +1430,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        78
+      ],
       "obligatorio": true
     },
     "cierre_indicador_12": {
@@ -1079,7 +1444,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        78
+      ],
       "obligatorio": true
     },
     "analisis_indicador_13": {
@@ -1091,7 +1458,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        81
+      ],
       "obligatorio": true
     },
     "graficas_indicador_13": {
@@ -1103,7 +1472,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        81
+      ],
       "obligatorio": false
     },
     "tablas_indicador_13": {
@@ -1115,7 +1486,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        81
+      ],
       "obligatorio": true
     },
     "cierre_indicador_13": {
@@ -1127,7 +1500,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        81
+      ],
       "obligatorio": true
     },
     "analisis_indicador_14": {
@@ -1139,7 +1514,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        83
+      ],
       "obligatorio": true
     },
     "graficas_indicador_14": {
@@ -1151,7 +1528,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        83
+      ],
       "obligatorio": false
     },
     "tablas_indicador_14": {
@@ -1163,7 +1542,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        83
+      ],
       "obligatorio": true
     },
     "cierre_indicador_14": {
@@ -1175,7 +1556,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        83
+      ],
       "obligatorio": true
     },
     "analisis_indicador_15": {
@@ -1187,7 +1570,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        86
+      ],
       "obligatorio": true
     },
     "graficas_indicador_15": {
@@ -1199,7 +1584,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        86
+      ],
       "obligatorio": false
     },
     "tablas_indicador_15": {
@@ -1211,7 +1598,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        86
+      ],
       "obligatorio": true
     },
     "cierre_indicador_15": {
@@ -1223,7 +1612,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        86
+      ],
       "obligatorio": true
     },
     "analisis_indicador_16": {
@@ -1235,7 +1626,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        88
+      ],
       "obligatorio": true
     },
     "graficas_indicador_16": {
@@ -1247,7 +1640,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        88
+      ],
       "obligatorio": false
     },
     "tablas_indicador_16": {
@@ -1259,7 +1654,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        88
+      ],
       "obligatorio": true
     },
     "cierre_indicador_16": {
@@ -1271,7 +1668,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        88
+      ],
       "obligatorio": true
     },
     "benchmark_eficiencia_policial": {
@@ -1283,7 +1682,51 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "investigacion_verificada",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        89
+      ],
+      "obligatorio": true
+    },
+    "investigacion_eficiencia_policial_derechos_humanos": {
+      "marcador": "{investigacion_eficiencia_policial_derechos_humanos}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        90
+      ],
+      "obligatorio": true
+    },
+    "investigacion_eficiencia_policial_letalidad": {
+      "marcador": "{investigacion_eficiencia_policial_letalidad}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        91
+      ],
+      "obligatorio": true
+    },
+    "investigacion_eficiencia_policial_detenciones_seguridad": {
+      "marcador": "{investigacion_eficiencia_policial_detenciones_seguridad}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "bloques_origen": [
+        92
+      ],
       "obligatorio": true
     },
     "analisis_indicador_17": {
@@ -1295,7 +1738,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        95
+      ],
       "obligatorio": true
     },
     "graficas_indicador_17": {
@@ -1307,7 +1752,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        95
+      ],
       "obligatorio": false
     },
     "tablas_indicador_17": {
@@ -1319,7 +1766,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        95
+      ],
       "obligatorio": true
     },
     "cierre_indicador_17": {
@@ -1331,7 +1780,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        95
+      ],
       "obligatorio": true
     },
     "analisis_indicador_18": {
@@ -1343,7 +1794,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        98
+      ],
       "obligatorio": true
     },
     "graficas_indicador_18": {
@@ -1355,7 +1808,9 @@
       },
       "tipo_contenido": "graficas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        98
+      ],
       "obligatorio": false
     },
     "tablas_indicador_18": {
@@ -1367,7 +1822,9 @@
       },
       "tipo_contenido": "tablas",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        98
+      ],
       "obligatorio": true
     },
     "cierre_indicador_18": {
@@ -1379,7 +1836,9 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [
+        98
+      ],
       "obligatorio": true
     },
     "bibliografia": {
@@ -1391,7 +1850,7 @@
       },
       "tipo_contenido": "texto",
       "origen_contenido": "evidencia_documental",
-      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "bloques_origen": [],
       "obligatorio": true
     }
   },
@@ -2117,7 +2576,8 @@
         "aplicabilidad": "string",
         "revisado_por": "string"
       },
-      "minimos_indicadores": "object con claves 01, 02 y 03 y valores {texto, referencias: [urls declaradas]}"
+      "minimos_indicadores": "object con claves 01, 02 y 03 y valores {texto, referencias: [urls declaradas]}",
+      "apartados": "object por línea, claves del contrato y textos con URL citada"
     }
   },
   "catalogo_indicadores": [

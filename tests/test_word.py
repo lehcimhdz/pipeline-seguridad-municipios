@@ -11,11 +11,12 @@ from lxml import etree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from calificar import agregar
+from calificar import agregar, definir_periodos
 from componer_documento import componer
 from documentos import sha256
 from contrato import huellas, cargar_contrato
 from investigacion import validar_aporte
+from fuentes_word import FONTS
 from unittest.mock import patch
 from renderizar_word import (DICTIONARY, RULES, TEMPLATE, W, STYLE, auditar,
                              parrafo, reemplazar, renderizar, run, texto, validar_resultado)
@@ -29,6 +30,7 @@ def investigacion_sintetica():
         url = 'https://example.org/' + definition['id']
         lines.append({'id': definition['id'], 'estado': 'verificado',
                       'analisis': 'Análisis sintético de pruebas. Fuente: ' + url,
+                      'apartados': {p['id']: 'Evidencia sintética. Fuente: ' + url for p in definition.get('apartados', [])},
                       'referencias': [{'titulo': 'Fuente sintética', 'url': url,
                                       'fecha_consulta': '2026-09-25', 'localizador': 'Sección de prueba',
                                       'aplicabilidad': 'Sólo prueba', 'revisado_por': 'Prueba automatizada'}]})
@@ -45,18 +47,22 @@ def ejemplo(pending=True, research=None):
     for ficha in rules['fichas']:
         number = ficha['id']
         evaluation = {'puntaje': None if pending and number == 4 else 5,
-                      'años_evaluados': [2020, 2022], 'criterio_aplicado': f'Ficha {number}, criterio 5'}
+                      'años_evaluados': [2021, 2022], 'criterio_aplicado': f'Ficha {number}, criterio 5'}
         if evaluation['puntaje'] is None:
             evaluation['motivo'] = 'Falta población comparable.'
         sections.append({'numero': number, 'nombre': ficha['nombre'],
                          'evaluaciones': {p: deepcopy(evaluation) for p in ('general', 'ultimo_periodo')},
                          'control_cruzado_anexo': {'tablas_identicas': True, 'calificacion_reportada_coincide': True},
                          'tablas': [{'tabla': number, 'ambito': 'municipal',
-                                     'filas': [['Año', 'Valor'], ['2020', 'Sí & válido < 100'], ['2022', '']]}]})
+                                     'filas': [['Año', 'Valor'], ['2021', 'Sí & válido < 100'], ['2022', '']]}]})
+        if number in (14, 15, 18):
+            sections[-1]['tablas'].append({'tabla': 100 + number, 'ambito': 'estatal',
+                                           'filas': [['Año', 'Valor'], ['2021', '30'], ['2022', '40']]})
     values = {k: None for k in dictionary['variables_documento']}
-    values.update(municipio='Municipio de prueba', estado='Entidad de prueba', año_inicial=2020, año_final=2022)
+    values.update(municipio='Municipio de prueba', estado='Entidad de prueba', año_inicial=2021, año_final=2022)
     result = {'municipio': values['municipio'], 'estado': values['estado'], 'estado_ejecucion': 'requiere_revision',
               'contrato': huellas(),
+              'periodos_evaluacion': definir_periodos(sections),
               'valores_plantilla': values, 'indicadores': sections,
               'calculos': {p: agregar({s['numero']: s['evaluaciones'][p] for s in sections}, rules)
                           for p in ('general', 'ultimo_periodo')},
@@ -120,12 +126,13 @@ class WordTests(unittest.TestCase):
                 self.assertNotIn('TEXTOS BASE', text)
                 self.assertNotIn('{', text)
                 self.assertIn('Certificado', text)
-                first = next(p for p in root.iter(W + 'p') if texto(p).startswith('La medición examina'))
-                subsequent = next(p for p in root.iter(W + 'p') if texto(p).startswith('El documento conserva'))
-                self.assertEqual(first.find(W + 'pPr/' + W + 'ind').get(W + 'firstLine'), '0')
-                self.assertEqual(subsequent.find(W + 'pPr/' + W + 'ind').get(W + 'firstLine'), '283')
+                self.assertTrue(report['fidelidad_machote_verificada'])
+                self.assertEqual(report['bloques_origen_verificados'], 101)
+                self.assertTrue(text.startswith('SEGURIDAD'))
+                self.assertNotIn('Mediciones de Funcionamiento Municipal — SEGURIDAD', text)
+                self.assertEqual(len(root.findall('.//' + W + 'numPr')), 35)
                 sections = root.findall('.//' + W + 'sectPr')
-                self.assertEqual(len(sections), 2)
+                self.assertEqual(len(sections), 1)
                 for r in root.iter(W + 'r'):
                     style = r.find(W + 'rPr/' + W + 'rStyle')
                     if style is not None and style.get(W + 'val') == STYLE:
@@ -206,7 +213,7 @@ class WordTests(unittest.TestCase):
                 self.assertEqual(header.find(W + 'r/' + W + 'rPr/' + W + 'rFonts').get(W + 'ascii'), 'Archivo Medium')
                 self.assertEqual(header.find(W + 'r/' + W + 'rPr/' + W + 'sz').get(W + 'val'), '24')
                 self.assertEqual(header.find(W + 'pPr/' + W + 'spacing').get(W + 'line'), '280')
-                self.assertEqual(len([n for n in archive.namelist() if n.endswith('.odttf')]), 4)
+                self.assertEqual(len([n for n in archive.namelist() if n.endswith('.odttf')]), len(FONTS))
                 charts = [n for n in archive.namelist() if n.startswith('word/charts/pipeline_')]
                 self.assertEqual(len(charts), 17)  # El indicador 4 está pendiente en ambos periodos.
                 for name in charts:
@@ -261,6 +268,7 @@ class WordTests(unittest.TestCase):
                 aporte['lineas'][0]['referencias'][0]['revisado_por'] = ''
             elif kind == 'citation':
                 aporte['lineas'][0]['analisis'] = 'Sin cita'
+                aporte['lineas'][0]['apartados'] = {}
             elif kind == 'minimum':
                 aporte['minimos_indicadores']['01']['referencias'] = ['https://example.org/desconocida']
             else:
@@ -278,6 +286,52 @@ class WordTests(unittest.TestCase):
         result = ejemplo(pending=False)
         result['investigacion']['lineas'][0]['variable'] = 'municipio'
         with self.assertRaisesRegex(ValueError, 'Variable de benchmark'):
+            validar_resultado(result, 'borrador')
+
+    def test_recent_period_cannot_use_two_nonconsecutive_observations(self):
+        result = ejemplo()
+        result['indicadores'][0]['evaluaciones']['ultimo_periodo']['años_evaluados'] = [2020, 2022]
+        with self.assertRaisesRegex(ValueError, 'mismo último periodo'):
+            validar_resultado(result, 'borrador')
+
+    def test_missing_municipal_year_cannot_be_scored_even_without_missing_flags(self):
+        for keep_flags in (True, False):
+            for mode in ('borrador', 'final'):
+                with self.subTest(keep_flags=keep_flags, mode=mode):
+                    result = ejemplo(pending=False)
+                    section = result['indicadores'][0]
+                    section['tablas'][0]['filas'].pop(1)
+                    evaluation = section['evaluaciones']['ultimo_periodo']
+                    if keep_flags:
+                        evaluation.update(cobertura_temporal_insuficiente=True, años_faltantes=[2021])
+                    # Reconstruir las vistas: no basta detectar una gráfica o
+                    # tabla desincronizada, se debe revisar cobertura real.
+                    componer(result, json.loads(DICTIONARY.read_text()), json.loads(RULES.read_text()))
+                    result['estado_ejecucion'] = 'validado'
+                    result['validaciones'] = []
+                    with self.assertRaisesRegex(ValueError, 'cobertura temporal insuficiente'):
+                        validar_resultado(result, mode)
+
+    def test_missing_state_year_blocks_comparative_indicator_score(self):
+        for number in (14, 15, 18):
+            with self.subTest(number=number):
+                result = ejemplo(pending=False)
+                section = result['indicadores'][number - 1]
+                section['tablas'][1]['filas'].pop(1)
+                componer(result, json.loads(DICTIONARY.read_text()), json.loads(RULES.read_text()))
+                with self.assertRaisesRegex(ValueError, f'Indicador {number}: cobertura temporal insuficiente'):
+                    validar_resultado(result, 'borrador')
+
+    def test_temporal_block_flag_cannot_coexist_with_a_score(self):
+        result = ejemplo(pending=False)
+        result['indicadores'][0]['evaluaciones']['ultimo_periodo']['cobertura_temporal_insuficiente'] = True
+        with self.assertRaisesRegex(ValueError, 'puntaje reciente debe ser null'):
+            validar_resultado(result, 'borrador')
+
+    def test_research_topic_cannot_diverge_from_its_cited_content(self):
+        result = ejemplo(pending=False)
+        result['valores_plantilla']['investigacion_inteligencia_policial_hotspots'] = 'Contenido sustituido'
+        with self.assertRaisesRegex(ValueError, 'Apartado del machote'):
             validar_resultado(result, 'borrador')
 
     def test_changed_original_blocks_contract_without_touching_files(self):

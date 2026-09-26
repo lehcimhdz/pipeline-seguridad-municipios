@@ -1,13 +1,17 @@
-# Pipeline de seguridad municipal — v3
+# Pipeline de seguridad municipal — v3.1
 
 Genera una medición de SEGURIDAD desde los mismos cuatro Word por municipio.
 Incorpora el machote **rzg investigación**, conserva los 18 indicadores y sus
 90 criterios y separa la investigación externa de los puntajes.
 
 La base activa [seguridad_medicion_v3.docx](templates/seguridad_medicion_v3.docx)
-tiene **97 variables snake_case**, cuatro benchmarks y tres mínimos de
-protección civil. El original recibido se conserva sin editar.
-No se genera un anexo adicional ni una plataforma electoral.
+parametriza una copia del original recibido en sus posiciones existentes:
+**116 variables snake_case**, cuatro benchmarks, quince apartados de
+investigación y tres mínimos de protección civil. Conserva los 101 bloques
+de origen, títulos, listas, colores, márgenes y una sección. La corrección
+documentada del personal duplicado restituye CUP como indicador 7.
+La identidad se incorpora bajo SEGURIDAD y las fuentes al final; no se
+añade portada ni logotipo. El original permanece intacto.
 
 ## Ejecutar
 
@@ -18,8 +22,10 @@ Python 3.11+:
     python3 scripts/ejecutar_pipeline.py
 
 Produce JSON trazable, Word **BORRADOR DE REVISIÓN** y recibo de renderizado.
-Texto, tablas y gráficas insertados desde JSON llevan amarillo. Se aplica el
-manual editorial y se incrustan las tipografías Archivo.
+Texto, tablas y gráficas insertados desde JSON llevan amarillo. El texto
+hereda el formato local del machote; los elementos nuevos usan el perfil
+editorial y se incrustan las tipografías Archivo. La auditoría comprueba
+estructura, posiciones y resaltado del resultado.
 
 Después de una ejecución exitosa, se eliminan las salidas anteriores de
 `output/json/` y `output/word/`; sólo se conservan las vigentes.
@@ -29,13 +35,22 @@ Para incluir investigación previamente revisada:
 
     python3 scripts/ejecutar_pipeline.py --investigacion-json input/revision/investigacion_seguridad.json
 
-Sin ese aporte, los benchmarks y mínimos quedan pendientes. El pipeline
+Sin ese aporte, benchmarks, apartados y mínimos quedan pendientes. El pipeline
 valida estructura y referencias declaradas, **no vigencia jurídica ni veracidad
 de una investigación**. No necesita una API de IA.
 
-Los datos actuales permiten calcular 12 de 18 indicadores por periodo.
-Siguen pendientes 4, 8, 9, 14, 17 y 18, además de la nueva investigación.
-La versión final requiere datos completos y revisión resuelta.
+El aporte local de prueba desarrolla los quince temas con veinte fuentes
+primarias: es una revisión documental asistida por IA y mantiene pendiente
+la validación editorial humana. El comando no consulta la web automáticamente.
+El municipio, estado y periodo declarados se contrastan con el resultado;
+las revisiones pendientes del aporte se muestran en el Word y las referencias
+se reúnen sin duplicados en la bibliografía final.
+
+Con los datos actuales se calculan **12 de 18 indicadores generales y 0 de 18
+del último periodo**. El reciente es el intervalo común 2023–2024: falta 2023
+en los indicadores 1–16 y los indicadores 17–18 requieren revisión metodológica.
+No se sustituye 2023 por 2022. En el general siguen pendientes 4, 8, 9, 14,
+17 y 18. La versión final requiere datos completos y revisión resuelta.
 
 ## Cuando cambie el machote
 
@@ -44,10 +59,13 @@ La versión final requiere datos completos y revisión resuelta.
     python3 -m unittest discover -s tests -v
     python3 scripts/ejecutar_pipeline.py
 
-La migración actualiza base, diccionario, reglas y contrato.
+La migración actualiza base, diccionario, reglas y contrato; conserva
+101 bloques mediante controles de contenido y verifica su fidelidad.
 Una modificación del original bloquea el pipeline hasta migrar.
 Si cambia el inventario de indicadores, se exige revisar su correspondencia.
-Los JSON anteriores deben regenerarse.
+Los JSON anteriores deben regenerarse. Los 90 criterios y sus umbrales
+siguen iguales; se corrigió la selección temporal y los cierres ahora
+interpretan valores y tablas específicos de cada indicador.
 
 La población puede aportarse mediante CSV o INEGI opcional
 (`--inegi-population`, secreto de entorno `INEGI_TOKEN`).

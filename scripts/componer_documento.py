@@ -1,5 +1,6 @@
 """Contenido editorial reproducible a partir de resultados y evidencia del JSON."""
 from decimal import Decimal, ROUND_HALF_UP
+from analisis_evidencia import analizar_indicador
 from investigacion import integrar, narrativas
 
 PERIODOS = {'general': 'Periodo general', 'ultimo_periodo': 'Último periodo'}
@@ -23,10 +24,14 @@ def componer(result, dictionary, rules):
     values = result['valores_plantilla']
     sections = result['indicadores']
     title = f"Diagnóstico de seguridad municipal — {result['municipio']}, {result.get('estado') or 'entidad pendiente'}"
+    source = next((item['archivo'] for item in result.get('fuentes', [])
+                   if item.get('archivo', '').casefold().endswith(' paquete seguridad.docx')), 'PAQUETE SEGURIDAD')
+    periods = result.get('periodos_evaluacion', {})
     analyses = []
     for section in sections:
         number = section['numero']
-        paragraphs = []
+        reading = analizar_indicador(section, source, periods)
+        paragraphs = list(reading['parrafos'])
         for period, label in PERIODOS.items():
             evaluation = section['evaluaciones'][period]
             years = ', '.join(map(str, evaluation.get('años_evaluados', []))) or 'sin cobertura confirmada'
@@ -37,21 +42,21 @@ def componer(result, dictionary, rules):
             if evaluation.get('nota'):
                 sentence += ' ' + evaluation['nota']
             paragraphs.append(sentence)
-        refs = [f"tabla {table['tabla']} ({table['ambito']})" for table in section['tablas']]
-        paragraphs.append('Evidencia: PAQUETE SEGURIDAD, ' + '; '.join(refs) + '. Las tablas siguientes conservan los valores reportados; una celda vacía representa un dato pendiente de clasificar.')
         if not all(section.get('control_cruzado_anexo', {}).get(key, False)
                    for key in ('tablas_identicas', 'calificacion_reportada_coincide')):
             paragraphs.append('El control cruzado con el Anexo requiere revisión.')
         key = f'analisis_indicador_{number:02d}'
         values[key] = '\n\n'.join(paragraphs)
         analyses.append({'indicador': number, 'variable': key,
-                         'cierre': 'Las puntuaciones anteriores corresponden a los criterios internos de la ficha. Los datos autodeclarados no acreditan por sí solos calidad operativa ni efectos sobre el delito.'})
+                         'cierre': reading['cierre'], 'evidencia': reading['evidencia']})
     dimension_names = {item['codigo']: item['nombre'] for item in dictionary['catalogos']['dimensiones']}
     dimension_values = {period: {} for period in PERIODOS}
     for period, label in PERIODOS.items():
         pending = [s['numero'] for s in sections if s['evaluaciones'][period]['puntaje'] is None]
         grade = result['calculos'][period]['calificacion_final']
-        sentences = [f"{label}: {len(sections) - len(pending)} de 18 indicadores cuentan con puntaje calculado."]
+        target_years = periods.get(period, {}).get('años_objetivo', [])
+        period_label = label + (' (' + ', '.join(map(str, target_years)) + ')' if target_years else '')
+        sentences = [f"{period_label}: {len(sections) - len(pending)} de 18 indicadores cuentan con puntaje calculado."]
         if pending:
             sentences.append('La calificación global permanece pendiente por los indicadores ' + ', '.join(map(str, pending)) + '.')
         else:
@@ -95,10 +100,14 @@ def componer(result, dictionary, rules):
         for source in sources) or 'Referencias documentales registradas en el JSON fuente.'
     active = list(dictionary['variables_documento'])
     result['contenido_word'] = {
-        'version': '3.0', 'perfil': 'seguridad_investigacion_v3',
+        'version': '3.1', 'perfil': 'seguridad_investigacion_v3',
         'titulo': title,
         'aviso_borrador': 'BORRADOR DE REVISIÓN — evaluación pendiente de validación; no es un diagnóstico final.',
-        'periodo': f"Periodo documental: {values.get('año_inicial', 'pendiente')}–{values.get('año_final', 'pendiente')}. Los años se conservan como etiquetas de las tablas fuente.",
+        'periodo': (f"Periodo documental: {values.get('año_inicial', 'pendiente')}–{values.get('año_final', 'pendiente')}. "
+                    + ('Intervalo reciente común: ' + '–'.join(map(str, periods['ultimo_periodo']['años_objetivo'])) + '. '
+                       if periods.get('ultimo_periodo', {}).get('años_objetivo') else '')
+                    + 'Los años se conservan como etiquetas de las tablas fuente.'),
+        'periodos_evaluacion': periods,
         'calificaciones': grades, 'hoja_computo': rows,
         'promedios_dimension': dimension_values,
         'promedios_generales': {p: result['calculos'][p].get('promedio_tres_dimensiones') for p in PERIODOS},
@@ -110,7 +119,8 @@ def componer(result, dictionary, rules):
         'decision_editorial': 'Único perfil de medición de SEGURIDAD v3. Investigación en cuatro líneas, mínimos de protección civil, análisis, gráficas y tablas; propuestas y tendencias limitadas a evidencia. Los benchmarks no cambian puntajes.',
     }
     result['validaciones'] = [v for v in result['validaciones'] if v['codigo'] not in
-        ('INVESTIGACION_PENDIENTE', 'MINIMOS_PROTECCION_CIVIL_PENDIENTES', 'VARIABLES_ACTIVAS_PENDIENTES')]
+        ('INVESTIGACION_PENDIENTE', 'REVISION_FUENTES_INVESTIGACION', 'APARTADOS_INVESTIGACION_PENDIENTES',
+         'MINIMOS_PROTECCION_CIVIL_PENDIENTES', 'VARIABLES_ACTIVAS_PENDIENTES')]
     narrativas(result, rules)
     integrar(result)
     # Quitar únicamente los bloqueos técnicos que esta composición sí resuelve.

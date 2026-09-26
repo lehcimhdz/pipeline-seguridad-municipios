@@ -7,6 +7,7 @@ import sys
 import zipfile
 from lxml import etree as ET
 from contrato import cargar_contrato, ROOT
+from fidelidad_machote import validar as validar_fidelidad
 
 MARKER = re.compile(r'(?<!\{)\{([a-z][a-z0-9_]*)\}(?!\})')
 W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
@@ -18,6 +19,7 @@ def validar():
     total = Counter()
     for perfil, entry in contract['plantillas'].items():
         with zipfile.ZipFile(ROOT / entry['archivo']) as archive:
+            files = {n: archive.read(n) for n in archive.namelist()}
             if archive.testzip():
                 raise ValueError('DOCX dañado.')
             text = ''
@@ -33,8 +35,11 @@ def validar():
             raise ValueError(f'{perfil}: marcadores distintos al diccionario.')
         if re.search(r'\[[^\[\]]+\]|\{\{|\}\}', text):
             raise ValueError(f'{perfil}: instrucciones editoriales o marcadores antiguos pendientes.')
-        headings = re.findall(r'Indicador (\d{2}):', text)
-        if headings != [f'{i:02d}' for i in range(1, 19)]:
+        with zipfile.ZipFile(ROOT / entry['origen']) as archive:
+            original_files = {n: archive.read(n) for n in archive.namelist()}
+        validar_fidelidad(original_files, files, contract['fidelidad'])
+        indicators = re.findall(r'\{analisis_indicador_(\d{2})\}', text)
+        if indicators != [f'{i:02d}' for i in range(1, 19)]:
             raise ValueError(f'{perfil}: orden de indicadores distinto al contrato.')
         total.update(found)
     for key, entry in dictionary['variables_documento'].items():

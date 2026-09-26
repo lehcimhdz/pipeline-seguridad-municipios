@@ -13,13 +13,14 @@ import tempfile
 import unicodedata
 import zipfile
 from lxml import etree as ET
-from calificar import agregar
+from calificar import agregar, cobertura_periodo, definir_periodos
 from componer_documento import PERIODOS, decimal_corto
 from contrato import ROOT, CONTRACT, cargar_contrato, huellas
 from documentos import sha256
 from editorial import configurar
 from graficas_word import agregar_grafica
 from salidas import limpiar_salidas
+from fidelidad_machote import controles, validar as validar_fidelidad
 
 TEMPLATE = ROOT / 'templates/seguridad_medicion_v3.docx'
 DICTIONARY = ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json'
@@ -55,6 +56,8 @@ def run(value, model=None, generated=True):
         props.insert(0, ET.Element(W + 'rStyle', {W + 'val': STYLE}))
         ET.SubElement(props, W + 'highlight', {W + 'val': 'yellow'})
         ET.SubElement(props, W + 'shd', {W + 'val': 'clear', W + 'color': 'auto', W + 'fill': 'FFFF00'})
+        if props.find(W + 'rFonts') is None:
+            props.insert(1, ET.Element(W + 'rFonts', {W + key: 'Archivo Light' for key in ('ascii', 'hAnsi', 'eastAsia', 'cs')}))
     element.append(props)
     for i, line in enumerate(str(value).split('\n')):
         if i:
@@ -69,6 +72,18 @@ def parrafo(value, model=None, generated=True, perfil='medicion', rol='cuerpo', 
         p.append(deepcopy(model.find(W + 'pPr')))
     p.append(run(value, model.find('.//' + W + 'r') if model is not None else None, generated))
     return configurar(p, perfil, rol, inicial)
+
+
+def parrafo_del_machote(value, model, continuation=False):
+    """Rellena respetando sangría, listas, color y formato local del original."""
+    p = ET.Element(W + 'p')
+    if model.find(W + 'pPr') is not None:
+        p.append(deepcopy(model.find(W + 'pPr')))
+    p.append(run(value, model.find('.//' + W + 'r')))
+    if continuation and p.find(W + 'pPr') is not None:
+        for node in p.find(W + 'pPr').findall(W + 'numPr'):
+            node.getparent().remove(node)
+    return p
 
 
 def reemplazar(p, token, replacement, first_only=False):
@@ -139,6 +154,19 @@ def validar_resultado(result, mode):
     sections = result['indicadores']; ids = [s['numero'] for s in sections]
     if ids != list(range(1, 19)):
         raise ValueError('Se requieren los 18 indicadores ordenados, sin duplicados.')
+    periods = definir_periodos(sections)
+    if result.get('periodos_evaluacion') != periods:
+        raise ValueError('El intervalo documental difiere de los años de las tablas.')
+    recent = periods['ultimo_periodo']['años_objetivo']
+    if any(s['evaluaciones']['ultimo_periodo'].get('años_evaluados') != recent for s in sections):
+        raise ValueError('Los indicadores deben usar el mismo último periodo de dos años consecutivos.')
+    for section in sections:
+        evaluation = section['evaluaciones']['ultimo_periodo']
+        coverage = cobertura_periodo(section, 'ultimo_periodo', recent,
+                                     comparar_estado=section['numero'] in (14, 15, 18))
+        if (coverage.get('cobertura_temporal_insuficiente')
+                or evaluation.get('cobertura_temporal_insuficiente')) and evaluation['puntaje'] is not None:
+            raise ValueError(f"Indicador {section['numero']}: cobertura temporal insuficiente; el puntaje reciente debe ser null.")
     rules = json.loads(RULES.read_text(encoding='utf-8'))
     dictionary = json.loads(DICTIONARY.read_text(encoding='utf-8'))
     active = set(dictionary['variables_documento'])
@@ -208,13 +236,21 @@ def validar_resultado(result, mode):
             raise ValueError('Variable de benchmark distinta al contrato.')
     verified = [l for l in lines if l.get('estado') == 'verificado']
     validar_aporte({'version': '1.0', 'lineas': [
-        {**l, 'analisis': result['valores_plantilla'][l['variable']]} for l in verified],
+        {**l, 'analisis': result['valores_plantilla'][l['variable']],
+         'apartados': l.get('contenidos_apartados', {})} for l in verified],
         'minimos_indicadores': research.get('minimos_indicadores', {})}, research_config)
     for line in lines:
         if line.get('estado') not in ('pendiente', 'verificado'):
             raise ValueError('Estado de investigación inválido.')
         if line['estado'] == 'pendiente' and result['valores_plantilla'][line['variable']] is not None:
             raise ValueError('Benchmark pendiente presentado como verificado.')
+        definition = next(d for d in research_config['lineas'] if d['id'] == line['id'])
+        for part in definition.get('apartados', []):
+            expected = line.get('contenidos_apartados', {}).get(part['id'])
+            if result['valores_plantilla'].get(part['variable']) != expected:
+                raise ValueError('Apartado del machote distinto a la investigación revisada.')
+            if line['estado'] == 'pendiente' and expected is not None:
+                raise ValueError('Investigación pendiente con apartados presentados como revisados.')
     for i in range(1, 4):
         supplied = research.get('minimos_indicadores', {}).get(f'{i:02d}')
         if result['valores_plantilla'][f'minimos_indicador_{i:02d}'] != (supplied['texto'] if supplied else None):
@@ -225,10 +261,11 @@ def validar_resultado(result, mode):
 
 def seleccionar_documento(root, result, mode, perfil, files):
     body = root.find(W + 'body')
-    start = next((i + 1 for i, p in enumerate(body) if p.find(W + 'pPr/' + W + 'sectPr') is not None), 0)
+    positions = controles(root)
+    identification = positions['origen_003']
     if mode == 'borrador':
-        body.insert(start, parrafo(result['contenido_word']['aviso_borrador'], perfil=perfil, rol='nota'))
-    body.insert(start + (1 if mode == 'borrador' else 0), parrafo(result['contenido_word']['periodo'], perfil=perfil, rol='nota'))
+        identification.append(parrafo(result['contenido_word']['aviso_borrador'], perfil=perfil, rol='nota'))
+    identification.append(parrafo(result['contenido_word']['periodo'], perfil=perfil, rol='nota'))
     chart_number = 0
     format_config = json.loads((ROOT / 'config/formato_editorial.json').read_text(encoding='utf-8'))
     for p in list(root.iter(W + 'p')):
@@ -253,9 +290,7 @@ def seleccionar_documento(root, result, mode, perfil, files):
             else:
                 value = f'Pendiente de revisión: {key}' if value is None else value
                 rol = 'bibliografia' if key == 'bibliografia' else 'cuerpo'
-                indent = p.find(W + 'pPr/' + W + 'ind')
-                continuation = indent is not None and indent.get(W + 'firstLine') == '283'
-                replacements = [parrafo(piece, p, perfil=perfil, rol=rol, inicial=i == 0 and not continuation)
+                replacements = [parrafo_del_machote(piece, p, continuation=i > 0)
                                 for i, piece in enumerate(str(value).split('\n\n'))]
                 if rol == 'bibliografia':
                     for i, replacement in enumerate(replacements):
@@ -267,7 +302,6 @@ def seleccionar_documento(root, result, mode, perfil, files):
                             italic = run(title + '. ')
                             ET.SubElement(italic.find(W + 'rPr'), W + 'i')
                             replacement.extend([italic, run('SHA-256: ' + checksum)])
-                            configurar(replacement, perfil, 'bibliografia', inicial=i == 0)
             parent = p.getparent(); index = parent.index(p); parent.remove(p)
             for offset, replacement in enumerate(replacements):
                 parent.insert(index + offset, replacement)
@@ -278,18 +312,17 @@ def seleccionar_documento(root, result, mode, perfil, files):
                 if match[1].startswith('calificacion_'):
                     for r in p.iter(W + 'r'):
                         rpr = r.find(W + 'rPr')
-                        if rpr is not None:
+                        if rpr is not None and rpr.find(W + 'rStyle') is not None and rpr.find(W + 'rStyle').get(W + 'val') == STYLE:
                             for n in rpr.findall(W + 'color'):
                                 rpr.remove(n)
                             ET.SubElement(rpr, W + 'color', {W + 'val': format_config['colores_calificacion'].get(value, '666666')})
     if mode == 'borrador':
-        section = body.find(W + 'sectPr')
-        index = body.index(section)
-        body.insert(index, parrafo('Pendientes de revisión', generated=False, perfil=perfil, rol='subcapitulo'))
-        for offset, v in enumerate(result['validaciones'], 1):
+        appendix = positions['adicional_fuentes']
+        appendix.append(parrafo('Pendientes de revisión', generated=False, perfil=perfil, rol='subcapitulo'))
+        for v in result['validaciones']:
             detail = v.get('detalle') or ', '.join(v.get('variables', []))
             detail = detail or f"Indicador {v.get('indicador', '')} {v.get('periodo', '')}"
-            body.insert(index + offset, parrafo(f"{v['codigo']}: {detail}", perfil=perfil, rol='nota'))
+            appendix.append(parrafo(f"{v['codigo']}: {detail}", perfil=perfil, rol='nota'))
 
 
 def auditar(path, expected_generated=None):
@@ -344,14 +377,15 @@ def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='me
     validar_resultado(result, mode)
     with zipfile.ZipFile(template) as archive:
         files = {n: archive.read(n) for n in archive.namelist()}
+    with zipfile.ZipFile(ROOT / contract['plantillas'][perfil]['origen']) as archive:
+        original_files = {n: archive.read(n) for n in archive.namelist()}
+    validar_fidelidad(original_files, files, contract['fidelidad'])
     root = ET.fromstring(files['word/document.xml'], PARSER)
     dictionary = json.loads(DICTIONARY.read_text(encoding='utf-8'))
     found = Counter(k for p in root.iter(W + 'p') for k in MARKER.findall(texto(p)))
     target = Counter({k: v['apariciones_por_documento'][perfil] for k, v in dictionary['variables_documento'].items() if v['apariciones_por_documento'][perfil]})
     if found != target:
         raise ValueError('Marcadores distintos al contrato del perfil.')
-    for cached in list(root.iter(W + 'lastRenderedPageBreak')):
-        cached.getparent().remove(cached)
     seleccionar_documento(root, result, mode, perfil, files)
     generated = len(root.xpath('.//w:r[w:rPr/w:rStyle[@w:val="ContenidoJSON"]]', namespaces=NS))
     files['word/document.xml'] = xml_bytes(root)
@@ -364,6 +398,7 @@ def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='me
     ET.SubElement(props, W + 'highlight', {W + 'val': 'yellow'})
     ET.SubElement(props, W + 'shd', {W + 'val': 'clear', W + 'color': 'auto', W + 'fill': 'FFFF00'})
     files['word/styles.xml'] = xml_bytes(styles)
+    fidelity = validar_fidelidad(original_files, files, contract['fidelidad'], salida=True)
     output_dir.mkdir(parents=True, exist_ok=True)
     municipality = slug(result['municipio'])
     if not municipality:
@@ -376,7 +411,7 @@ def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='me
                 archive.writestr(name, data)
         audit = auditar(temporary, generated)
         os.replace(temporary, dest)
-    return {**audit, 'archivo': str(dest), 'sha256': sha256(dest), 'modo': mode, 'perfil': perfil,
+    return {**audit, **fidelity, 'archivo': str(dest), 'sha256': sha256(dest), 'modo': mode, 'perfil': perfil,
             'json_fuente': str(json_path), 'json_sha256': hashlib.sha256(raw).hexdigest(),
             'plantilla_sha256': sha256(template), 'contrato_documental_sha256': sha256(CONTRACT)}
 

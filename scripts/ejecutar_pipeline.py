@@ -9,8 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
-from documentos import leer_docx, registros, seccion_seguridad, sha256
-from calificar import agregar, calificar_indicador, dependencias
+from documentos import leer_docx, seccion_seguridad, sha256
+from calificar import agregar, calificar_indicador, definir_periodos, dependencias
 from datos_externos import fuente, leer_csv, seleccionar, serie, serie_estatal, validar_campos
 from inegi import consultar_poblacion, guardar_respuestas
 from componer_documento import componer
@@ -90,6 +90,21 @@ def cargar_externos(args, run):
     return external, provenance, config_path
 
 
+def evaluar_periodos(sections, rules, mappings=None, external=None):
+    periods = definir_periodos(sections)
+    evaluations = {}
+    for period in ('general', 'ultimo_periodo'):
+        target_years = periods[period]['años_objetivo'] if period == 'ultimo_periodo' else None
+        calculations = {
+            section['numero']: calificar_indicador(
+                section, ficha, period, mappings, external, años_objetivo=target_years)
+            for section, ficha in zip(sections, rules['fichas'])
+        }
+        dependencias(calculations)
+        evaluations[period] = calculations
+    return periods, evaluations
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', type=Path, default=ROOT / 'input/word')
@@ -141,12 +156,7 @@ def main():
         state = identity[2].strip()
     else:
         validations.append({'codigo': 'IDENTIDAD_NO_CONFIRMADA', 'nivel': 'bloqueante'})
-    evaluations = {}
-    for period in ('general', 'ultimo_periodo'):
-        calculations = {section['numero']: calificar_indicador(section, ficha, period, mappings, external)
-                        for section, ficha in zip(sections, rules['fichas'])}
-        dependencias(calculations)
-        evaluations[period] = calculations
+    periods, evaluations = evaluar_periodos(sections, rules, mappings, external)
     for section, annex in zip(sections, annex_sections):
         number = section['numero']
         section['evaluaciones'] = {period: values[number] for period, values in evaluations.items()}
@@ -163,21 +173,19 @@ def main():
             if calculation['puntaje'] is None:
                 validations.append({'nivel': 'bloqueante', 'codigo': 'INDICADOR_PENDIENTE',
                                     'indicador': number, 'periodo': period, 'detalle': calculation['motivo']})
-    years = sorted({row['año'] for section in sections for table in section['tablas']
-                    if table['ambito'] == 'municipal' for row in registros(table)})
-    census_years = sorted({row['año'] for section in sections[:16] for table in section['tablas']
-                           if table['ambito'] == 'municipal' for row in registros(table)})
+    years = periods['general']['años_objetivo']
     values = {key: None for key in dictionary['variables_documento']}
     values.update(municipio=municipality, estado=state)
     if years:
         values.update({'año_inicial': years[0], 'año_final': years[-1]})
-    if len(census_years) >= 2:
-        values.update({'año_ultimo_periodo_inicial': census_years[-2], 'año_ultimo_periodo_final': census_years[-1]})
+    if periods['ultimo_periodo']['años_objetivo']:
+        values.update({'año_ultimo_periodo_inicial': periods['ultimo_periodo']['año_inicial'],
+                       'año_ultimo_periodo_final': periods['ultimo_periodo']['año_final']})
     validations.append({'nivel': 'revision', 'codigo': 'COBERTURA_EDICIONES',
-                        'detalle': 'Los años son etiquetas de las tablas. Confirmar su relación con edición censal y años no observados antes de cerrar el diagnóstico.'})
+                        'detalle': 'Los años son etiquetas de las tablas. El último periodo exige los mismos dos años calendario consecutivos en los 18 indicadores. Confirmar la relación entre esas etiquetas y los años de referencia de cada edición censal antes de cerrar el diagnóstico.'})
     aggregates = {period: agregar(results, rules) for period, results in evaluations.items()}
     result = {
-        'version': '3.0', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
+        'version': '3.1', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
         'estado_ejecucion': 'requiere_revision',
         'contrato': {**huellas(), 'normalizaciones_sha256': sha256(mappings_path),
                      'fuentes_externas_sha256': sha256(external_config_path)},
@@ -185,7 +193,7 @@ def main():
                      'rol': 'primaria' if suffix == SUFFIXES[1] else 'control_cruzado_o_contexto'}
                     for suffix, path in documents.items()] + external_sources,
         'identidad_evidencia': title, 'valores_plantilla': values,
-        'indicadores': sections, 'calculos': aggregates,
+        'indicadores': sections, 'calculos': aggregates, 'periodos_evaluacion': periods,
         'evidencia_documental': {documents[suffix].name: blocks for suffix, blocks in evidence.items()},
         'validaciones': validations,
     }

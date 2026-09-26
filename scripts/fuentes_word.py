@@ -12,7 +12,9 @@ CT = '{http://schemas.openxmlformats.org/package/2006/content-types}'
 FONTS = [('Archivo', 'Archivo-Regular.ttf', 'embedRegular'),
          ('Archivo Medium', 'Archivo-Medium.ttf', 'embedRegular'),
          ('Archivo Light', 'Archivo-Light.ttf', 'embedRegular'),
-         ('Archivo Light', 'Archivo-LightItalic.ttf', 'embedItalic')]
+         ('Archivo Light', 'Archivo-LightItalic.ttf', 'embedItalic'),
+         ('Archivo', 'Archivo-Bold.ttf', 'embedBold'),
+         ('Archivo Medium', 'Archivo-Bold.ttf', 'embedBold')]
 
 
 def incrustar(files):

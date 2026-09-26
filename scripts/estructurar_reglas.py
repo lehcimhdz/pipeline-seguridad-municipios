@@ -16,11 +16,13 @@ def construir():
     if any(sorted(c['puntaje'] for c in f['criterios']) != [1, 2, 3, 4, 5] for f in historical['fichas']):
         raise ValueError('Se requieren los cinco criterios en cada ficha.')
     result = deepcopy(historical)
-    result['version'] = '3.0'
+    result['version'] = '3.1'
     result['fuente_historica'] = historical['fuente']
     result['fuente'] = {'archivo': str(SOURCE.relative_to(ROOT)), 'sha256': sha256(SOURCE)}
-    result['alcance'] = 'Metodología histórica de seguridad preservada. El machote rzg aporta instrucciones editoriales y de investigación, no nuevos umbrales.'
+    result['alcance'] = 'Criterios históricos conservados; último periodo común de dos años consecutivos conforme al machote.'
     result['investigacion_modifica_puntajes'] = False
+    result['periodo_reciente'] = {'criterio': 'dos_anios_consecutivos', 'anclaje': 'maximo_anio_municipal_documental',
+        'faltantes': 'null; no sustituir un año ausente por una observación anterior'}
     return result
 
 
