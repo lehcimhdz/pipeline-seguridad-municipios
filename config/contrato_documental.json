@@ -1,0 +1,73 @@
+{
+  "version": "2.0",
+  "alcance": "seguridad",
+  "marcador": "{snake_case}",
+  "plantillas": {
+    "medicion": {
+      "archivo": "templates/seguridad_medicion.docx",
+      "sha256": "f4cf70ed6a92b078aa0dba863d2b7abde33e11584ac20b5a6fce8dc3a31c5bb9",
+      "origen": "templates/Machote general medicion version final.docx",
+      "origen_sha256": "6404e0eed69c2562259787af065dddce4b004147923e0da32f4f30ecabc6f159"
+    },
+    "anexo": {
+      "archivo": "templates/seguridad_anexo.docx",
+      "sha256": "52d682480dd82046366f7357950b6f2cade8350c40b580638e4af7d671b9c267",
+      "origen": "templates/Machote general anexos version final.docx",
+      "origen_sha256": "5ffb4b9be704e6310cd09e68eb90d3c2d44af9a7394af4aeaf1d5adb71da276b"
+    }
+  },
+  "diccionario": {
+    "archivo": "diccionario_datos_diagnostico_seguridad_municipal.json",
+    "sha256": "dcc63da0dc6a0395621ca4e537220751e8b08ba9252e07f12c951309d1781cc4"
+  },
+  "reglas": {
+    "archivo": "reglas_calificacion.json",
+    "sha256": "1019c713ecf3a953ea03402036a152452c823217d58c7ec193f70ecbc8c91b68"
+  },
+  "formato": {
+    "archivo": "config/formato_editorial.json",
+    "sha256": "a3e4cfed6102da2dc3f2779e681a4505be4c804bd71be7eaeea450e25593f081"
+  },
+  "tipografias": [
+    {
+      "archivo": "assets/fonts/Archivo-Regular.ttf",
+      "sha256": "59fbfd8a9bb41301bfe950e7b097fd42d52af224a07761e2c1b2c959a4c9cf9a"
+    },
+    {
+      "archivo": "assets/fonts/Archivo-Medium.ttf",
+      "sha256": "6d42123d7954e72600b2e29284a9c8c95cddb4372b21cd3d2a5e8cd4f231f36b"
+    },
+    {
+      "archivo": "assets/fonts/Archivo-Light.ttf",
+      "sha256": "950fc47e639af87cf403aa6617bffd72bd9cbfdfdacdc14141b374e059586892"
+    },
+    {
+      "archivo": "assets/fonts/Archivo-LightItalic.ttf",
+      "sha256": "1cd2e59510f36ba11015e6efc6e5f08e0506dfea7a59056f0a495e673992f39f"
+    }
+  ],
+  "orden_indicadores": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "correcciones": [
+    "Medición: eliminar duplicado de personal e incorporar Certificado Único Policial como indicador 7.",
+    "Mantener EXCELENTE en la metodología; IDEAL del catálogo general no redefine umbrales."
+  ]
+}

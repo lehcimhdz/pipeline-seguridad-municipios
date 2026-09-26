@@ -73,12 +73,37 @@ def componer(result, dictionary, rules):
                      'ultimo_periodo': puntaje(evaluations['ultimo_periodo']['puntaje']),
                      'nota': ' '.join(notes)})
     grades = {p: result['calculos'][p]['calificacion_final'] or 'PENDIENTE' for p in PERIODOS}
-    active = ['municipio', 'estado', 'año_inicial', 'año_final', 'resumen_general', 'resumen_ultimo_periodo'] + [a['variable'] for a in analyses]
+    values.update(calificacion_general=grades['general'], calificacion_ultimo_periodo=grades['ultimo_periodo'])
+    for section, analysis in zip(sections, analyses):
+        number = section['numero']
+        tables = [{'titulo': f"Datos {table['ambito']} — PAQUETE SEGURIDAD, tabla {table['tabla']}",
+                   'ambito': table['ambito'], 'tabla_fuente': table['tabla'], 'filas': table['filas']}
+                  for table in section['tablas']]
+        values[f'tablas_indicador_{number:02d}'] = tables
+        for scope, label in [('municipal', 'municipales'), ('estatal', 'estatales')]:
+            values[f'tablas_{label}_indicador_{number:02d}'] = [t for t in tables if t['ambito'] == scope]
+        values[f'cierre_indicador_{number:02d}'] = analysis['cierre']
+        scores = [section['evaluaciones'][period]['puntaje'] for period in PERIODOS]
+        values[f'graficas_indicador_{number:02d}'] = ([{
+            'tipo': 'puntajes', 'titulo': f"Indicador {number:02d}: puntajes calculados",
+            'categorias': list(PERIODOS.values()), 'valores': scores,
+            'fuente': 'Cálculo interno a partir de PAQUETE SEGURIDAD; escala 1–5.'
+        }] if any(score is not None for score in scores) else [])
+    values['tabla_calificaciones'] = [{'titulo': 'Calificaciones calculadas por indicador',
+        'filas': [['Indicador', 'General', 'Último periodo']] +
+                 [[f"{s['numero']}. {s['nombre']}", *[puntaje(s['evaluaciones'][p]['puntaje']) for p in PERIODOS]]
+                  for s in sections]}]
+    sources = result.get('fuentes', [])
+    values['bibliografia'] = '\n\n'.join(
+        f"{source.get('archivo') or source.get('nombre') or source.get('tipo', 'Fuente externa')}. "
+        f"SHA-256: {source['sha256']}." if source.get('sha256') else str(source.get('nombre', 'Fuente externa declarada'))
+        for source in sources) or 'Referencias documentales registradas en el JSON fuente.'
+    active = list(dictionary['variables_documento'])
     result['contenido_word'] = {
-        'version': '1.0', 'perfil': 'diagnostico_desde_evidencia',
+        'version': '2.0', 'perfil': 'seguridad_v2',
         'titulo': title,
         'aviso_borrador': 'BORRADOR DE REVISIÓN — evaluación pendiente de validación; no es un diagnóstico final.',
-        'periodo': f"Periodo documental: {values['año_inicial']}–{values['año_final']}. Los años se conservan como etiquetas de las tablas fuente.",
+        'periodo': f"Periodo documental: {values.get('año_inicial', 'pendiente')}–{values.get('año_final', 'pendiente')}. Los años se conservan como etiquetas de las tablas fuente.",
         'calificaciones': grades, 'hoja_computo': rows,
         'promedios_dimension': dimension_values,
         'promedios_generales': {p: result['calculos'][p].get('promedio_tres_dimensiones') for p in PERIODOS},
@@ -87,7 +112,7 @@ def componer(result, dictionary, rules):
         'analisis': analyses,
         'variables_activas': active,
         'variables_no_aplicables': sorted(set(dictionary['variables_documento']) - set(active)),
-        'decision_editorial': 'Se usan los resúmenes y análisis específicos. Se excluyen guía de captura, textos alternativos genéricos, productos de gobierno/electoral y bancos de fuentes sugeridas; se conserva el Anexo 1 metodológico. Esta selección no resuelve sus verificaciones ni acredita vigencia externa.',
+        'decision_editorial': 'Sólo SEGURIDAD: medición y anexo. Análisis, gráficas de puntajes y tablas tipadas; metodología histórica independiente. La revisión humana sigue siendo obligatoria.',
     }
     # Quitar únicamente los bloqueos técnicos que esta composición sí resuelve.
     result['validaciones'] = [v for v in result['validaciones']

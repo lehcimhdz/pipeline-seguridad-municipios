@@ -1,371 +1,225 @@
-# Especificación del pipeline de seguridad municipal
+# Pipeline de seguridad municipal · contrato v2
 
-## Propósito
+## Alcance y fuentes
 
-Para un municipio, el pipeline recibe cuatro documentos Word, extrae evidencia
-para los 18 indicadores de seguridad, construye un JSON trazable con base en
-diccionario_datos_diagnostico_seguridad_municipal.json y genera el diagnóstico
-terminado desde templates/Machote_seguridad_general_con_calificacion.docx.
-
-El diccionario y el machote son activos de referencia: no se sobrescriben al
-procesar un municipio.
-
-## Entradas
-
-Los cuatro archivos viven en input/word/ y comparten exactamente el mismo
-prefijo de municipio:
+Se llena exclusivamente SEGURIDAD. Las entradas siguen siendo los cuatro DOCX
+en `input/word/`, con el mismo prefijo municipal:
 
     {nombre_municipio} Anexo.docx
     {nombre_municipio} PAQUETE SEGURIDAD.docx
     {nombre_municipio} PAQUETE GOBIERNO ABIERTO Y BUEN GOBIERNO.docx
     {nombre_municipio} PAQUETE DESARROLLO URBANO SOSTENIBLE Y DERECHOS HUMANOS CONEXOS.docx
 
-La carpeta de entrada cambia en cada ejecución. El nombre del municipio se toma
-del prefijo común; el estado se extrae del contenido, nunca se infiere del
-nombre de archivo.
+La carpeta es cambiante. El prefijo identifica el municipio y el contenido del
+Anexo confirma identidad y estado. Se exige un archivo por sufijo; las cuatro
+fuentes quedan identificadas con SHA-256 en el JSON. PAQUETE SEGURIDAD es la
+fuente primaria de los 18 indicadores; el Anexo sirve de control cruzado. Los
+otros dos paquetes aportan evidencia contextual, sin sustituir una observación
+de seguridad. No se inventan datos para resolver discrepancias o faltantes.
 
-Antes de extraer, el agente debe detenerse con un error claro si falta un
-archivo, existe más de un archivo para alguno de los cuatro sufijos, los
-prefijos no coinciden o un archivo no es un DOCX legible.
+## Machotes y migración
 
-### Prioridad de fuentes
+Los machotes generales recibidos son:
 
-| Fuente | Uso en el pipeline |
-| --- | --- |
-| PAQUETE SEGURIDAD | Fuente primaria para los 18 indicadores, sus series, calificaciones y comparaciones. |
-| Anexo | Control cruzado de identidad municipal, periodo, calificaciones y resultados resumidos. |
-| PAQUETE DESARROLLO URBANO… | Contexto para riesgos, desastres o protección civil; no sustituye un dato del paquete de seguridad. |
-| PAQUETE GOBIERNO ABIERTO… | Contexto institucional; no sustituye un indicador de seguridad. |
+- `templates/Machote general medicion version final.docx`.
+- `templates/Machote general anexos version final.docx`.
 
-Cuando haya una discrepancia, se conserva la evidencia de ambos documentos, se
-prefiere el PAQUETE SEGURIDAD para el dato del indicador y se marca el caso
-para revisión. El agente no debe inventar un valor para resolverla.
+La migración normaliza sólo sus capítulos SEGURIDAD y deriva las bases
+operativas `templates/seguridad_medicion.docx` y `templates/seguridad_anexo.docx`.
+Las bases contienen portada, logo original de InstitutionWorks y SEGURIDAD.
+El resto de los ejes de los originales se conserva. La plataforma electoral
+queda fuera del pipeline.
 
-## Flujo
+La sección original de medición duplicaba el indicador de personal y omitía
+Certificado Único Policial. Se corrige usando el catálogo de los 18 indicadores:
+personal es el 4, evaluaciones el 5, instituto el 6 y CUP el 7. La corrección
+se registra en el contrato. El calificativo IDEAL de la tabla general no
+redefine la categoría EXCELENTE ni los umbrales de la metodología de seguridad.
 
-El diagrama editable para draw.io está en [flujo_pipeline.drawio](flujo_pipeline.drawio).
+Tras recibir una nueva revisión de los machotes generales:
 
-    input/word (4 DOCX)
-            |
-            +-- 1. Validar conjunto y detectar municipio
-            +-- 2. Extraer párrafos, tablas, encabezados y evidencia
-            +-- 3. Normalizar y calcular indicadores/calificaciones
-            +-- 4. Validar contra el diccionario y la evidencia
-            +-- 5. Escribir JSON trazable
-            +-- 6. Componer y renderizar el Word final
-                     |
-                     +-- output/json/{municipio}_diagnostico_seguridad_municipal_{corrida}.json
-                     +-- output/word/{municipio}_diagnostico_seguridad_municipal_{modo}.docx
-                     +-- output/json/{municipio}_diagnostico_seguridad_municipal_{modo}_renderizado.json
+    python3 scripts/migrar_machotes_v2.py
+    python3 scripts/validar_plantilla.py
 
-### 1. Extracción
+La migración actualiza ambas bases, el diccionario, las reglas y los hashes del
+contrato. `normalizar_plantilla.py` y `contextualizar_variables.py` delegan en
+ella por compatibilidad. Se debe revisar el diff editorial y metodológico antes
+de aceptar una nueva versión. El pipeline de un municipio nunca modifica estos
+activos de referencia.
 
-El agente debe conservar, para cada dato usado, la fuente, el indicador, una
-referencia localizable (página, tabla, encabezado o fragmento) y el texto o
-valor original. Debe leer tablas además de párrafos. Si una gráfica o imagen
-contiene el único dato disponible, se registra como evidencia visual y se
-marca para revisión en lugar de estimar su valor.
+## Contrato y variables
 
-### 2. Normalización y cálculo
+[config/contrato_documental.json](config/contrato_documental.json) registra
+versiones, alcance, rutas, orden de indicadores y hashes de las bases,
+diccionario, reglas, formato y fuentes. El JSON municipal incorpora esas
+huellas. El renderizador rechaza resultados de versiones anteriores o activos
+que cambien sin actualizar el contrato.
 
-Se aplican las reglas ya definidas en el diccionario:
+Los marcadores usan llaves simples: `{snake_case}`, con nombres ASCII y sin
+espacios. El diccionario declara el tipo y las apariciones por documento:
+116 variables y 137 apariciones entre medición y anexo. Se validan sobre el texto
+de los párrafos, aun cuando Word fragmente un marcador en varios segmentos.
 
-- 18 indicadores y 3 dimensiones.
-- Calificación general y del último periodo.
-- Tratamiento de datos faltantes, candados y ajustes.
-- Variables narrativas sólo cuando están respaldadas por evidencia.
+| Marcador | Tipo JSON | Uso |
+| --- | --- | --- |
+| `{municipio}`, `{estado}` | string | Identidad de ambos documentos. |
+| `{calificacion_general}`, `{calificacion_ultimo_periodo}` | string | Categorías calculadas; PENDIENTE en borrador incompleto. |
+| `{resumen_general}`, `{resumen_ultimo_periodo}` | string | Párrafos descriptivos por periodo. |
+| `{analisis_indicador_01}`…`{analisis_indicador_18}` | string | Análisis específicos, con criterio, cobertura y evidencia. |
+| `{cierre_indicador_01}`…`{cierre_indicador_18}` | string | Párrafo que cierra el análisis y las visualizaciones. |
+| `{graficas_indicador_01}`…`{graficas_indicador_18}` | array | Especificaciones de gráficas nativas Word. |
+| `{tablas_indicador_01}`…`{tablas_indicador_18}` | array | Tablas originales de ambos ámbitos en medición. |
+| `{tablas_estatales_indicador_01}`…`{tablas_estatales_indicador_18}` | array | Tablas estatales del anexo. |
+| `{tablas_municipales_indicador_01}`…`{tablas_municipales_indicador_18}` | array | Tablas municipales del anexo. |
+| `{tabla_calificaciones}` | array | Puntajes de los 18 indicadores y ambos periodos, en el anexo. |
+| `{bibliografia}` | string | Identificación de las fuentes efectivamente utilizadas. |
 
-Las elecciones de texto, por ejemplo comparacion_con_periodo_completo, deben
-tomar uno de los valores permitidos en el diccionario. Si no hay evidencia
-suficiente, el campo queda sin resolver y el estado de la ejecución es
-requiere_revision; no se genera un Word final como si estuviera validado.
+Las instrucciones `[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]` se
+descomponen en párrafos separados con análisis, gráficas, tablas y cierre del
+indicador correspondiente. No se reutiliza una variable genérica `{analisis}`
+en 18 contextos diferentes. Los saltos reales de párrafo se almacenan como
+`\n\n` en el JSON; no se inserta la cadena literal `/n`.
 
-### 3. JSON de salida
+Las tablas son listas de objetos con `titulo`, `filas`, `ambito` y
+`tabla_fuente`. El renderizador comprueba que sus filas y ámbitos coincidan con
+la evidencia. Las gráficas contienen `tipo: puntajes`, `titulo`, `categorias`,
+`valores` y `fuente`; sus valores deben coincidir con las evaluaciones. Un valor
+null se omite de la gráfica y se explica como pendiente, nunca como cero. Si
+ningún periodo tiene puntaje, la lista de gráficas está vacía. Esta versión no
+genera automáticamente series de datos brutos: categorías, unidades y campos
+comparables deben definirse antes de añadir otro tipo de gráfica.
 
-El archivo en output/json/ es una instancia municipal del contrato, no una
-modificación del diccionario base. Debe incluir, como mínimo:
+## Flujo y salidas
 
-    {
-      "version": "1.0",
-      "municipio": "{nombre_municipio}",
-      "estado_ejecucion": "validado",
-      "fuentes": [
-        {
-          "archivo": "{nombre_municipio} PAQUETE SEGURIDAD.docx",
-          "sha256": "..."
-        }
-      ],
-      "valores_plantilla": {
-        "municipio": "{nombre_municipio}",
-        "año_inicial": 2014,
-        "comparacion_con_periodo_completo": "igual"
-      },
-      "indicadores": {},
-      "calculos": {},
-      "evidencia": {},
-      "validaciones": []
-    }
+El diagrama editable está en [flujo_pipeline.drawio](flujo_pipeline.drawio).
 
-valores_plantilla contiene una clave por cada una de las 62 variables de
-variables_documento; se usa directamente para sustituir {{ clave_json }}. Los
-objetos indicadores, calculos, evidencia y validaciones conservan la
-trazabilidad necesaria para auditar esas decisiones.
+    4 Word → validar identidad → extraer evidencia → normalizar y calificar
+           → componer variables → JSON municipal → medición + anexo
+           → auditar formato y amarillo → recibos → limpiar salidas anteriores
 
-Antes de guardarlo, el pipeline valida tipos, opciones permitidas, campos
-obligatorios, las 120 apariciones del machote y la ausencia de valores
-inventados. El JSON se escribe de forma atómica para no dejar resultados
-parciales.
+    output/json/{municipio}_diagnostico_seguridad_municipal_{corrida}.json
+    output/word/{municipio}_seguridad_medicion_{modo}.docx
+    output/word/{municipio}_seguridad_anexo_{modo}.docx
+    output/json/{municipio}_seguridad_medicion_{modo}_renderizado.json
+    output/json/{municipio}_seguridad_anexo_{modo}_renderizado.json
 
-### 4. Word de salida
+La composición queda registrada en `contenido_word`, perfil `seguridad_v2`.
+Incluye la hoja de cómputo y promedios auditables en JSON, sin reintroducir las
+antiguas fichas como contenido editorial de los nuevos documentos.
 
-El renderizador crea una copia del machote y sólo la copia se guarda en
-output/word/. Sustituye los marcadores {{ clave_json }} usando
-valores_plantilla. Todo texto, cifra, tabla o bloque que se incorpore desde el
-JSON debe conservar el formato tipográfico circundante y llevar resaltado
-amarillo. El resaltado identifica con claridad el contenido generado para su
-revisión editorial; no se aplica al texto preexistente del machote.
+Después de publicar las salidas solicitadas, se conservan únicamente el JSON
+fuente vigente, los Word y sus recibos. Se eliminan permanentemente los JSON y
+DOCX previos de esas carpetas, que son destinos exclusivos del pipeline. Un
+error antes de completar el renderizado impide la limpieza. Las publicaciones
+individuales son atómicas; el conjunto de dos Word y dos recibos no es una
+transacción indivisible: si falla el segundo documento, se conserva el JSON y
+se informa el error. Los bloqueos temporales `~$` se omiten y Word los administra.
+No se admiten ejecuciones simultáneas sobre la misma carpeta de salida.
 
-El machote actual también contiene guía de calificación, textos alternativos e
-instrucciones editoriales entre corchetes. Por ello el renderizado final tiene
-dos partes:
+Los recibos vinculan JSON, Word, modo, perfil y contrato mediante SHA-256 y
+registran la auditoría de las inserciones. Las salidas y entradas municipales
+están ignoradas por Git.
 
-1. Sustituir variables y conservar formato.
-2. Seleccionar únicamente los textos que correspondan a la calificación y
-   evidencia del municipio; eliminar instrucciones editoriales y alternativas
-   no elegidas.
+## Manual editorial
 
-Un documento no se considera final mientras contenga un marcador {{ ... }},
-una instrucción [borrar al finalizar], una nota [Verificar ...] sin resolver,
-una variante incompatible con los datos o contenido incorporado desde el JSON
-sin resaltado amarillo. Esas condiciones deben quedar en validaciones y
-bloquear la salida final.
+[config/formato_editorial.json](config/formato_editorial.json) define los dos
+perfiles. Archivo Regular corresponde a la familia `Archivo`, estilo regular.
+Los cuatro TTF oficiales se incluyen con licencia OFL en `assets/fonts/` y se
+incrustan completos en los DOCX. Un visor que ignore incrustaciones necesita
+tener instaladas las fuentes para reproducir el diseño exactamente.
 
-El modo `borrador` permite revisar resultados incompletos en un Word claramente
-identificado. Se escribe «Pendiente» para un puntaje no calculado y se conserva
-la explicación de su causa. Esta salida no cambia el estado `requiere_revision`
-ni autoriza una calificación global parcial.
+| Elemento | Medición: fuente / tamaño / interlineado | Anexo: fuente / tamaño / interlineado |
+| --- | --- | --- |
+| Título principal | Archivo Regular · 26 / 40 pt | Archivo Regular · 30 / 36 pt |
+| Capítulo o rubro | Archivo Light · 24 / 14 pt | Archivo Light · 24 / 14 pt |
+| Subcapítulo o indicador | Archivo Light · 24 / 14 pt | Archivo Light · 18 / 16 pt |
+| Cuerpo | Archivo Light · 12 / 16 pt | Archivo Light · 9 / 10 pt |
+| Calificación | Archivo Light · 9 / 10 pt | Archivo Light · 9 / 10 pt |
+| Encabezado de tabla | Archivo Medium · 12 / 14 pt | Archivo Medium · 11 / 14 pt |
+| Contenido de tabla | Archivo Light · 11 / 14 pt | Archivo Light · 9 / 10 pt |
+| Tabla de años y porcentajes | Formato de tabla de medición | Medium/Light · 12 / 14 pt |
+| Notas | Archivo Light · 9 / 11 pt | Archivo Light · 9 / 10 pt |
+| Bibliografía | Archivo Light/Italic · 12 / 16 pt | Archivo Light/Italic · 12 / 16 pt |
 
-### Perfil editorial implementado
+Las portadas centran título e identidad; el logo original se coloca centrado en
+la parte baja, con 5 cm de ancho y altura proporcional. Capítulos y categorías
+usan altas; cuerpo y subcapítulos conservan altas y bajas. El contenido usa una
+columna, cero separación entre párrafos y sangría de 5 mm salvo el párrafo
+inicial. Las notas se alinean a la izquierda, las tablas se centran y las
+calificaciones aplican el color de su categoría.
 
-El perfil `diagnostico_desde_evidencia` utiliza los marcadores de resumen y
-los 18 análisis específicos para componer prosa descriptiva a partir de los
-resultados. Los bloques genéricos de alternativas se descartan en favor de
-esa prosa. La selección queda registrada en `contenido_word.decision_editorial`.
+Los interlineados inferiores al tamaño de la fuente en títulos se interpretan
+como mínimos (por ejemplo, título 24 pt con mínimo de 14 pt) para evitar
+superposición y recorte. Cuerpo, notas y tablas mantienen el interlineado fijo
+del manual. Las gráficas tienen espacio propio que puede crecer con el objeto.
+Sus títulos y ejes usan Archivo Medium 12 pt, categorías Medium 9 pt y datos
+Archivo Light 9 pt. Los valores pendientes no aparecen como barras de altura cero.
 
-La copia de salida incluye:
+Cada inserción textual desde JSON lleva estilo `ContenidoJSON`, resaltado
+`yellow` y sombreado `FFFF00`, incluidos encabezados y celdas de tablas. Las
+gráficas usan texto DrawingML y fondo amarillo para marcar el objeto completo. El contenido fijo del machote
+conserva su formato. Se reabre el DOCX para comprobar marcadores pendientes,
+fuentes editoriales y resaltado.
 
-- Identidad y periodo documental, calificaciones general y reciente.
-- Resumen de ambos periodos y hoja de cómputo completa.
-- Las 18 secciones del documento base, sus benchmarks, puntajes y análisis.
-- Tablas municipales y estatales originales, con ámbito y número de tabla.
-- Pendientes de revisión en el borrador, el Anexo 1 metodológico y el Anexo 2
-  en su sección apaisada original.
-
-Se excluyen la guía de captura, textos alternativos genéricos, variantes de
-producto de gobierno/electoral y bancos de fuentes sugeridas. Los Anexos 1 y 2
-se conservan: el segundo mantiene su sección apaisada y tabla de referencias.
-Esta selección editorial no valida referencias ni resuelve las notas que
-contienen. La revisión de criterios y referencias sigue siendo obligatoria antes
-del cierre.
-
-`valores_plantilla` conserva las 62 claves del contrato: las variantes
-descartadas pueden quedar en null y se enumeran en
-`contenido_word.variables_no_aplicables`. Sólo las variables activas bloquean
-el renderizado final. Los resúmenes y análisis automáticos describen puntajes,
-criterios y evidencia; no deducen causalidad ni vigencia jurídica.
-
-Se conserva la tipografía y el énfasis del contexto en las sustituciones. Los
-párrafos compuestos y las tablas ajustan espaciado y alineación en la copia
-para facilitar la lectura. El renderer soporta marcadores fragmentados entre
-segmentos de Word, escapa caracteres XML y resalta todo texto nuevo procedente
-del JSON, incluidas las celdas y sus encabezados. Los segmentos generados usan
-el estilo `ContenidoJSON`, resaltado directo `yellow` y sombreado `FFFF00`.
-La doble marca mantiene el amarillo visible tanto en Word como en visores que
-interpretan el resaltado de manera distinta. Una reapertura del DOCX comprueba
-ambos atributos y la ausencia de marcadores pendientes.
-
-## Controles operativos
-
-- El proceso debe ejecutarse para un solo municipio por corrida.
-- El Word vigente usa el nombre estable
-  `{municipio}_diagnostico_seguridad_municipal_{modo}.docx`; una publicación
-  exitosa lo reemplaza atómicamente y la limpieza elimina las salidas previas.
-- Cada archivo de entrada se identifica con SHA-256 en el JSON de salida.
-- Los cambios al diccionario o al machote se validan con el comando siguiente:
-
-      python3 scripts/validar_plantilla.py
-
-- La revisión humana es obligatoria cuando hay conflicto de fuentes, datos
-  faltantes relevantes, evidencia sólo visual, ajustes de puntuación o notas
-  de verificación pendientes.
-
-## Ejecución disponible
-
-El comando de prevalidación y extracción inicial recibe la carpeta input/word/
-por defecto:
-
-    python3 -m pip install -r requirements.txt
+## Ejecución y revisión
 
     python3 scripts/ejecutar_pipeline.py
-
-Valida los cuatro DOCX, identifica municipio y estado, registra las huellas
-SHA-256 y conserva párrafos y tablas con coordenadas de bloque, tabla y fila.
-Extrae los 18 indicadores, compara sus tablas con el Anexo y calcula por
-separado el periodo general y el reciente en los casos implementados.
-
-Cada corrida identifica el JSON de extracción con un identificador de ejecución
-para su trazabilidad, pero publica un Word y recibo de nombre estable para el
-municipio y modo. Los años se extraen de las tablas y se registra la cobertura
-de cada indicador. Las calificaciones reportadas en la fuente se conservan
-separadas de las calculadas. La ausencia de una calificación reciente en la
-fuente no constituye un bloqueo: se calcula a partir de los datos cuando el
-criterio lo permite.
-
-El JSON incluye las tablas originales de los cuatro documentos para auditar
-la extracción. Todavía no extrae contenido exclusivo de imágenes o gráficas.
-
-El comando genera por defecto un Word de revisión (`--word borrador`).
-`--word ninguno` conserva el uso de extracción y JSON sin cargar el renderizador.
-Las corridas de extracción mantienen `requiere_revision` hasta resolver las
-revisiones de evidencia, cobertura temporal y composición editorial.
-
-Para renderizar nuevamente un JSON compuesto, sin repetir la extracción:
-
     python3 scripts/renderizar_word.py output/json/{archivo}.json --modo borrador
 
-Para emitir la versión final desde un JSON revisado:
+El pipeline genera ambos documentos por defecto. El renderizador independiente
+permite `--documento medicion`, `--documento anexo` o `--documento ambos`.
+Cada comando conserva sólo las salidas solicitadas de esa ejecución.
+`--word ninguno` produce sólo JSON y elimina los Word y recibos anteriores.
 
-    python3 scripts/renderizar_word.py output/json/{archivo_validado}.json --modo final
-
-El cierre requiere `estado_ejecucion: validado`, ausencia de validaciones de
-nivel `bloqueante` o `revision`, 18 puntajes por periodo, ambas calificaciones
-completas y variables activas resueltas. El renderizador recalcula la agregación
-y contrasta la hoja de cómputo y los promedios; también exige que los hashes de
-plantilla, diccionario y reglas correspondan al contrato actual. Cambiar sólo
-el estado no habilita una versión final con puntajes faltantes.
-
-La revisión debe corregir o resolver cada hallazgo en una nueva copia del JSON,
-con evidencia y justificación conservadas; quitar una validación sin resolver
-su causa no constituye una revisión. El sistema no verifica automáticamente
-la suficiencia de esa justificación humana. Los ajustes metodológicos especiales
-requieren extender primero el motor y su auditoría; el renderer no acepta
-agregaciones que difieran del cálculo vigente.
-
-Cada ejecución exitosa publica un único conjunto vigente: JSON fuente, recibo
-`*_renderizado.json` y DOCX. Al terminar, elimina los JSON y Word generados por
-corridas anteriores de `output/json/` y `output/word/`; por tanto esas carpetas
-no son un archivo histórico. No sobrescribe la plantilla ni modifica el JSON
-después de calcular su hash. Los bloqueos temporales `~$` de Word se omiten de
-la limpieza porque Word los administra mientras el documento está abierto.
-El recibo registra el hash del JSON fuente exacto, el del Word, modo, perfil,
-plantilla y auditoría de resaltado. Los JSON de versiones anteriores sin
-`contenido_word` deben regenerarse con el pipeline actual.
-
-## Reglas de calificación versionadas
-
-[reglas_calificacion.json](reglas_calificacion.json) contiene las 18 fichas y
-los 90 criterios de puntuación transcritos del Anexo 1, con coordenadas en el
-DOCX, datos requeridos, precauciones y hash del documento fuente. Estas reglas
-reproducen la metodología interna; no acreditan vigencia normativa externa.
-
-Para regenerarlo tras una revisión del documento base:
-
-    python3 scripts/estructurar_reglas.py
-
-El motor de scripts/calificar.py interpreta las condiciones estructuradas
-del JSON. Automatiza existencia (1, 6, 11, 12, 13 y 16), cursos (2),
-temas de protección civil (3), porcentajes de evaluación y CUP (5 y 7),
-temas de capacitación policial (10) y llamadas procedentes (15). Las
-dependencias 3→2, 6→10 y 12→11 se aplican antes de agregar resultados.
-
-Las equivalencias están en config/normalizaciones.json: temas núcleo,
-prendas básicas, categorías de equipamiento y frecuencias. Cada patrón puede
-revisarse y cambiarse sin editar el motor. Para preservar evidencia, el JSON
-de salida registra temas o comparaciones que llevaron al puntaje.
-
-La agregación exige los 18 puntajes: promedia por dimensión y después entre
-las tres dimensiones, aplicando los candados generales 1–4. Los ajustes por
-dato dudoso son decisiones del evaluador y no se aplican automáticamente.
-La composición descriptiva ya está implementada. La explicación causal de
-divergencias entre periodos continúa siendo una revisión editorial respaldada
-por evidencia.
-
-Criterios operativos explícitos de esta implementación:
-
-- Se conserva precisión decimal interna y se clasifica el promedio agregado
-  con redondeo ROUND_HALF_UP a dos decimales. Es una concreción técnica de la
-  propuesta de redondeo del diccionario y debe constar al revisar el método.
-- Los rangos individuales se interpretan literalmente. No se rellenan huecos
-  entre umbrales ni se decide un puntaje cuando ninguna condición coincide.
-- En los indicadores binarios, existencia anterior con ausencia en las dos
-  observaciones recientes aplica el criterio 2 antes del de intermitencia.
-- Una celda vacía requiere clasificar la causa; no equivale automáticamente
-  a cero, falta de respuesta o inexistencia de la variable.
-- Se seleccionan las dos etiquetas temporales más recientes observadas sin
-  saltar vacíos. Debe confirmarse la relación entre edición y año de referencia,
-  así como la cobertura de las ediciones ausentes, antes de cerrar el informe.
-
-Pruebas reproducibles de umbrales, faltantes, dependencias, fuentes externas
-y candados:
+El borrador indica `requiere_revision`, explica faltantes y muestra PENDIENTE
+sin asignar una calificación global parcial. Para `--modo final`, se exige
+`estado_ejecucion: validado`, los 18 puntajes en ambos periodos, agregaciones
+coherentes, todas las variables requeridas y ausencia de validaciones
+bloqueantes o de revisión. Cambiar sólo el estado no basta. Quitar una
+validación sin resolver su evidencia no constituye revisión; el sistema no
+acredita automáticamente la suficiencia de una justificación humana.
 
     python3 -m unittest discover -s tests -v
 
-## Fuentes externas y decisiones de revisión
+## Reglas de calificación y fuentes externas
 
-Los indicadores 4 y 14 requieren población; el 18 requiere incidencia
-delictiva. Sus contratos se encuentran en config/fuentes_externas.json. La
-población puede provenir de un CSV trazable de CONAPO o, de forma explícita,
-de la API oficial del Banco de Indicadores de INEGI. La incidencia delictiva
-continúa teniendo como fuente primaria al SESNSP.
+Los nuevos machotes no contienen fichas ni criterios numéricos. La transcripción
+histórica se conserva en `config/metodologia_seguridad.json`; sus coordenadas
+remiten al antiguo documento indicado en `fuente_historica`, disponible en el
+historial Git. `reglas_calificacion.json` registra el hash de esa transcripción.
+Se mantienen 18 fichas, 90 criterios, tres dimensiones, ambos periodos, umbrales,
+dependencias y candados. Su preservación no acredita vigencia normativa externa.
 
-Para CSV, se deposita la descarga original normalizada en
-input/datos_externos/ y se pasa en la corrida:
+    python3 scripts/estructurar_reglas.py
+    python3 scripts/migrar_machotes_v2.py
+
+`scripts/calificar.py` calcula existencia, cursos, temas, porcentajes de
+evaluación/CUP y llamadas, usando `config/normalizaciones.json`. Aplica las
+dependencias 3→2, 6→10 y 12→11; no interpola huecos ni confunde una celda vacía
+con ausencia de respuesta municipal. Los ajustes discrecionales requieren
+revisión y una extensión metodológica explícita.
+
+Los indicadores 4 y 14 requieren población; el 18, incidencia delictiva. Los
+contratos externos siguen en `config/fuentes_externas.json`. CSV normalizados
+pueden aportarse desde `input/datos_externos/`:
 
     python3 scripts/ejecutar_pipeline.py \
       --population-csv input/datos_externos/poblacion_municipal.csv \
       --incidence-csv input/datos_externos/incidencia_delictiva_municipal.csv \
       --cve-ent 00 --cve-mun 000
 
-Cada CSV debe tener los campos de su contrato. El JSON final registra
-proveedor, página oficial, ruta local, hash y campos utilizados. Las fuentes
-son CONAPO para población municipal y SESNSP para incidencia delictiva.
-
-### Población mediante la API de INEGI
-
-La alternativa INEGI consulta la serie histórica de `1002000001` (Población
-total) para la clave municipal de cinco dígitos y para su entidad. El token es
-un secreto de entorno, no un parámetro del comando ni un archivo del proyecto:
+La población puede consultarse opcionalmente a INEGI (indicador 1002000001):
 
     export INEGI_TOKEN
-    python3 scripts/ejecutar_pipeline.py \
-      --inegi-population \
-      --cve-ent 00 --cve-mun 000
+    python3 scripts/ejecutar_pipeline.py --inegi-population --cve-ent 00 --cve-mun 000
 
-Cada respuesta original se conserva en `input/datos_externos/`, carpeta
-ignorada por Git. El JSON de salida registra indicador, área geográfica,
-metadatos de serie, fecha, años y SHA-256; la URL se conserva con el token
-redactado. Una corrida rechaza combinar `--inegi-population` y
-`--population-csv`, pues mezclar una serie censal con proyecciones requiere
-una conciliación metodológica documentada.
+El token sólo se lee del entorno, se oculta de la procedencia y nunca se guarda
+en Git. Las respuestas originales quedan en la carpeta ignorada de datos
+externos. No se combinan CSV de población y API en una corrida; sólo se usan
+años publicados sin interpolar. La ejecución con los cuatro Word funciona sin
+token. Las fuentes externas mantienen proveedor, huella y campos usados.
 
-La API puede devolver sólo años censales. El motor usa únicamente años
-publicados por INEGI y no interpola ni proyecta; por tanto, los indicadores 4
-y 14 siguen pendientes cuando faltan años que aparecen en sus tablas fuente.
-
-Las celdas vacías, datos dudosos y excepciones se resuelven sólo mediante el
-archivo JSON descrito en input/revision/README.md. Una decisión debe señalar
-indicador, año, clasificación, justificación y coordenadas de evidencia. Sin
-esa decisión una celda vacía sigue bloqueando el indicador.
-
-## Siguiente paso técnico
-
-Completar los indicadores 4, 14 y 18 al ingresar sus CSV externos; completar
-el 8 y 9 con una decisión explícita sobre cobertura de la dotación e
-inventario; y resolver los vacíos de fallecimientos del 17 mediante revisión.
-No se declara ausente un dato sólo porque su extracción aún no esté implementada.
-
-Después corresponde resolver la revisión de evidencia y referencias para
-cerrar los diagnósticos finales. La composición descriptiva y el renderizador
-con resaltado amarillo ya permiten revisar el flujo completo mediante un
-borrador. Las variables de variantes descartadas no se exigen como campos
-obligatorios del informe final.
+Pueden seguir pendientes 4, 8, 9, 14, 17 y 18 según la evidencia recibida.
+Uniformes/equipo requieren resolver cobertura; fallecimientos vacíos necesitan
+clasificación explícita. Las decisiones humanas siguen el formato de
+`input/revision/README.md`. El cambio de machotes no resuelve esos faltantes.

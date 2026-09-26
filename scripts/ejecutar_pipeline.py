@@ -15,6 +15,7 @@ from datos_externos import fuente, leer_csv, seleccionar, serie, serie_estatal, 
 from inegi import consultar_poblacion, guardar_respuestas
 from componer_documento import componer
 from salidas import limpiar_salidas
+from contrato import huellas
 
 ROOT = Path(__file__).resolve().parents[1]
 SUFFIXES = (' Anexo.docx', ' PAQUETE SEGURIDAD.docx',
@@ -167,10 +168,9 @@ def main():
                         'detalle': 'Los años son etiquetas de las tablas. Confirmar su relación con edición censal y años no observados antes de cerrar el diagnóstico.'})
     aggregates = {period: agregar(results, rules) for period, results in evaluations.items()}
     result = {
-        'version': '1.2', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
+        'version': '2.0', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
         'estado_ejecucion': 'requiere_revision',
-        'contrato': {'diccionario_sha256': sha256(dictionary_path), 'plantilla_sha256': sha256(template),
-                     'reglas_sha256': sha256(rules_path), 'normalizaciones_sha256': sha256(mappings_path),
+        'contrato': {**huellas(), 'normalizaciones_sha256': sha256(mappings_path),
                      'fuentes_externas_sha256': sha256(external_config_path)},
         'fuentes': [{'archivo': path.name, 'sha256': sha256(path),
                      'rol': 'primaria' if suffix == SUFFIXES[1] else 'control_cruzado_o_contexto'}
@@ -184,9 +184,10 @@ def main():
     directory = args.output / 'json'
     directory.mkdir(parents=True, exist_ok=True)
     dest = directory / f'{slug(municipality)}_diagnostico_seguridad_municipal_{run}.json'
-    receipt = directory / f'{dest.stem}_renderizado.json'
+    receipts = {perfil: directory / f'{slug(municipality)}_seguridad_{perfil}_{args.word}_renderizado.json'
+                for perfil in ('medicion', 'anexo')}
     result['salida_word'] = {'modo_solicitado': args.word,
-                            'recibo_renderizado': str(receipt) if args.word != 'ninguno' else None}
+                            'recibos_renderizado': {p: str(path) for p, path in receipts.items()} if args.word != 'ninguno' else {}}
     temporary = dest.with_suffix('.json.tmp')
     try:
         with temporary.open('x', encoding='utf-8') as target:
@@ -201,15 +202,18 @@ def main():
     print('Estado: requiere_revision. Los motivos específicos constan en validaciones.')
     if args.word != 'ninguno':
         from renderizar_word import renderizar, guardar_recibo
+        words = []
         try:
-            report = renderizar(dest, args.output / 'word', args.word)
-            guardar_recibo(report, receipt)
+            for perfil, receipt in receipts.items():
+                report = renderizar(dest, args.output / 'word', args.word, perfil=perfil)
+                guardar_recibo(report, receipt)
+                words.append(Path(report['archivo']))
+                print(f"Word ({perfil}, {args.word}): {report['archivo']}")
+                print(f"Resaltado amarillo verificado: {report['segmentos_json']} segmentos. Recibo: {receipt}")
         except (ValueError, OSError) as error:
             parser.error(f'JSON conservado; no se completó la salida Word: {error}')
-        print(f"Word ({args.word}): {report['archivo']}")
-        print(f"Resaltado amarillo verificado: {report['segmentos_json']} segmentos. Recibo: {receipt}")
         removidos = limpiar_salidas(directory, args.output / 'word', json_actual=dest,
-                                    word_actual=Path(report['archivo']), recibo_actual=receipt)
+                                    words_actuales=words, recibos_actuales=list(receipts.values()))
     else:
         removidos = limpiar_salidas(directory, args.output / 'word', json_actual=dest)
     print(f"Limpieza de salidas: {removidos['json']} JSON y {removidos['word']} Word anteriores eliminados.")

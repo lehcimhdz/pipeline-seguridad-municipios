@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT / 'scripts'))
 from calificar import agregar
 from componer_documento import componer
 from documentos import sha256
+from contrato import huellas
 from renderizar_word import (DICTIONARY, RULES, TEMPLATE, W, STYLE, auditar,
                              parrafo, reemplazar, renderizar, run, texto, validar_resultado)
 
@@ -36,7 +37,7 @@ def ejemplo(pending=True):
     values = {k: None for k in dictionary['variables_documento']}
     values.update(municipio='Municipio de prueba', estado='Entidad de prueba', año_inicial=2020, año_final=2022)
     result = {'municipio': values['municipio'], 'estado': values['estado'], 'estado_ejecucion': 'requiere_revision',
-              'contrato': {'plantilla_sha256': sha256(TEMPLATE), 'diccionario_sha256': sha256(DICTIONARY), 'reglas_sha256': sha256(RULES)},
+              'contrato': huellas(),
               'valores_plantilla': values, 'indicadores': sections,
               'calculos': {p: agregar({s['numero']: s['evaluaciones'][p] for s in sections}, rules)
                           for p in ('general', 'ultimo_periodo')},
@@ -50,11 +51,11 @@ def ejemplo(pending=True):
 class WordTests(unittest.TestCase):
     def test_fragmented_marker_preserves_surrounding_style(self):
         p = ET.Element(W + 'p')
-        for text in ('Antes {{ muni', 'cipio }} después'):
+        for text in ('Antes {muni', 'cipio} después'):
             r = run(text, generated=False)
             ET.SubElement(r.find(W + 'rPr'), W + 'i')
             p.append(r)
-        reemplazar(p, '{{ municipio }}', 'A & B < C')
+        reemplazar(p, '{municipio}', 'A & B < C')
         self.assertEqual(texto(p), 'Antes A & B < C después')
         runs = list(p.iter(W + 'r'))
         self.assertEqual(len(runs), 3)
@@ -68,8 +69,8 @@ class WordTests(unittest.TestCase):
     def test_composition_keeps_missing_scores_and_inactive_variables(self):
         result = ejemplo()
         self.assertIn('4', result['valores_plantilla']['resumen_general'])
-        self.assertIsNone(result['valores_plantilla']['condicion_critica'])
-        self.assertIn('condicion_critica', result['contenido_word']['variables_no_aplicables'])
+        self.assertNotIn('condicion_critica', result['valores_plantilla'])
+        self.assertEqual(result['contenido_word']['variables_no_aplicables'], [])
         self.assertIsNone(result['calculos']['general']['calificacion_final'])
         codes = {v['codigo'] for v in result['validaciones']}
         self.assertNotIn('COMPOSICION_WORD_PENDIENTE', codes)
@@ -84,7 +85,7 @@ class WordTests(unittest.TestCase):
             path.write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')
             report = renderizar(path, Path(directory) / 'word')
             word = Path(report['archivo'])
-            self.assertEqual(word.name, 'municipio_de_prueba_diagnostico_seguridad_municipal_borrador.docx')
+            self.assertEqual(word.name, 'municipio_de_prueba_seguridad_medicion_borrador.docx')
             self.assertEqual(report['json_sha256'], sha256(path))
             self.assertEqual(report['sha256'], sha256(word))
             self.assertTrue(report['resaltado_amarillo_verificado'])
@@ -95,18 +96,16 @@ class WordTests(unittest.TestCase):
                 self.assertIn('Sí & válido < 100', text)
                 self.assertIn('Falta población comparable', text)
                 self.assertNotIn('TEXTOS BASE', text)
-                self.assertNotIn('{{', text)
-                self.assertIn('Anexo 1.', text)
-                self.assertIn('Anexo 2.', text)
+                self.assertNotIn('{', text)
+                self.assertIn('Certificado', text)
                 sections = root.findall('.//' + W + 'sectPr')
                 self.assertEqual(len(sections), 2)
-                self.assertEqual(sections[-1].find(W + 'pgSz').get(W + 'orient'), 'landscape')
                 for r in root.iter(W + 'r'):
                     style = r.find(W + 'rPr/' + W + 'rStyle')
                     if style is not None and style.get(W + 'val') == STYLE:
                         self.assertEqual(r.find(W + 'rPr/' + W + 'highlight').get(W + 'val'), 'yellow')
                         self.assertEqual(r.find(W + 'rPr/' + W + 'shd').get(W + 'fill'), 'FFFF00')
-                        self.assertEqual(r.find(W + 'rPr/' + W + 'rFonts').get(W + 'ascii'), 'Archivo Light')
+                        self.assertIn(r.find(W + 'rPr/' + W + 'rFonts').get(W + 'ascii'), ('Archivo Light', 'Archivo Medium', 'Archivo'))
             again = renderizar(path, word.parent)
             self.assertEqual(report['archivo'], again['archivo'])
             self.assertEqual(again['sha256'], sha256(word))
@@ -165,6 +164,60 @@ class WordTests(unittest.TestCase):
                 archive.writestr('word/document.xml', ET.tostring(p))
             with self.assertRaisesRegex(ValueError, 'sin resaltado'):
                 auditar(path)
+
+    def test_annex_uses_editorial_fonts_and_native_chart_relationships(self):
+        result = ejemplo()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'municipio.json'
+            path.write_text(json.dumps(result), encoding='utf-8')
+            report = renderizar(path, Path(directory) / 'word', perfil='anexo')
+            with zipfile.ZipFile(report['archivo']) as archive:
+                root = ET.fromstring(archive.read('word/document.xml'))
+                self.assertNotIn('DESARROLLO SOCIAL', texto(root))
+                self.assertNotIn('{', texto(root))
+                table = root.find('.//' + W + 'tbl')
+                header = table.find(W + 'tr/' + W + 'tc/' + W + 'p')
+                self.assertEqual(header.find(W + 'r/' + W + 'rPr/' + W + 'rFonts').get(W + 'ascii'), 'Archivo Medium')
+                self.assertEqual(header.find(W + 'r/' + W + 'rPr/' + W + 'sz').get(W + 'val'), '22')
+                self.assertEqual(header.find(W + 'pPr/' + W + 'spacing').get(W + 'line'), '280')
+                self.assertEqual(len([n for n in archive.namelist() if n.endswith('.odttf')]), 4)
+                charts = [n for n in archive.namelist() if n.startswith('word/charts/pipeline_')]
+                self.assertEqual(len(charts), 17)  # El indicador 4 está pendiente en ambos periodos.
+                for name in charts:
+                    graph = ET.fromstring(archive.read(name))
+                    self.assertEqual(graph.find('{http://schemas.openxmlformats.org/drawingml/2006/chart}spPr/'
+                                                '{http://schemas.openxmlformats.org/drawingml/2006/main}solidFill/'
+                                                '{http://schemas.openxmlformats.org/drawingml/2006/main}srgbClr').get('val'), 'FFFF00')
+                relations = ET.fromstring(archive.read('word/_rels/document.xml.rels'))
+                chart_targets = [r.get('Target') for r in relations if r.get('Type', '').endswith('/chart')]
+                self.assertEqual(len(chart_targets), len(charts))
+                self.assertTrue(all('word/' + target in archive.namelist() for target in chart_targets))
+
+    def test_visual_data_tampering_is_rejected(self):
+        for kind in ('graph', 'table', 'summary'):
+            result = json.loads(json.dumps(ejemplo()))
+            if kind == 'graph':
+                result['valores_plantilla']['graficas_indicador_01'][0]['valores'][0] = 1
+            elif kind == 'table':
+                result['valores_plantilla']['tablas_municipales_indicador_01'][0]['filas'][1][1] = 'Inventado'
+            else:
+                result['valores_plantilla']['tabla_calificaciones'][0]['filas'][1][1] = '1'
+            with self.assertRaises(ValueError):
+                validar_resultado(result, 'borrador')
+
+    def test_embedded_fonts_match_official_font_bytes(self):
+        from uuid import UUID
+        from fuentes_word import FONTS
+        with zipfile.ZipFile(TEMPLATE) as archive:
+            fonts = ET.fromstring(archive.read('word/fontTable.xml'))
+            for i, (family, filename, variant) in enumerate(FONTS, 1):
+                f = next(n for n in fonts if n.get(W + 'name') == family)
+                embed = f.find(W + variant)
+                mask = UUID(embed.get(W + 'fontKey').strip('{}')).bytes[::-1]
+                raw = bytearray(archive.read(f'word/fonts/archivo_{i}.odttf'))
+                for j in range(32):
+                    raw[j] ^= mask[j % 16]
+                self.assertEqual(bytes(raw), (ROOT / 'assets/fonts' / filename).read_bytes())
 
 
 if __name__ == '__main__':
