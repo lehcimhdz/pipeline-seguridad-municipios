@@ -11,7 +11,8 @@ def cargar_contrato(verificar=True):
     contract = json.loads(CONTRACT.read_text(encoding='utf-8'))
     if verificar:
         for entry in [*contract['plantillas'].values(), contract['diccionario'], contract['reglas'], contract['formato'],
-                      contract['investigacion'], contract['metodologia'], *contract.get('tipografias', []), *contract.get('logotipo', [])]:
+                      contract['investigacion'], contract['metodologia'], *contract.get('tipografias', []), *contract.get('logotipo', []),
+                      *([contract['redaccion']] if 'redaccion' in contract else [])]:
             if sha256(ROOT / entry['archivo']) != entry['sha256']:
                 raise ValueError(f"Cambió el contrato documental: {entry['archivo']}. Ejecutar scripts/migrar_machote_v3.py y revisar.")
         for entry in contract['plantillas'].values():
@@ -28,4 +29,5 @@ def huellas():
             'diccionario_sha256': contract['diccionario']['sha256'],
             'reglas_sha256': contract['reglas']['sha256'], 'formato_sha256': contract['formato']['sha256'],
             'investigacion_sha256': contract['investigacion']['sha256'],
+            **({'redaccion_sha256': contract['redaccion']['sha256']} if 'redaccion' in contract else {}),
             'origenes_sha256': {key: entry['origen_sha256'] for key, entry in contract['plantillas'].items()}}

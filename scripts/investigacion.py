@@ -112,92 +112,199 @@ def integrar(result):
     if aporte.get('pendientes_revision'):
         result['validaciones'].append({'nivel': 'revision', 'codigo': 'REVISION_FUENTES_INVESTIGACION',
                                       'detalle': ' '.join(aporte['pendientes_revision'])})
-    refs = list({r['url']: r for line in statuses for r in line['referencias']}.values())
-    if refs:
-        values['bibliografia'] += '\n\n' + '\n\n'.join(
-            f"{r['titulo']}. {r['url']} — {r['localizador']}. Consulta: {r['fecha_consulta']}. "
-            f"Aplicabilidad: {r['aplicabilidad']}. Revisión: {r['revisado_por']}." for r in refs)
+    citations = []
+    for line in statuses:
+        for reference in line['referencias']:
+            citation = referencia_visible(reference)
+            if citation not in citations:
+                citations.append(citation)
+    if citations:
+        values['bibliografia'] = '\n\n'.join(
+            item for item in [values.get('bibliografia'), *citations] if item)
+
+
+def referencia_visible(reference):
+    """Conserva la cita; reserva aplicabilidad, revisor y controles para el registro técnico."""
+    attribution = []
+    title = reference['titulo']
+    for field in ('autor', 'institucion'):
+        value = reference.get(field)
+        if isinstance(value, str) and value.strip() and not title.casefold().startswith(value.strip().casefold()):
+            if value.strip() not in attribution:
+                attribution.append(value.strip())
+    prefix = '. '.join(attribution) + '. ' if attribution else ''
+    return (f"{prefix}{title}. {reference['url']}. {reference['localizador']}. "
+            f"Consulta: {reference['fecha_consulta']}.")
+
+
+def _indicadores(numbers, preposicion=''):
+    """Referencia legible con concordancia y sin abreviaturas técnicas."""
+    labels = list(map(str, numbers))
+    if len(labels) == 18 and set(labels) == {str(i) for i in range(1, 19)}:
+        return (preposicion + ' ' if preposicion else '') + 'los 18 indicadores'
+    enumeration = labels[0] if len(labels) == 1 else ', '.join(labels[:-1]) + ' y ' + labels[-1]
+    if len(labels) == 1:
+        return ('del indicador ' if preposicion == 'de' else
+                (preposicion + ' ' if preposicion else '') + 'el indicador ') + enumeration
+    return (preposicion + ' ' if preposicion else '') + 'los indicadores ' + enumeration
 
 
 def narrativas(result, rules):
+    """Lectura de consultoría sustentada en resultados; no sustituye la investigación aportada."""
     values = result['valores_plantilla']
     sections = result['indicadores']
     recent = result.get('periodos_evaluacion', {}).get('ultimo_periodo', {}).get('años_objetivo', [])
-    recent_text = ' y '.join(map(str, recent)) or 'los dos años consecutivos de cierre documental'
+    recent_text = ' y '.join(map(str, recent)) or 'los dos años consecutivos que cierran el periodo documental'
+    start, end = values.get('año_inicial'), values.get('año_final')
+    if start is not None and end is not None:
+        period_description = f'abarca el periodo {start}–{end}'
+    elif start is not None:
+        period_description = f'incluye observaciones desde {start}, con el año de cierre por confirmar'
+    elif end is not None:
+        period_description = f'incluye observaciones hasta {end}, con el año inicial por confirmar'
+    else:
+        period_description = 'requiere confirmar su delimitación temporal'
+    territory = result['municipio'] + (f", {result['estado']}" if result.get('estado') else '')
+    pending_recent = [s['numero'] for s in sections if s['evaluaciones']['ultimo_periodo']['puntaje'] is None]
+    observed_recent = len(sections) - len(pending_recent)
     values['introduccion_periodo_general'] = (
-        f"El periodo documental de {result['municipio']}, {result.get('estado', '')}, comprende "
-        f"{values.get('año_inicial', 'el inicio observado')}–{values.get('año_final', 'el cierre observado')}. "
-        'La interpretación general integra las capacidades reportadas y sus cambios, con los años faltantes identificados en cada indicador.')
+        f'El diagnóstico de seguridad de {territory} {period_description}. '
+        'Su propósito es valorar las capacidades municipales reportadas en protección civil, condiciones del personal '
+        'e inteligencia y eficiencia policial. La lectura conjunta permite identificar capacidades documentadas '
+        'y asuntos que requieren seguimiento; su alcance depende de los años y variables disponibles en cada indicador.')
     values['introduccion_ultimo_periodo'] = (
-        f'El último periodo corresponde a {recent_text}, con un mismo intervalo para los 18 indicadores. '
-        'Cuando falta alguno de esos años, se conserva el puntaje observado como no disponible y se emite '
-        'la calificación documental de no acreditación. No se arrastra la nota de otro año ni se atribuye desempeño deficiente.')
+        f'La evaluación reciente se concentra en {recent_text}, con un intervalo común para los {len(sections)} indicadores. '
+        + (f'La documentación permite sustentar la valoración de {observed_recent} de ellos. '
+           if observed_recent else 'Ninguno cuenta con evidencia suficiente para valorar el intervalo completo. ')
+        + (('En los restantes ' if observed_recent else 'Por ello, en todos ')
+           + 'se aplica la categoría de no acreditación documental, que expresa insuficiencia de evidencia '
+           'para ese intervalo y no un juicio de desempeño deficiente. Esta distinción impide trasladar al presente '
+           'capacidades acreditadas únicamente en años anteriores.' if pending_recent else
+           'Esta cobertura permite una lectura conjunta del intervalo, sin sustituir la revisión de los resultados '
+           'y de las condiciones en que opera cada capacidad municipal.'))
     values['enfoque_gobierno'] = (
-        'La información se examina para identificar capacidades reportadas, carencias documentales y acciones de seguimiento. '
-        'Las propuestas se relacionan con los hallazgos de cada indicador y con las referencias que se desarrollan a continuación.')
+        'Para la gestión municipal, el diagnóstico distingue entre capacidades documentadas, aspectos que ameritan '
+        'revisión y vacíos de información. Esta separación permite orientar el seguimiento sin confundir la falta de '
+        'registro con la ausencia de una capacidad. Las propuestas deben vincular cada hallazgo con la evidencia '
+        'disponible, las responsabilidades institucionales y las condiciones de su posible aplicación.')
     values['criterio_lectura_graficas'] = (
-        'Las tablas conservan los valores y años de las fuentes; los análisis y cierres explican sus cambios y limitaciones. '
-        'Las gráficas muestran las calificaciones documentales asignadas de ambos periodos; '
-        'su nota distingue el puntaje observado de la base por no acreditación. Esta base no es un cero ni un dato imputado '
-        'a las tablas. Diferencias de cobertura no prueban cambios de desempeño. Las series originales se conservan en las tablas.')
+        'Las tablas presentan los valores y años reportados por las fuentes; las gráficas comparan las calificaciones '
+        'documentales de ambos periodos. Una calificación basada en observaciones y otra asignada por falta de '
+        'acreditación no tienen el mismo fundamento. Por ello, la distancia entre dos barras debe leerse junto con '
+        'sus notas de cobertura: no demuestra por sí sola una mejora o un deterioro del desempeño. '
+        'Las asignaciones documentales no sustituyen los valores originales de las tablas.')
     values['bienes_a_proteger'] = (
-        'La medición examina la protección civil, las condiciones del personal y la información y eficiencia policial '
-        'como aspectos relacionados con la seguridad física, humana y el respeto de los derechos humanos. '
-        'La existencia de capacidades declaradas y sus puntajes internos no acredita por sí sola resultados de protección '
-        'ni cumplimiento jurídico; los estándares se revisan por separado en los benchmarks.')
+        'La seguridad física de las personas, la protección de sus derechos y la capacidad de respuesta municipal '
+        'constituyen el horizonte de esta evaluación. Los indicadores examinan capacidades relacionadas con esos '
+        'propósitos, pero la existencia de un instrumento o una calificación favorable no acredita, por sí sola, '
+        'resultados de protección. La valoración de su suficiencia y de su adecuación jurídica requiere contrastar '
+        'la evidencia municipal con las referencias pertinentes para el lugar y el periodo analizados.')
     comparable = [s['numero'] for s in sections if s['evaluaciones']['general'].get('referencia_estatal')]
     values['comparacion_estatal_municipal'] = (
-        'El documento conserva las tablas municipales y estatales con sus ámbitos y coordenadas originales. '
-        'Una comparación sustantiva requiere la misma variable, unidad y año; no se equipara un conteo municipal con '
-        'un total estatal ni una respuesta de existencia con un porcentaje estatal. '
-        + ('Los cálculos registran referencias estatales explícitas en los indicadores ' + ', '.join(map(str, comparable)) + '.'
-           if comparable else 'No se establece una posición global del municipio frente al estado con la información actual.'))
+        'Las referencias estatales ofrecen un contexto para interpretar los datos municipales, siempre que coincidan '
+        'la variable, la unidad de medida y el año. Un conteo municipal no es directamente equiparable al total del '
+        'estado, ni la existencia de una capacidad equivale al porcentaje de municipios que la reportan. '
+        + (_indicadores(comparable).capitalize() + (' incorpora' if len(comparable) == 1 else ' incorporan')
+           + ' referencias estatales explícitas; '
+           'sus resultados deben interpretarse de manera individual y no como una clasificación global del municipio.'
+           if comparable else 'La información disponible no permite establecer una posición global del municipio frente al estado.'))
     comparable_scores = [s for s in sections if s['evaluaciones']['general']['puntaje'] is not None
                          and s['evaluaciones']['ultimo_periodo']['puntaje'] is not None]
     changes = [s['numero'] for s in comparable_scores
                if s['evaluaciones']['general']['puntaje'] != s['evaluaciones']['ultimo_periodo']['puntaje']]
     values['avances_municipales'] = (
-        ('Hay diferencias entre el puntaje general y el del último periodo en los indicadores ' + ', '.join(map(str, changes)) + '. '
-         if changes else 'No hay pares de puntajes general/reciente disponibles para comparar. '
-         if not comparable_scores else 'Los puntajes comparables coinciden entre ambos periodos. ')
-        + 'El periodo general incluye observaciones del reciente; esta comparación no demuestra por sí sola una '
-          'tendencia sostenida ni una mejora causal. Los años y valores originales deben revisarse en cada indicador.')
+        ('Las calificaciones sustentadas en observaciones difieren entre el periodo general y el reciente '
+         + _indicadores(changes, 'en') + '. '
+         if changes else 'La evidencia disponible no permite contrastar calificaciones observadas entre ambos periodos. '
+         if not comparable_scores else 'Las calificaciones sustentadas en observaciones coinciden entre ambos periodos '
+         + _indicadores([s['numero'] for s in comparable_scores], 'en') + '. ')
+        + 'El periodo general puede incluir observaciones del intervalo reciente; no se trata necesariamente de dos '
+          'etapas independientes. Para identificar avances es preciso revisar las series anuales y la continuidad '
+          'de cada capacidad, además de las calificaciones agregadas.')
     for dimension, key in [('proteccion_civil', 'resumen_proteccion_civil'),
                            ('condiciones_del_personal', 'resumen_condiciones_personal'),
                            ('inteligencia_y_eficiencia_policial', 'resumen_inteligencia_eficiencia')]:
         ids = rules['dimensiones'][dimension]
-        pending = [s['numero'] for s in sections if s['numero'] in ids and s['evaluaciones']['ultimo_periodo']['puntaje'] is None]
+        dimension_sections = [s for s in sections if s['numero'] in ids]
+        pending = [s['numero'] for s in dimension_sections if s['evaluaciones']['ultimo_periodo']['puntaje'] is None]
+        observed = len(dimension_sections) - len(pending)
         mean = result['contenido_word']['promedios_dimension']['ultimo_periodo'][dimension]
         label = {'proteccion_civil': 'Protección civil',
                  'condiciones_del_personal': 'Condiciones del personal',
                  'inteligencia_y_eficiencia_policial': 'Inteligencia y eficiencia policial'}[dimension]
-        values[key] = (f"{label}: promedio documental {mean}/5. "
-                       f"{len(ids) - len(pending)} de {len(ids)} indicadores con puntaje observado en el último periodo. "
-                       + ('La base de no acreditación se asignó a los indicadores ' + ', '.join(map(str, pending)) + '. ' if pending else '')
-                       + 'Este valor no sustituye la evaluación de resultados ni el benchmark externo.')
-    values['tendencia_general'] = 'La tendencia general requiere revisar series compatibles y cobertura temporal. ' + values['avances_municipales']
+        grade_text = (f'En {label.lower()}, la calificación documental del intervalo reciente es de {mean}/5. '
+                      if mean is not None else f'En {label.lower()}, el promedio documental reciente no está disponible. ')
+        if not observed:
+            interpretation = (f'Ninguno de los {len(ids)} indicadores dispone de una calificación sustentada en '
+                              'observaciones para ese intervalo. El resultado expresa falta de acreditación documental, '
+                              'no ausencia de las capacidades evaluadas. ')
+        elif pending:
+            interpretation = (f'{observed} de los {len(ids)} indicadores cuentan con calificaciones sustentadas en '
+                              'observaciones; en los restantes se aplica la base de no acreditación documental. '
+                              'El promedio combina, por tanto, evidencia de capacidades y vacíos de información. ')
+        else:
+            interpretation = (f'Los {observed} indicadores cuentan con calificaciones sustentadas en observaciones. '
+                              'Esta cobertura permite examinar la dimensión en conjunto, aunque el promedio no '
+                              'acredita por sí mismo resultados de protección o de servicio. ')
+        implications = {
+            'proteccion_civil': 'El seguimiento debe precisar la continuidad y las condiciones de operación de los instrumentos de protección civil.',
+            'condiciones_del_personal': 'La revisión debe relacionar las condiciones reportadas del personal con su cobertura y continuidad, antes de formular medidas de fortalecimiento.',
+            'inteligencia_y_eficiencia_policial': 'Para orientar decisiones, conviene examinar conjuntamente la información disponible, las capacidades operativas y los resultados reportados, sin atribuir causalidad entre ellos.',
+        }
+        values[key] = grade_text + interpretation + implications[dimension]
+    values['tendencia_general'] = (
+        'No es posible establecer una trayectoria reciente con las calificaciones observadas disponibles. '
+        if not comparable_scores else
+        'Las diferencias entre calificaciones agregadas no bastan para establecer una tendencia sostenida. '
+        if changes else
+        'La coincidencia de calificaciones entre periodos no demuestra estabilidad en todas las variables evaluadas. ')
+    values['tendencia_general'] += (
+        'Una conclusión temporal requiere series con definiciones y unidades comparables, cobertura suficiente y '
+        'revisión de los cambios anuales. Hasta contar con esa base, corresponde distinguir los resultados '
+        'documentados de las hipótesis sobre su evolución.')
     strong = [s['numero'] for s in sections if s['evaluaciones']['ultimo_periodo']['puntaje'] is not None
               and s['evaluaciones']['ultimo_periodo']['puntaje'] >= 4]
     weak = [s['numero'] for s in sections if s['evaluaciones']['ultimo_periodo']['puntaje'] is not None
             and s['evaluaciones']['ultimo_periodo']['puntaje'] <= 2]
     pending = [s['numero'] for s in sections if s['evaluaciones']['ultimo_periodo']['puntaje'] is None]
     values['fortalezas_seguridad'] = (
-        'Los indicadores con puntaje interno de 4 o 5 en el último periodo son ' + ', '.join(map(str, strong)) + '. '
-        if strong else 'No hay indicadores con puntaje interno de 4 o 5 confirmado para el último periodo. ')
-    values['fortalezas_seguridad'] += 'Estos resultados orientan la revisión de capacidades a conservar; no acreditan efectos sobre el delito.'
+        _indicadores(strong).capitalize() + (' obtiene una calificación observada' if len(strong) == 1 else ' obtienen calificaciones observadas')
+        + ' de 4 o 5 en el intervalo reciente. Se trata de resultados favorables conforme a los criterios de esta evaluación. '
+        'Conviene verificar la continuidad de las capacidades que los sustentan; no equivalen a evidencia de reducción del delito.'
+        if strong else 'La evidencia del intervalo reciente no identifica indicadores con calificaciones observadas de 4 o 5. '
+        'Este resultado no permite concluir que el municipio carezca de fortalezas, particularmente cuando la '
+        'cobertura documental es incompleta.')
     values['areas_mejora_seguridad'] = (
-        'Los indicadores con puntaje interno de 1 o 2 en el último periodo son ' + ', '.join(map(str, weak)) + '. '
-        if weak else 'No hay indicadores con puntaje interno de 1 o 2 confirmado para el último periodo. ')
+        _indicadores(weak).capitalize() + (' registra una calificación observada' if len(weak) == 1 else ' registran calificaciones observadas')
+        + ' de 1 o 2 en el intervalo reciente. Conviene revisar las condiciones reportadas que sustentan ese resultado. '
+        if weak else 'No se identifican calificaciones observadas de 1 o 2 en el intervalo reciente. '
+        'Esto no descarta necesidades de mejora fuera del alcance de la evidencia disponible. ')
     if pending:
-        values['areas_mejora_seguridad'] += ('Los indicadores ' + ', '.join(map(str, pending))
-                                           + ' tienen nota documental de no acreditación y puntaje observado no disponible; '
-                                           'falta de datos no equivale a desempeño deficiente.')
-    values['recomendaciones_gobierno'] = (
-        ('Completar y clasificar la evidencia de los indicadores ' + ', '.join(map(str, pending)) + ' antes de priorizar intervenciones. '
-         if pending else 'Conservar la trazabilidad de todos los indicadores y revisar los hallazgos con el municipio. ')
-        + 'Contrastar capacidades observadas con los benchmarks revisados y definir responsables de seguimiento. '
-          'Las decisiones operativas, presupuestarias o normativas requieren una revisión específica; no se deducen automáticamente de los puntajes.')
+        values['areas_mejora_seguridad'] += (_indicadores(pending, 'en').capitalize()
+                                           + ', es necesario completar la evidencia para distinguir una carencia '
+                                           'de registro de una posible limitación institucional.')
+    recommendations = []
+    if pending:
+        recommendations.append('La primera tarea es completar la evidencia ' + _indicadores(pending, 'de')
+                               + ', conservando la correspondencia entre año, variable y unidad de medida. '
+                               'Conviene acordar con las áreas responsables qué registros faltan y cuándo podrán revisarse.')
+    if weak:
+        recommendations.append(_indicadores(weak, 'para').capitalize()
+                               + ', se recomienda examinar las condiciones asociadas a las calificaciones bajas y '
+                               'definir medidas de seguimiento proporcionales a los hallazgos comprobados.')
+    if strong:
+        recommendations.append('En los resultados favorables, el seguimiento debe concentrarse en verificar la '
+                               'continuidad de las capacidades y documentar las condiciones que permiten sostenerlas.')
+    if not recommendations:
+        recommendations.append('Se recomienda revisar los hallazgos con las áreas municipales responsables y '
+                               'establecer una agenda de seguimiento de las capacidades documentadas.')
+    recommendations.append('Antes de adoptar medidas operativas, presupuestarias o normativas, es necesario '
+                           'contrastar su pertinencia con la evidencia municipal y las referencias aplicables; '
+                           'las calificaciones no sustituyen esa valoración.')
+    values['recomendaciones_gobierno'] = '\n\n'.join(recommendations)
     values['justificacion_prioridades'] = (
-        'Las prioridades se fundamentan en los valores documentales, los criterios internos y las revisiones pendientes. '
-        'Las referencias externas deben sustentar su aplicabilidad al municipio y al periodo. '
-        'Este bloque no genera una plataforma electoral ni explica causas sin evidencia adicional.')
+        'Se propone ordenar el seguimiento según la solidez de la evidencia y la naturaleza del hallazgo: '
+        'completar información donde no es posible valorar una capacidad, examinar las condiciones asociadas a '
+        'resultados desfavorables y verificar la continuidad de los resultados favorables. Esta distinción evita '
+        'tratar como equivalentes un vacío documental y una limitación observada. La prioridad de una intervención '
+        'específica requiere, además, valorar su alcance, viabilidad y pertinencia para el municipio.')

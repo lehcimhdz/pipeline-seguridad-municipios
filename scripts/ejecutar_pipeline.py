@@ -191,7 +191,7 @@ def main():
                         'detalle': 'Los años son etiquetas de las tablas. El último periodo exige los mismos dos años calendario consecutivos en los 18 indicadores. Confirmar la relación entre esas etiquetas y los años de referencia de cada edición censal antes de cerrar el diagnóstico.'})
     aggregates = {period: agregar_documental(results, rules) for period, results in evaluations.items()}
     result = {
-        'version': '3.3', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
+        'version': '3.4', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
         'estado_ejecucion': 'requiere_revision',
         'contrato': {**huellas(), 'normalizaciones_sha256': sha256(mappings_path),
                      'fuentes_externas_sha256': sha256(external_config_path)},
@@ -207,7 +207,10 @@ def main():
         result['investigacion_aportada'] = research_input
         result['fuentes_investigacion'] = {'archivo': args.investigacion_json.name,
                                          'sha256': sha256(args.investigacion_json)}
-    componer(result, dictionary, rules)
+    try:
+        componer(result, dictionary, rules)
+    except ValueError as error:
+        parser.error(f'No se publicaron resultados: {error}')
     directory = args.output / 'json'
     directory.mkdir(parents=True, exist_ok=True)
     dest = directory / f'{slug(municipality)}_diagnostico_seguridad_municipal_{run}.json'

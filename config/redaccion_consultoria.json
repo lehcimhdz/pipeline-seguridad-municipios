@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "perfil": "academico_consultivo",
+  "idioma": "es-MX",
+  "tono": "Sobrio, analítico y accesible; orientado a decisiones de gestión municipal.",
+  "criterios": [
+    "Abrir con el hallazgo y precisar su ámbito, periodo y magnitud.",
+    "Distinguir hechos observados, interpretación, límites y recomendaciones.",
+    "Usar vocabulario sustantivo del indicador y evitar fórmulas de relleno.",
+    "Reservar los procedimientos técnicos, nombres de archivos y códigos para la trazabilidad interna.",
+    "Citar documentos, instituciones y referencias públicas sin exponer rutas locales ni huellas digitales.",
+    "Conservar cifras, años, unidades, fuentes y condiciones de la calificación.",
+    "Explicar una limitación donde afecta a la lectura; evitar repetir advertencias generales en cada párrafo.",
+    "No atribuir causas, cumplimiento normativo o resultados de seguridad sin evidencia suficiente."
+  ],
+  "patrones_no_publicables": {
+    "referencia_informatica": "\\b(?:json|pipeline|sha[ -]?256|checksum|docx|snake_case|None|null)\\b",
+    "ruta_local": "(?:file://|/(?:Users|home|tmp|private|var)/|[A-Za-z]:[\\\\/]|\\b(?:input|output|scripts|templates|config)/)",
+    "archivo_local": "\\b[^\\s/]+\\.(?:json|docx?|py|md|csv|ya?ml|env)\\b",
+    "identificador_interno": "\\b(?:calificacion_|analisis_|investigacion_|minimos_|tablas_|graficas_|benchmark_|resumen_|puntaje_|base_calificacion|motivo_asignacion|años_objetivo)[a-z0-9_]*\\b",
+    "autorreferencia_ia": "(?:como (?:modelo|asistente) de (?:ia|inteligencia artificial)|asistid[ao] por ia)",
+    "huella_digital": "\\b[0-9a-f]{64}\\b"
+  },
+  "control": "Se comprueban los textos publicables antes de guardar el JSON y antes de publicar el Word. Las URL públicas se conservan. La revisión de estilo y de contenido sigue siendo necesaria.",
+  "sin_reescritura_automatica_de_fuentes": true
+}

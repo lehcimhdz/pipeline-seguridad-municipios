@@ -1,5 +1,5 @@
 {
-  "version": "3.3",
+  "version": "3.4",
   "alcance": "seguridad_investigacion",
   "marcador": "{snake_case}",
   "politica_calificacion": {
@@ -23,7 +23,7 @@
   },
   "diccionario": {
     "archivo": "diccionario_datos_diagnostico_seguridad_municipal.json",
-    "sha256": "24b8635e2553d998af9933bb85304fae1093d35652e22bc6f627e3b7b9c84455"
+    "sha256": "a7562fbba9e0f73979ea79dceb7de9eb58fcb3f0ecb12dcbfe4e6229c88a0aed"
   },
   "reglas": {
     "archivo": "reglas_calificacion.json",
@@ -32,6 +32,10 @@
   "formato": {
     "archivo": "config/formato_editorial.json",
     "sha256": "8644d03d617543e41a1dbc9bc6078f32bfbe705d20baab0d5e65dffb13d18672"
+  },
+  "redaccion": {
+    "archivo": "config/redaccion_consultoria.json",
+    "sha256": "cb8333e82869db5f85da8790a77e0e888644d6d9867bd52a460bf1674a72415c"
   },
   "investigacion": {
     "archivo": "config/investigacion_seguridad.json",

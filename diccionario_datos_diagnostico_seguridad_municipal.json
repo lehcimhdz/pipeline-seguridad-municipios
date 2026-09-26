@@ -1,6 +1,6 @@
 {
   "metadatos": {
-    "version": "3.3",
+    "version": "3.4",
     "nombre": "diccionario_variables_diagnostico_seguridad_municipal",
     "idioma": "es",
     "tipo_documento": "diccionario_de_datos_y_especificacion_de_contenido",
@@ -98,6 +98,12 @@
         "orden_de_aparicion_dentro_del_parrafo"
       ],
       "regla": "Solo los datos verdaderamente globales, como municipio y estado, pueden compartir automáticamente un valor entre todas sus apariciones."
+    },
+    "redaccion_publicable": {
+      "perfil": "academico_consultivo",
+      "configuracion": "config/redaccion_consultoria.json",
+      "regla": "Los textos de valores_plantilla se redactan para el lector de consultoría. Las rutas, huellas, códigos y mensajes de diagnóstico permanecen en metadatos técnicos.",
+      "evidencia": "Conservar cifras, años, unidades, fuentes y límites; no alterar la investigación aportada ni inventar causalidad."
     }
   },
   "catalogos": {

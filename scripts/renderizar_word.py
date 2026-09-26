@@ -21,6 +21,8 @@ from documentos import sha256
 from editorial import configurar, incorporar_estilos, normalizar_seccion, rol_estilo
 from auditoria_editorial import preparar_base, normalizar_notas, validar_editorial
 from logo_editorial import construir_portada
+from redaccion_consultoria import (comprobar_texto, fuente_grafica, nota_indicador,
+                                  notas_alcance, texto_pendiente, titulo_tabla, validar_publicacion)
 from graficas_word import agregar_grafica
 from salidas import limpiar_salidas
 from fidelidad_machote import controles, retirar_resaltado_amarillo, validar as validar_fidelidad
@@ -197,7 +199,7 @@ def validar_resultado(result, mode):
             raise ValueError(f'Identidad inconsistente: {key}.')
     for section in sections:
         number = section['numero']
-        expected = [{'titulo': f"Datos {t['ambito']} — PAQUETE SEGURIDAD, tabla {t['tabla']}",
+        expected = [{'titulo': titulo_tabla(t),
                      'ambito': t['ambito'], 'tabla_fuente': t['tabla'], 'filas': t['filas']} for t in section['tablas']]
         if result['valores_plantilla'][f'tablas_indicador_{number:02d}'] != expected:
             raise ValueError(f'Tablas diferentes a la evidencia del indicador {number}.')
@@ -208,18 +210,13 @@ def validar_resultado(result, mode):
         for graph in graphs:
             if graph.get('tipo') != 'puntajes' or graph.get('categorias') != list(PERIODOS.values()) or graph.get('valores') != scores:
                 raise ValueError('La gráfica difiere de las evaluaciones.')
-            missing = [PERIODOS[p] for p in PERIODOS if section['evaluaciones'][p]['puntaje'] is None]
-            expected_source = ('Metodología documental interna; escala 1–5. '
-                               + ('Base por no acreditación (no desempeño observado): ' + ', '.join(missing) + '. ' if missing else '')
-                               + 'Las diferencias de cobertura no demuestran una tendencia de desempeño.')
+            expected_source = fuente_grafica(section)
             if (graph.get('titulo') != f'Indicador {number:02d}: calificaciones documentales'
                     or graph.get('fuente') != expected_source):
                 raise ValueError('La gráfica debe declarar su carácter documental y los puntajes no acreditados.')
         for period, label in PERIODOS.items():
             evaluation = section['evaluaciones'][period]
-            assigned = evaluation.get('puntaje_asignado')
-            note = (f'{label}: {assigned}/5 — NO ACREDITADO (asignación documental; puntaje observado no disponible).'
-                    if evaluation['puntaje'] is None else f'{label}: {assigned}/5 — sustentado en puntaje observado.')
+            note = nota_indicador(section, period)
             if result['valores_plantilla'].get(f'calificacion_indicador_{number:02d}_{period}') != note:
                 raise ValueError('Calificación individual distinta de su asignación documental.')
     for period in PERIODOS:
@@ -286,6 +283,7 @@ def validar_resultado(result, mode):
             raise ValueError('Mínimos normativos distintos a la investigación revisada.')
     if mode == 'final' and (len(verified) != 4 or len(research.get('minimos_indicadores', {})) != 3):
         raise ValueError('La versión final requiere cuatro benchmarks y tres mínimos revisados.')
+    validar_publicacion(result)
 
 
 def seleccionar_documento(root, result, mode, perfil, files):
@@ -318,20 +316,22 @@ def seleccionar_documento(root, result, mode, perfil, files):
                         replacements.append(parrafo(item['titulo'], perfil=perfil, rol='nota'))
                         replacements.append(tabla_evidencia(item['filas'], perfil))
             else:
-                value = f'Pendiente de revisión: {key}' if value is None else value
+                value = texto_pendiente(key) if value is None else value
                 rol = 'bibliografia' if key == 'bibliografia' else 'cuerpo'
                 replacements = [parrafo_del_machote(piece, p, continuation=i > 0)
                                 for i, piece in enumerate(str(value).split('\n\n'))]
                 if rol == 'bibliografia':
                     for i, replacement in enumerate(replacements):
                         value = texto(replacement)
-                        if '. SHA-256: ' in value:
-                            title, checksum = value.split('. SHA-256: ', 1)
-                            for r in list(replacement.iter(W + 'r')):
-                                replacement.remove(r)
-                            italic = run(title + '. ')
-                            ET.SubElement(italic.find(W + 'rPr'), W + 'i')
-                            replacement.extend([italic, run('SHA-256: ' + checksum)])
+                        url = re.search(r'https?://', value)
+                        split = url.start() if url else len(value)
+                        for r in list(replacement.iter(W + 'r')):
+                            replacement.remove(r)
+                        italic = run(value[:split])
+                        ET.SubElement(italic.find(W + 'rPr'), W + 'i')
+                        replacement.append(italic)
+                        if split < len(value):
+                            replacement.append(run(value[split:]))
                         configurar(replacement, rol='bibliografia', inicial=i == 0)
             parent = p.getparent(); index = parent.index(p); parent.remove(p)
             for offset, replacement in enumerate(replacements):
@@ -352,11 +352,9 @@ def seleccionar_documento(root, result, mode, perfil, files):
             configurar(p, rol=role, inicial=initial)
     if mode == 'borrador':
         appendix = positions['adicional_fuentes']
-        appendix.append(parrafo('Pendientes de revisión', generated=False, perfil=perfil, rol='subcapitulo'))
-        for v in result['validaciones']:
-            detail = v.get('detalle') or ', '.join(v.get('variables', []))
-            detail = detail or f"Indicador {v.get('indicador', '')} {v.get('periodo', '')}"
-            appendix.append(parrafo(f"{v['codigo']}: {detail}", perfil=perfil, rol='nota'))
+        appendix.append(parrafo('Alcance y aspectos por completar', generated=False, perfil=perfil, rol='subcapitulo'))
+        for note in notas_alcance(result):
+            appendix.append(parrafo(note, perfil=perfil, rol='nota'))
 
 
 def auditar(path, expected_generated=None, editorial_manifest=None):
@@ -387,6 +385,8 @@ def auditar(path, expected_generated=None, editorial_manifest=None):
             for p in root.iter(W + 'p'):
                 if re.search(r'[{}]|\[INSERTAR', texto(p), re.I):
                     raise ValueError(f'Marcador editorial pendiente en {name}.')
+                if editorial_manifest is not None:
+                    comprobar_texto(texto(p), 'Word/' + name)
             for r in root.iter(W + 'r'):
                 style = r.find(W + 'rPr/' + W + 'rStyle')
                 if style is None or style.get(W + 'val') != STYLE:
@@ -402,6 +402,13 @@ def auditar(path, expected_generated=None, editorial_manifest=None):
     if editorial_manifest is not None:
         with zipfile.ZipFile(path) as archive:
             editorial = validar_editorial({n: archive.read(n) for n in archive.namelist()}, editorial_manifest)
+            for name in archive.namelist():
+                if name.startswith('word/charts/pipeline_') and name.endswith('.xml'):
+                    root = ET.fromstring(archive.read(name), PARSER)
+                    a = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
+                    for t in root.iter(a + 't'):
+                        comprobar_texto(t.text or '', name)
+            editorial['sin_referencias_tecnicas_visibles_verificado'] = True
     return {**editorial, 'segmentos_json': count, 'caracteres_json': characters,
             'resaltado_amarillo': False, 'sin_resaltado_amarillo_verificado': True,
             'marcadores_pendientes': 0}

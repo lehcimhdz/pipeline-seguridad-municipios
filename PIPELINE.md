@@ -1,4 +1,4 @@
-# Pipeline de seguridad municipal — v3.3
+# Pipeline de seguridad municipal — v3.4
 
 ## Alcance y origen
 
@@ -64,7 +64,7 @@ compatibles con las tablas municipales y estatales.
 ## Contrato y migración
 
 [config/contrato_documental.json](config/contrato_documental.json) vincula con
-SHA-256 original, base, diccionario, reglas, formato, investigación,
+SHA-256 original, base, diccionario, reglas, formato, redacción, investigación,
 metodología histórica y tipografías. Incluye el manifiesto de fidelidad
 con acciones y orden de los bloques originales y las adaptaciones de salida
 autorizadas: normalización editorial, portada y retirada de amarillo.
@@ -113,7 +113,7 @@ Una observación anterior no reemplaza al año faltante.
 automáticamente. Una modificación metodológica requiere decisión explícita.
 
 `normalizar_plantilla.py` y `contextualizar_variables.py` remiten a la
-migración v3.3. Repetirla con los mismos insumos y reglas produce la misma base y contrato.
+migración v3.4. Repetirla con los mismos insumos y reglas produce la misma base y contrato.
 
 ## Variables y composición
 
@@ -136,7 +136,11 @@ declara **157 variables y 157 apariciones**, con llaves simples y snake_case ASC
   `{sensibilidad_ultimo_periodo}`: explican la nota y sus límites en el propio Word.
 - `{bibliografia}`.
 
-Los análisis identifican periodo, criterio, puntaje y pendientes.
+Los análisis desarrollan observaciones, años y límites de interpretación.
+Las calificaciones por periodo aparecen en sus rótulos y gráficas, sin
+repetirse de manera mecánica en la prosa. El criterio aplicado y los motivos
+de asignación se conservan en la trazabilidad; los requisitos de evidencia
+pendientes se explican en el desarrollo o cierre del indicador.
 [scripts/analisis_evidencia.py](scripts/analisis_evidencia.py) interpreta
 valores y cambios de las tablas documentales con sus unidades y ámbitos.
 Los cierres explican hallazgos y límites específicos de cada indicador,
@@ -243,8 +247,8 @@ jurisdicción y periodo y revisar el contenido antes de declarar
 
 El aporte local preparado para la prueba contiene cuatro líneas, quince
 apartados y veinte fuentes primarias únicas. Fue consultado y redactado
-mediante revisión documental asistida por IA; sus referencias conservan
-esa atribución y la validación editorial humana queda pendiente. El valor
+mediante revisión documental asistida por IA; su procedencia permanece en
+la trazabilidad y la validación editorial humana queda pendiente. El valor
 `verificado` declara revisión documental del aportante, no aprobación final.
 Se distinguen leyes aplicables al periodo de cierre, recomendaciones
 internacionales no vinculantes y evidencia científica con límites de
@@ -255,10 +259,17 @@ siendo los cuatro Word.
 El aporte se identifica con SHA-256. Si declara municipio, estado o periodo,
 se comprueba su correspondencia con el resultado; no se reutiliza un aporte
 de otra localidad o cobertura temporal. Las referencias pasan a la
-bibliografía final sin duplicados por URL y `pendientes_revision` se incorpora
-a las revisiones del resultado y del Word.
+bibliografía final sin repetir citas idénticas; una misma URL puede aparecer
+en referencias con localizadores u otros datos de cita distintos.
+`pendientes_revision` se conserva íntegramente en las revisiones del JSON.
+El Word presenta un aviso agrupado sobre la revisión de las fuentes, no
+reproduce cada detalle técnico de esos pendientes.
 No modifica los criterios ni resuelve automáticamente indicadores faltantes.
 No requiere API de IA ni ejecuta investigación web automática.
+La investigación no se reescribe silenciosamente. Si el aporte contiene
+referencias técnicas no publicables en el texto destinado al informe, se
+bloquea la publicación hasta corregir su redacción, conservando el contenido
+sustantivo, las referencias y las URL públicas.
 
 ## Ejecución y salidas
 
@@ -267,9 +278,10 @@ No requiere API de IA ni ejecuta investigación web automática.
 
 Flujo: validar contrato y base → validar cuatro Word → extraer →
 fijar intervalos comunes → puntuar evidencia y asignar notas documentales → componer análisis específicos e
-integrar investigación por tema → JSON → rellenar las posiciones del
-machote → normalizar formato y añadir portada → auditar fidelidad,
-formato editorial y ausencia de amarillo → recibo → limpiar.
+integrar investigación por tema → controlar redacción publicable → JSON →
+rellenar las posiciones del machote → normalizar formato y añadir portada →
+comprobar nuevamente redacción, fidelidad, formato editorial y ausencia de
+amarillo → publicar Word y recibo → limpiar.
 Diagrama editable: [flujo_pipeline.drawio](flujo_pipeline.drawio).
 
     output/json/{municipio}_diagnostico_seguridad_municipal_{corrida}.json
@@ -279,7 +291,7 @@ Diagrama editable: [flujo_pipeline.drawio](flujo_pipeline.drawio).
 El JSON es una instancia municipal, no una copia del diccionario:
 contiene evidencia, cálculos, validaciones, investigación, contrato y
 `valores_plantilla`. El recibo vincula SHA-256 de JSON/Word y registra
-las auditorías de formato, ausencia de amarillo y fidelidad. El nombre del Word es estable por municipio,
+las auditorías de redacción, formato, ausencia de amarillo y fidelidad. El nombre del Word es estable por municipio,
 documento y modo; el ID de corrida sólo aparece en el JSON trazable.
 
 El modo predeterminado es borrador. `--word ninguno` genera únicamente JSON.
@@ -289,6 +301,34 @@ Para renderizar una instancia compatible:
 
 Los JSON anteriores no se renderizan contra el nuevo contrato:
 deben regenerarse desde la evidencia.
+
+## Redacción académico-consultiva
+
+[ESTILO_REDACCION.md](ESTILO_REDACCION.md) define una voz sobria, concreta y
+orientada a los hallazgos. La configuración de
+[config/redaccion_consultoria.json](config/redaccion_consultoria.json) y el
+módulo [scripts/redaccion_consultoria.py](scripts/redaccion_consultoria.py)
+separan los textos para el lector de la trazabilidad técnica. El análisis
+precisa ámbito, años y cifras; los cierres sintetizan los resultados sin
+repetir literalmente el desarrollo ni inventar causas o unidades.
+
+Antes de guardar el JSON y antes de publicar el Word se comprueban los textos
+publicables. Nombres de archivos, rutas locales, códigos internos y huellas
+SHA-256 permanecen en los metadatos, no en los párrafos o la bibliografía del
+informe. Las referencias visibles usan títulos documentales, instituciones
+y URL públicas. Los valores y las coordenadas de evidencia no se eliminan.
+
+Los borradores presentan «Alcance y aspectos por completar». Una variable
+pendiente mantiene `None` en memoria (`null` en JSON); la explicación visible
+se guarda por separado en `contenido_word.textos_pendientes`, sin mostrar
+la clave de la variable ni aparentar que existe información suficiente.
+
+El control léxico rechaza las referencias técnicas y autorreferencias
+definidas en la configuración. No es un detector de IA, no requiere un
+servicio de modelos de lenguaje y no certifica calidad, veracidad ni revisión
+humana. Una investigación aportada que incumpla ese control debe corregirse
+explícitamente: no se modifica de forma silenciosa. La redacción mantiene
+intactos los puntajes, sus bases, la cobertura y la metodología de cálculo.
 
 ## Formato editorial sin resaltado amarillo
 
@@ -418,3 +458,6 @@ revisado puede conservar puntajes observados faltantes debidamente explicados.
 También cubren separación observado/asignado, parámetros, pisos, pesos,
 candados, cobertura, sensibilidad, huecos metodológicos, divisores cero
 y rechazo de alteraciones de la nota documental.
+También comprueban la separación de metadatos y texto publicable, la
+conservación de URL y cifras, el rechazo de referencias técnicas y la
+explicación de pendientes sin exponer identificadores internos.

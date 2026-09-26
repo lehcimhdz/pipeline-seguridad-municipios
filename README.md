@@ -1,4 +1,4 @@
-# Pipeline de seguridad municipal — v3.3
+# Pipeline de seguridad municipal — v3.4
 
 Genera una medición de SEGURIDAD desde los mismos cuatro Word por municipio.
 Incorpora el machote **rzg investigación**, conserva los 18 indicadores y sus
@@ -32,6 +32,14 @@ Archivo y el perfil editorial por función: títulos, cuerpo, notas, tablas,
 gráficas y bibliografía. La auditoría comprueba estructura, posiciones,
 formato editorial y ausencia de amarillo antes de publicar la salida.
 
+La voz académico-consultiva y la separación entre texto publicable y
+trazabilidad están en [ESTILO_REDACCION.md](ESTILO_REDACCION.md).
+El control de redacción se aplica antes de guardar el JSON y antes de
+publicar el Word. Los títulos documentales y las URL públicas permanecen en
+la bibliografía; los archivos, códigos y SHA-256 se conservan sólo como
+metadatos internos. Este control léxico no detecta autoría por IA ni
+sustituye la revisión de calidad. No requiere un servicio de IA.
+
 Las medidas, la portada y la excepción de interlineado mínimo de 14 pt en
 títulos de 24 pt están en [FORMATO_EDITORIAL.md](FORMATO_EDITORIAL.md).
 Pasar esta auditoría de formato no valida los datos ni sustituye la revisión humana.
@@ -51,11 +59,21 @@ valida estructura y referencias declaradas, **no vigencia jurídica ni veracidad
 de una investigación**. No necesita una API de IA.
 
 El aporte local de prueba desarrolla los quince temas con veinte fuentes
-primarias: es una revisión documental asistida por IA y mantiene pendiente
-la validación editorial humana. El comando no consulta la web automáticamente.
+primarias y mantiene pendiente la validación editorial humana. El comando
+no consulta la web automáticamente ni reescribe el aporte silenciosamente.
+Si sus textos contienen referencias técnicas no publicables, la ejecución
+se detiene para que se corrija la redacción conservando el contenido y las URL.
+La procedencia y las declaraciones de revisión se mantienen en la trazabilidad.
 El municipio, estado y periodo declarados se contrastan con el resultado;
-las revisiones pendientes del aporte se muestran en el Word y las referencias
-se reúnen sin duplicados en la bibliografía final.
+las revisiones pendientes del aporte se conservan íntegramente en el JSON y
+se advierten de forma agrupada en el Word. La bibliografía elimina citas
+idénticas; conserva referencias a una misma URL cuando difieren sus
+localizadores u otros datos de la cita.
+
+Los borradores explican los límites bajo «Alcance y aspectos por completar».
+Los valores aún no desarrollados permanecen nulos y tienen una explicación
+visible independiente, sin mostrar nombres de variables. La nueva redacción
+no cambia los puntajes ni los cálculos.
 
 Cada periodo tiene **18 de 18 notas documentales asignadas**. Con los datos
 actuales hay 12 de 18 puntajes observados generales y 0 de 18 del último

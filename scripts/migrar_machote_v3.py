@@ -12,6 +12,7 @@ from lxml import etree as ET
 from calificar import normalizar
 from documentos import sha256
 from editorial import FORMATO
+from redaccion_consultoria import CONFIG as REDACCION
 from fuentes_word import incrustar, FONTS
 from fidelidad_machote import envolver, validar as validar_fidelidad
 from estructurar_reglas import construir
@@ -271,13 +272,17 @@ def migrar(source):
             variables[key]['descripcion'] = (
                 'Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado.')
     dictionary['variables_documento'] = variables
-    dictionary['metadatos'].update(version='3.3', fuente=str(source.relative_to(ROOT)), documento_modificado=False,
+    dictionary['metadatos'].update(version='3.4', fuente=str(source.relative_to(ROOT)), documento_modificado=False,
         alcance_activo='SEGURIDAD parametrizada sobre el original: estructura conservada y cada instrucción trazable.')
     dictionary['metadatos']['cobertura_verificada'] = {'marcadores_de_variables_unicos': len(variables),
         'apariciones_de_variables': sum(counts.values()), 'indicadores': 18, 'dimensiones': 3,
         'lineas_de_investigacion': 4, 'apartados_de_investigacion': 15, 'periodos_de_evaluacion': 2}
     dictionary['convenciones']['marcadores'] = {'formato_en_word': '{nombre_variable}',
         'formato_de_clave_json': 'nombre_variable', 'regla': 'Llaves simples, snake_case ASCII y posición del original.'}
+    dictionary['convenciones']['redaccion_publicable'] = {
+        'perfil': 'academico_consultivo', 'configuracion': 'config/redaccion_consultoria.json',
+        'regla': 'Los textos de valores_plantilla se redactan para el lector de consultoría. Las rutas, huellas, códigos y mensajes de diagnóstico permanecen en metadatos técnicos.',
+        'evidencia': 'Conservar cifras, años, unidades, fuentes y límites; no alterar la investigación aportada ni inventar causalidad.'}
     dictionary['marcadores_no_tratados_como_variables'] = {}
     dictionary['modelos_reutilizables']['investigacion_v3']['apartados'] = 'object por línea, claves del contrato y textos con URL citada'
     dictionary['modelos_reutilizables']['calificacion_documental'] = {
@@ -336,7 +341,7 @@ def migrar(source):
     dump(rules_path, rules)
     research_path = ROOT / 'config/investigacion_seguridad.json'
     dump(research_path, research)
-    contract = {'version': '3.3', 'alcance': 'seguridad_investigacion', 'marcador': '{snake_case}',
+    contract = {'version': '3.4', 'alcance': 'seguridad_investigacion', 'marcador': '{snake_case}',
         'politica_calificacion': {'archivo': 'reglas_calificacion.json', 'seccion': 'calificacion_documental',
                                  'puntajes_documentales_siempre': True, 'puntajes_observados_admiten_null': True},
         'contenido_generado': {'resaltado_amarillo': False, 'trazabilidad_estilo': 'ContenidoJSON',
@@ -346,6 +351,7 @@ def migrar(source):
         'diccionario': {'archivo': str(dictionary_path.relative_to(ROOT)), 'sha256': sha256(dictionary_path)},
         'reglas': {'archivo': str(rules_path.relative_to(ROOT)), 'sha256': sha256(rules_path)},
         'formato': {'archivo': str(FORMATO.relative_to(ROOT)), 'sha256': sha256(FORMATO)},
+        'redaccion': {'archivo': str(REDACCION.relative_to(ROOT)), 'sha256': sha256(REDACCION)},
         'investigacion': {'archivo': str(research_path.relative_to(ROOT)), 'sha256': sha256(research_path)},
         'metodologia': {'archivo': str(methodology.relative_to(ROOT)), 'sha256': sha256(methodology)},
         'tipografias': [{'archivo': f'assets/fonts/{filename}', 'sha256': sha256(ROOT / 'assets/fonts' / filename)} for _, filename, _ in FONTS],
