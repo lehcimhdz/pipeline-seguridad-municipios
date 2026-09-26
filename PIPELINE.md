@@ -47,6 +47,30 @@ ella por compatibilidad. Se debe revisar el diff editorial y metodológico antes
 de aceptar una nueva versión. El pipeline de un municipio nunca modifica estos
 activos de referencia.
 
+### Detección de cambios de los originales: pendiente
+
+El contrato registra `origen` y `origen_sha256` de cada machote general, pero
+`cargar_contrato()` valida actualmente los hashes de las bases operativas, el
+diccionario, las reglas, el formato y las fuentes. No compara automáticamente
+el hash del original en cada corrida y tampoco ejecuta la migración por sí solo.
+Si se edita o reemplaza un machote general, se debe ejecutar la migración manual
+antes de generar otro municipio. La detección automática queda pendiente.
+
+### Plataforma electoral: pendiente de integración
+
+`templates/PLATAFORMA ELECTORAL MACHOTE.docx` está en Git, pero no figura como
+plantilla activa del contrato, no tiene variables registradas y no se genera
+como documento de salida. Su contenido de SEGURIDAD y Protección Civil incluye
+introducción, propuesta general, problema social, razonamiento justificatorio,
+propuestas específicas y línea discursiva.
+
+La ampliación propuesta es un tercer perfil `plataforma_electoral` limitado a
+esos apartados, sustentado en el mismo JSON diagnóstico. Requerirá variables
+por apartado y ámbito, composición de propuestas, reglas de revisión editorial
+y ampliación de recibos y limpieza. Esta ampliación aún no está implementada;
+las propuestas no se deducen automáticamente de las calificaciones y no
+modificarían los umbrales de puntuación.
+
 ## Contrato y variables
 
 [config/contrato_documental.json](config/contrato_documental.json) registra
@@ -92,6 +116,10 @@ comparables deben definirse antes de añadir otro tipo de gráfica.
 ## Flujo y salidas
 
 El diagrama editable está en [flujo_pipeline.drawio](flujo_pipeline.drawio).
+La primera página representa la ejecución implementada; la segunda muestra
+los dos machotes generales, la migración manual, las bases derivadas y los
+pendientes. La plataforma electoral aparece como pendiente, sin conexión al
+flujo de generación actual.
 
     4 Word → validar identidad → extraer evidencia → normalizar y calificar
            → componer variables → JSON municipal → medición + anexo

@@ -13,6 +13,15 @@ machotes generales. Las variables usan llaves simples y `snake_case` ASCII:
 `{municipio}`, `{estado}`, `{analisis_indicador_01}`, `{graficas_indicador_01}`
 y `{tablas_indicador_01}`. Hay 116 variables y 137 apariciones entre ambas bases.
 
+Si cambia un machote general, ejecuta `python3 scripts/migrar_machotes_v2.py`
+antes de generar otro municipio. La detección de cambios del original en cada
+corrida todavía está pendiente; hoy se validan los hashes de las bases derivadas.
+`PLATAFORMA ELECTORAL MACHOTE.docx` está versionado, pero aún no está integrado
+al contrato ni al renderizador: no se genera una plataforma electoral.
+
+El [diagrama editable de draw.io](flujo_pipeline.drawio) tiene dos páginas:
+ejecución actual y relación entre machotes, migración y pendientes de integración.
+
 El [contrato documental](config/contrato_documental.json) vincula las plantillas,
 el [diccionario](diccionario_datos_diagnostico_seguridad_municipal.json), las
 [reglas](reglas_calificacion.json), el [formato editorial](config/formato_editorial.json)
