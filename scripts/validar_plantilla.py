@@ -1,67 +1,59 @@
 #!/usr/bin/env python3
-"""Comprueba el contrato entre el diccionario de datos y el machote DOCX."""
-
-from __future__ import annotations
-
+"""Valida llaves simples, snake_case y la base de SEGURIDAD v3."""
+from collections import Counter
 import json
 import re
 import sys
 import zipfile
-from collections import Counter
-from pathlib import Path
+from lxml import etree as ET
+from contrato import cargar_contrato, ROOT
+
+MARKER = re.compile(r'(?<!\{)\{([a-z][a-z0-9_]*)\}(?!\})')
+W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
 
 
-ROOT = Path(__file__).resolve().parents[1]
-JSON_PATH = ROOT / "diccionario_datos_diagnostico_seguridad_municipal.json"
-DOCX_PATH = ROOT / "templates" / "Machote_seguridad_general_con_calificacion.docx"
-CANONICAL = re.compile(r"\{\{\s*([^{}\s]+)\s*\}\}")
-LEGACY = re.compile(r"\[[^\[\]]+\]")
+def validar():
+    contract = cargar_contrato()
+    dictionary = json.loads((ROOT / contract['diccionario']['archivo']).read_text(encoding='utf-8'))
+    total = Counter()
+    for perfil, entry in contract['plantillas'].items():
+        with zipfile.ZipFile(ROOT / entry['archivo']) as archive:
+            if archive.testzip():
+                raise ValueError('DOCX dañado.')
+            text = ''
+            for name in archive.namelist():
+                if name.startswith('word/') and name.endswith('.xml'):
+                    root = ET.fromstring(archive.read(name))
+                    text += ''.join(t.text or '' for t in root.iter(W + 't'))
+        found = Counter(MARKER.findall(text))
+        expected = {key: value['apariciones_por_documento'][perfil]
+                    for key, value in dictionary['variables_documento'].items()
+                    if value['apariciones_por_documento'][perfil]}
+        if found != Counter(expected):
+            raise ValueError(f'{perfil}: marcadores distintos al diccionario.')
+        if re.search(r'\[[^\[\]]+\]|\{\{|\}\}', text):
+            raise ValueError(f'{perfil}: instrucciones editoriales o marcadores antiguos pendientes.')
+        headings = re.findall(r'Indicador (\d{2}):', text)
+        if headings != [f'{i:02d}' for i in range(1, 19)]:
+            raise ValueError(f'{perfil}: orden de indicadores distinto al contrato.')
+        total.update(found)
+    for key, entry in dictionary['variables_documento'].items():
+        if not re.fullmatch(r'[a-z][a-z0-9_]*', key) or entry['marcador'] != '{' + key + '}':
+            raise ValueError(f'Variable no canónica: {key}')
+        if total[key] != entry['apariciones']:
+            raise ValueError(f'Apariciones inconsistentes: {key}')
+    return len(total), sum(total.values())
 
 
-def main() -> int:
-    dictionary = json.loads(JSON_PATH.read_text(encoding="utf-8"))
-    expected = {
-        key: (value["marcador"], value["apariciones"])
-        for key, value in dictionary["variables_documento"].items()
-    }
-    expected_markers = {marker: key for key, (marker, _) in expected.items()}
-
-    with zipfile.ZipFile(DOCX_PATH, "r") as document:
-        xml = document.read("word/document.xml").decode("utf-8")
-
-    actual = Counter(CANONICAL.findall(xml))
-    errors = []
-    for key, (marker, appearances) in expected.items():
-        if marker != f"{{{{ {key} }}}}":
-            errors.append(f"{key}: marcador no canónico: {marker}")
-        if actual[key] != appearances:
-            errors.append(f"{key}: esperadas={appearances}, encontradas={actual[key]}")
-
-    unknown = sorted(set(actual) - set(expected))
-    if unknown:
-        errors.append("variables no declaradas: " + ", ".join(unknown))
-
-    legacy = sorted(set(LEGACY.findall(xml)))
-    declared_non_variables = set()
-    for group in dictionary["marcadores_no_tratados_como_variables"].values():
-        if "texto" in group:
-            declared_non_variables.add(group["texto"])
-        declared_non_variables.update(group.get("textos", []))
-    unknown_legacy = sorted(set(legacy) - declared_non_variables)
-    if unknown_legacy:
-        errors.append("marcadores entre corchetes no declarados: " + ", ".join(unknown_legacy))
-
-    if errors:
-        print("Validación fallida:", file=sys.stderr)
-        print("\n".join("- " + error for error in errors), file=sys.stderr)
+def main():
+    try:
+        variables, appearances = validar()
+    except (ValueError, OSError, KeyError) as error:
+        print(f'Validación fallida: {error}', file=sys.stderr)
         return 1
-
-    print(
-        "Validación correcta: "
-        f"{len(expected)} variables y {sum(actual.values())} apariciones canónicas."
-    )
+    print(f'Validación correcta: {variables} variables y {appearances} apariciones en la base de SEGURIDAD v3.')
     return 0
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == '__main__':
+    sys.exit(main())

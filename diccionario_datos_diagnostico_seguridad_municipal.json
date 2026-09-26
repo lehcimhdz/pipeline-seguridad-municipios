@@ -1,44 +1,42 @@
 {
   "metadatos": {
-    "version": "2.0",
+    "version": "3.0",
     "nombre": "diccionario_variables_diagnostico_seguridad_municipal",
     "idioma": "es",
     "tipo_documento": "diccionario_de_datos_y_especificacion_de_contenido",
     "es_json_schema_formal": false,
     "descripcion": "Define los marcadores existentes, sus contenidos esperados, los campos auxiliares y las reglas de consistencia para completar el documento.",
-    "fuente": "Documento activo: marcadores normalizados, guía de calificación, hoja de cómputo, textos base y fichas del Anexo 1.",
+    "fuente": "templates/Machote general medicion version final rzg investigación.docx",
     "cobertura_verificada": {
-      "marcadores_de_variables_unicos": 62,
-      "apariciones_de_variables": 120,
+      "marcadores_de_variables_unicos": 97,
+      "apariciones_de_variables": 97,
       "indicadores": 18,
       "dimensiones": 3,
-      "periodos_de_evaluacion": 2,
-      "selectores_de_puntaje_en_fichas": 36,
-      "bloques_de_analisis_por_indicador": 18,
-      "bloques_de_resumen": 2
+      "lineas_de_investigacion": 4,
+      "periodos_de_evaluacion": 2
     },
     "documento_modificado": false,
     "verificacion_externa_de_fuentes_realizada": false,
-    "advertencia_metodologica": "Los criterios descritos proceden del documento. Su inclusión no acredita la vigencia externa de referencias legales, técnicas o bibliográficas."
+    "advertencia_metodologica": "Los criterios descritos proceden del documento. Su inclusión no acredita la vigencia externa de referencias legales, técnicas o bibliográficas.",
+    "alcance_activo": "Sólo medición de SEGURIDAD, con investigación explícita y separada de la puntuación."
   },
   "convenciones": {
     "nombres_de_variables": {
       "formato": "snake_case",
       "mayusculas": false,
       "separador": "_",
-      "conservar_nombres_existentes": true,
-      "conservar_letra_ñ": true,
+      "conservar_nombres_existentes": false,
+      "conservar_letra_ñ": false,
       "ejemplos": [
         "municipio",
-        "año_inicial",
-        "situacion_final",
-        "indicadores_de_eficiencia"
+        "benchmark_proteccion_civil",
+        "analisis_indicador_01"
       ]
     },
     "marcadores": {
-      "formato_en_word": "[nombre_variable]",
+      "formato_en_word": "{nombre_variable}",
       "formato_de_clave_json": "nombre_variable",
-      "regla": "Los corchetes pertenecen al marcador de Word, no al nombre de la clave JSON."
+      "regla": "Llaves simples y snake_case ASCII; identificar indicador y contexto."
     },
     "tipos_de_dato": {
       "string": "Texto.",
@@ -233,661 +231,1168 @@
   },
   "variables_documento": {
     "municipio": {
-      "marcador": "{{ municipio }}",
-      "apariciones": 15,
+      "marcador": "{municipio}",
+      "apariciones": 1,
       "tipo_dato": "string",
-      "tipo_contenido": "nombre",
-      "alcance": "global",
-      "debe_contener": "Nombre del municipio evaluado.",
-      "validaciones": [
-        "No estar vacío.",
-        "Usar la misma denominación en todo el documento.",
-        "Corresponder al estado indicado."
-      ]
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "estado": {
-      "marcador": "{{ estado }}",
-      "apariciones": 5,
+      "marcador": "{estado}",
+      "apariciones": 1,
       "tipo_dato": "string",
-      "tipo_contenido": "nombre",
-      "alcance": "global",
-      "debe_contener": "Nombre de la entidad federativa a la que pertenece el municipio.",
-      "validaciones": [
-        "No estar vacío.",
-        "Corresponder a la entidad utilizada en las comparaciones estadísticas."
-      ]
-    },
-    "año_inicial": {
-      "marcador": "{{ año_inicial }}",
-      "apariciones": 5,
-      "tipo_dato": "integer",
-      "tipo_contenido": "año",
-      "alcance": "periodo_general",
-      "debe_contener": "Año inicial del periodo completo presentado en el diagnóstico.",
-      "validaciones": [
-        "Ser menor o igual a año_final.",
-        "Corresponder a la convención temporal documentada para el diagnóstico."
-      ]
-    },
-    "año_final": {
-      "marcador": "{{ año_final }}",
-      "apariciones": 5,
-      "tipo_dato": "integer",
-      "tipo_contenido": "año",
-      "alcance": "periodo_general",
-      "debe_contener": "Año final del periodo completo presentado en el diagnóstico.",
-      "validaciones": [
-        "Ser mayor o igual a año_inicial.",
-        "No extender el periodo más allá de los datos efectivamente utilizados."
-      ]
-    },
-    "años": {
-      "marcador": "{{ años }}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "tipo_elemento": "integer",
-      "tipo_contenido": "lista_de_años",
-      "alcance": "tendencia_avances_irregulares",
-      "debe_contener": "Años de mejora o de retroceso del indicador, según la aparición.",
-      "resolucion": {
-        "primera_aparicion": "años_mejora",
-        "segunda_aparicion": "años_retroceso"
+      "apariciones_por_documento": {
+        "medicion": 1
       },
-      "validaciones": [
-        "Cada año debe pertenecer a la serie analizada.",
-        "No repetir años dentro de una misma lista.",
-        "Sustentar la mejora o el retroceso con datos comparables."
-      ]
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
-    "años_indicadores": {
-      "marcador": "{{ años_indicadores }}",
+    "calificacion_general": {
+      "marcador": "{calificacion_general}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "tipo_contenido": "texto_descriptivo",
-      "alcance": "tendencia_datos_insuficientes",
-      "debe_contener": "Años, indicadores o ambos en los que faltan datos suficientes para identificar una tendencia.",
-      "validaciones": [
-        "Identificar faltantes concretos.",
-        "Distinguir ausencia de respuesta de inexistencia de la variable en una edición."
-      ]
-    },
-    "rubros": {
-      "marcador": "{{ rubros }}",
-      "apariciones": 4,
-      "tipo_dato": "array",
-      "tipo_elemento": "string",
-      "tipo_contenido": "lista_de_areas_o_componentes",
-      "alcance": "contextual",
-      "debe_contener": "Rubros con fortalezas, carencias o cumplimiento básico, según el texto seleccionado.",
-      "contextos": {
-        "general_muy_bien": "Áreas de mejora.",
-        "general_regular": "Áreas con capacidades insuficientes o intermitentes.",
-        "general_mal": "Áreas donde faltan instrumentos básicos.",
-        "personal_muy_bien": "Áreas en las que se cumplen la mayoría de los mínimos."
+      "apariciones_por_documento": {
+        "medicion": 1
       },
-      "validacion": "No reutilizar la misma lista automáticamente entre contextos positivos y negativos."
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
-    "rubro": {
-      "marcador": "{{ rubro }}",
-      "apariciones": 3,
-      "tipo_dato": "string",
-      "tipo_contenido": "area_o_componente",
-      "alcance": "aparicion",
-      "debe_contener": "Un rubro específico relacionado con una carencia o con la distribución de prioridades.",
-      "contextos": {
-        "personal_muy_bien": "Rubro donde se concentra una carencia.",
-        "explicacion_prioridades_primera_aparicion": "Rubro en el que se concentraron recursos.",
-        "explicacion_prioridades_segunda_aparicion": "Rubro que se descuidó."
-      }
-    },
-    "condiciones_faltantes": {
-      "marcador": "{{ condiciones_faltantes }}",
+    "calificacion_ultimo_periodo": {
+      "marcador": "{calificacion_ultimo_periodo}",
       "apariciones": 1,
-      "tipo_dato": "array",
-      "tipo_elemento": "string",
-      "tipo_contenido": "lista_de_carencias",
-      "alcance": "general_mal",
-      "debe_contener": "Condiciones básicas que la corporación no tiene y cuya ausencia se encuentra respaldada por los indicadores.",
-      "validacion": "No confundir falta de información con ausencia comprobada de una condición."
-    },
-    "n": {
-      "marcador": "{{ n }}",
-      "apariciones": 2,
-      "tipo_dato": "integer",
-      "tipo_contenido": "conteo",
-      "alcance": "comparacion_municipio_estado",
-      "debe_contener": "Número de indicadores comparables en los que el municipio está por encima o por debajo del estado, según la variante.",
-      "minimo": 0,
-      "maximo": 18,
-      "validaciones": [
-        "Ser menor o igual a total.",
-        "Contar únicamente indicadores comparables.",
-        "Corresponder a la dirección de la variante seleccionada."
-      ]
-    },
-    "total": {
-      "marcador": "{{ total }}",
-      "apariciones": 2,
-      "tipo_dato": "integer",
-      "tipo_contenido": "conteo",
-      "alcance": "comparacion_municipio_estado",
-      "debe_contener": "Total de indicadores con datos municipal y estatal comparables.",
-      "minimo": 1,
-      "maximo": 18,
-      "validaciones": [
-        "No asumir automáticamente que son 18.",
-        "Excluir comparaciones con periodos, unidades o definiciones incompatibles.",
-        "Si no existe ningún indicador comparable, no usar el texto n de total."
-      ]
-    },
-    "indicadores": {
-      "marcador": "{{ indicadores }}",
-      "apariciones": 6,
-      "tipo_dato": "array",
-      "tipo_elemento": "string",
-      "tipo_contenido": "lista_de_indicadores",
-      "alcance": "contextual",
-      "debe_contener": "Nombres de los indicadores que explican la posición frente al estado o la tendencia descrita.",
-      "validaciones": [
-        "Relacionar cada nombre con un identificador del catálogo de 18 indicadores.",
-        "No repetir elementos.",
-        "Respaldar todos los elementos con evidencia pertinente al contexto."
-      ]
-    },
-    "indicador": {
-      "marcador": "{{ indicador }}",
-      "apariciones": 2,
       "tipo_dato": "string",
-      "tipo_contenido": "nombre_de_indicador",
-      "alcance": "contextual",
-      "debe_contener": "Nombre del indicador utilizado para mostrar el rezago estatal o los avances irregulares.",
-      "validacion": "Identificar por separado el indicador de cada contexto."
-    },
-    "capacidad": {
-      "marcador": "{{ capacidad }}",
-      "apariciones": 2,
-      "tipo_dato": "string",
-      "tipo_contenido": "descripcion_de_capacidad",
-      "alcance": "contextual",
-      "contextos": {
-        "municipio_por_debajo": "Capacidad que otros municipios tienen y el municipio evaluado no ha desarrollado.",
-        "producto_electoral_que_funciona": "Capacidad que el municipio sí posee y conviene conservar."
+      "apariciones_por_documento": {
+        "medicion": 1
       },
-      "validacion": "No tratar ambas apariciones como una misma afirmación."
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
-    "x": {
-      "marcador": "{{ x }}",
-      "apariciones": 2,
-      "tipo_dato": "number",
-      "tipo_contenido": "valor_numerico_contextual",
-      "alcance": "aparicion",
-      "contextos": {
-        "brecha_estatal": {
-          "debe_contener": "Porcentaje de municipios de la entidad que cumplen el indicador.",
-          "minimo": 0,
-          "maximo": 100,
-          "fuente_auxiliar": "porcentaje_estatal_cumplimiento",
-          "formato": "Número sin símbolo %, porque el texto ya lo contiene."
-        },
-        "tendencia_deterioro": {
-          "debe_contener": "Valor inicial de la medición que se compara.",
-          "fuente_auxiliar": "valor_inicial_tendencia",
-          "formato": "Número presentado con una unidad identificable."
-        }
-      }
-    },
-    "y": {
-      "marcador": "{{ y }}",
-      "apariciones": 1,
-      "tipo_dato": "number",
-      "tipo_contenido": "valor_final_de_comparacion",
-      "alcance": "tendencia_deterioro",
-      "debe_contener": "Valor final de la misma medición representada por x.",
-      "fuente_auxiliar": "valor_final_tendencia",
-      "validaciones": [
-        "Usar la misma unidad y definición que x.",
-        "Determinar el deterioro según el sentido del indicador, no solo porque el número aumente o disminuya."
-      ]
-    },
-    "situacion_inicial": {
-      "marcador": "{{ situacion_inicial }}",
+    "bienes_a_proteger": {
+      "marcador": "{bienes_a_proteger}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "tipo_contenido": "descripcion_comparativa",
-      "alcance": "tendencia_mejora_sostenida",
-      "debe_contener": "Condición inicial de los indicadores, con referencia a los datos y al periodo correspondiente."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
-    "situacion_final": {
-      "marcador": "{{ situacion_final }}",
+    "comparacion_estatal_municipal": {
+      "marcador": "{comparacion_estatal_municipal}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "tipo_contenido": "descripcion_comparativa",
-      "alcance": "tendencia_mejora_sostenida",
-      "debe_contener": "Condición final de los mismos indicadores, comparable con la situación inicial.",
-      "validacion": "No describir como sostenida una mejora que solo aparece en un punto aislado."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
-    "cambio_administracion_fin_subsidio_otro": {
-      "marcador": "{{ cambio_administracion_fin_subsidio_otro }}",
+    "avances_municipales": {
+      "marcador": "{avances_municipales}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "tipo_contenido": "explicacion_contextual",
-      "alcance": "tendencia_avances_irregulares",
-      "debe_contener": "Evento documentado que coincide temporalmente con los cambios observados.",
-      "validaciones": [
-        "Identificar el evento y su fecha o periodo.",
-        "Citar la evidencia utilizada.",
-        "No afirmar causalidad solamente por coincidencia temporal."
-      ]
-    },
-    "nivel": {
-      "marcador": "{{ nivel }}",
-      "apariciones": 1,
-      "tipo_dato": [
-        "string",
-        "number"
-      ],
-      "tipo_contenido": "nivel_de_desempeño",
-      "alcance": "tendencia_estancamiento",
-      "debe_contener": "Valor, intervalo o condición en la que se mantienen los indicadores.",
-      "validaciones": [
-        "Si es numérico, identificar la unidad.",
-        "Si resume varios indicadores, comprobar que la descripción sea válida para todos."
-      ]
-    },
-    "comparacion_con_periodo_completo": {
-      "marcador": "{{ comparacion_con_periodo_completo }}",
-      "apariciones": 5,
-      "tipo_dato": "string",
-      "tipo_contenido": "seleccion_derivada",
-      "alcance": "apertura_ultimo_periodo",
-      "opciones": [
-        "igual",
-        "superior",
-        "inferior"
-      ],
-      "debe_contener": "Relación entre la calificación final del último periodo y la calificación final general.",
-      "regla": "Comparar niveles ordinales de las calificaciones finales, después de aplicar los candados.",
-      "validacion": "Una diferencia entre promedios dentro de la misma categoría no convierte por sí sola la calificación en superior o inferior."
-    },
-    "dimension": {
-      "marcador": "{{ dimension }}",
-      "apariciones": 2,
-      "tipo_dato": "string",
-      "tipo_contenido": "nombre_de_dimension",
-      "alcance": "contextual",
-      "catalogo": "dimensiones",
-      "contextos": {
-        "ultimo_periodo_muy_bien": "Dimensión con carencias puntuales.",
-        "producto_electoral_que_no_funciona": "Dimensión donde no se alcanza el estándar descrito."
-      }
-    },
-    "dimensiones": {
-      "marcador": "{{ dimensiones }}",
-      "apariciones": 4,
-      "tipo_dato": "array",
-      "tipo_elemento": "string",
-      "tipo_contenido": "lista_de_dimensiones",
-      "alcance": "contextual",
-      "catalogo": "dimensiones",
-      "debe_contener": "Dimensiones con carencias, mejoras, niveles altos o retrocesos, según la variante utilizada.",
-      "validaciones": [
-        "No repetir dimensiones.",
-        "No exceder las tres dimensiones del documento.",
-        "Seleccionarlas por sus resultados, no por la calificación global solamente."
-      ]
-    },
-    "temas": {
-      "marcador": "{{ temas }}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "tipo_elemento": "string",
-      "tipo_contenido": "lista_de_temas",
-      "alcance": "proteccion_civil_ultimo_periodo",
-      "debe_contener": "Temas de capacitación impartidos en el periodo reciente."
-    },
-    "temas_faltantes": {
-      "marcador": "{{ temas_faltantes }}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "tipo_elemento": "string",
-      "tipo_contenido": "lista_de_brechas_de_capacitacion",
-      "alcance": "proteccion_civil_ultimo_periodo",
-      "debe_contener": "Temas pertinentes que no se cubrieron respecto del criterio utilizado.",
-      "validaciones": [
-        "No confundir un tema no impartido con una categoría inexistente en el cuestionario.",
-        "Indicar la base utilizada para determinar los temas esperados."
-      ]
-    },
-    "situacion_programa_capacitacion": {
-      "marcador": "{{ situacion_programa_capacitacion }}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "tipo_contenido": "seleccion",
-      "alcance": "proteccion_civil_regular",
-      "opciones": [
-        "existe programa, pero no hubo capacitación",
-        "hubo capacitación, pero no hay programa vigente"
-      ],
-      "debe_contener": "La situación que describa correctamente la relación entre programa y capacitación.",
-      "validacion": "Si ninguna opción está respaldada por los datos, no forzar la selección."
-    },
-    "situacion_desempeno_personal": {
-      "marcador": "{{ situacion_desempeno_personal }}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "tipo_contenido": "seleccion",
-      "alcance": "condiciones_del_personal_regular",
-      "opciones": [
-        "la dotación es incompleta",
-        "la capacitación no tiene continuidad",
-        "el estado de fuerza apenas alcanza para cubrir turnos"
-      ],
-      "validacion": "La opción sobre cobertura de turnos requiere evidencia suficiente sobre la capacidad operativa."
-    },
-    "carencia_relevante": {
-      "marcador": "{{ carencia_relevante }}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "tipo_contenido": "seleccion",
-      "alcance": "condiciones_del_personal_mal",
-      "opciones": [
-        "parte del personal no tiene control de confianza o CUP vigente",
-        "el estado de fuerza está por debajo del mínimo",
-        "no hay equipo de protección suficiente"
-      ],
-      "validacion": "Precisar en el análisis cuál certificación, mínimo o equipo sustenta la selección."
-    },
-    "condicion_critica": {
-      "marcador": "{{ condicion_critica }}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "tipo_contenido": "seleccion",
-      "alcance": "condiciones_del_personal_catastrofico",
-      "opciones": [
-        "personal sin certificación",
-        "sin equipo de protección",
-        "sin capacitación",
-        "sin datos"
-      ],
-      "validacion": "Sin datos no equivale a ausencia comprobada de certificación, equipo o capacitación."
-    },
-    "herramienta": {
-      "marcador": "{{ herramienta }}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "tipo_contenido": "nombre_de_herramienta_faltante",
-      "alcance": "inteligencia_y_eficiencia_muy_bien",
-      "debe_contener": "Herramienta que le falta al municipio para orientar su trabajo policial.",
-      "validacion": "Este marcador representa una carencia, no una herramienta disponible."
-    },
-    "indicadores_de_eficiencia": {
-      "marcador": "{{ indicadores_de_eficiencia }}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "tipo_elemento": "string",
-      "tipo_contenido": "lista_de_indicadores",
-      "alcance": "inteligencia_y_eficiencia_muy_bien",
-      "debe_contener": "Indicadores de resultados o eficiencia cuyo desempeño es comparable o mejor que el estatal.",
-      "validacion": "La comparación debe utilizar datos compatibles y el sentido correcto de cada indicador."
-    },
-    "herramienta_aislada": {
-      "marcador": "{{ herramienta_aislada }}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "tipo_contenido": "seleccion",
-      "alcance": "inteligencia_y_eficiencia_regular",
-      "opciones": [
-        "cámaras",
-        "registro de llamadas"
-      ],
-      "debe_contener": "Herramienta disponible que no forma parte de un sistema integral documentado."
-    },
-    "problema_critico": {
-      "marcador": "{{ problema_critico }}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "tipo_contenido": "seleccion",
-      "alcance": "inteligencia_y_eficiencia_mal",
-      "opciones": [
-        "las puestas a disposición no guardan relación con la incidencia",
-        "se registraron fallecimientos de policías",
-        "no hay informe de resultados"
-      ],
-      "validacion": "La selección debe estar sustentada y contextualizada en el análisis correspondiente."
-    },
-    "indicadores_con_4_o_5": {
-      "marcador": "{{ indicadores_con_4_o_5 }}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "tipo_elemento": "string",
-      "tipo_contenido": "lista_derivada",
-      "alcance": "producto_electoral",
-      "debe_contener": "Nombres de los indicadores con puntaje final de 4 o 5 en el periodo elegido para el producto.",
-      "validaciones": [
-        "Definir explícitamente el periodo utilizado.",
-        "Derivar la lista de los puntajes, no seleccionarla de forma independiente."
-      ]
-    },
-    "indicadores_con_1_o_2": {
-      "marcador": "{{ indicadores_con_1_o_2 }}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "tipo_elemento": "string",
-      "tipo_contenido": "lista_derivada",
-      "alcance": "producto_electoral",
-      "debe_contener": "Nombres de los indicadores con puntaje final de 1 o 2 en el periodo elegido.",
-      "validaciones": [
-        "Usar el mismo periodo que indicadores_con_4_o_5.",
-        "No incluir indicadores con puntaje 3.",
-        "Explicar cuando el puntaje 1 se debe a falta de información."
-      ]
-    },
-    "posicion_relativa": {
-      "marcador": "{{ posicion_relativa }}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "tipo_contenido": "seleccion",
-      "alcance": "producto_electoral_que_funciona",
-      "opciones": [
-        "por encima de",
-        "al nivel de"
-      ],
-      "debe_contener": "Posición respaldada frente a la mayoría de los municipios de la entidad.",
-      "validacion": "No inferir una posición frente a la mayoría a partir del promedio estatal sin una justificación estadística."
-    },
-    "estandar": {
-      "marcador": "{{ estandar }}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "tipo_contenido": "criterio_de_referencia",
-      "alcance": "producto_electoral_que_no_funciona",
-      "debe_contener": "Estándar o condición de referencia que no se alcanza.",
-      "validaciones": [
-        "Identificar su fuente.",
-        "Incluir unidad y umbral si es numérico.",
-        "Distinguir obligación jurídica, estándar técnico y criterio propuesto de evaluación."
-      ]
-    },
-    "dimension_con_carencias": {
-      "marcador": "{{ dimension_con_carencias }}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "tipo_contenido": "seleccion_del_ambito_afectado",
-      "alcance": "producto_electoral_que_no_funciona",
-      "opciones": [
-        "la protección ante desastres",
-        "las condiciones de los policías",
-        "la capacidad de prevenir el delito"
-      ],
-      "nota": "Aunque su nombre contiene dimension, el valor es una frase sobre el ámbito afectado, no necesariamente el nombre literal de una de las tres dimensiones."
-    },
-    "año_deterioro_inicial": {
-      "marcador": "{{ año_deterioro_inicial }}",
-      "apariciones": 1,
-      "tipo_dato": "integer",
-      "alcance": "tendencia_deterioro",
-      "debe_contener": "Año inicial del deterioro descrito."
-    },
-    "año_deterioro_final": {
-      "marcador": "{{ año_deterioro_final }}",
-      "apariciones": 1,
-      "tipo_dato": "integer",
-      "alcance": "tendencia_deterioro",
-      "debe_contener": "Año final del deterioro descrito."
-    },
-    "año_ultimo_periodo_inicial": {
-      "marcador": "{{ año_ultimo_periodo_inicial }}",
-      "apariciones": 5,
-      "tipo_dato": "integer",
-      "alcance": "ultimo_periodo",
-      "debe_contener": "Primer año del último periodo analizado."
-    },
-    "año_ultimo_periodo_final": {
-      "marcador": "{{ año_ultimo_periodo_final }}",
-      "apariciones": 5,
-      "tipo_dato": "integer",
-      "alcance": "ultimo_periodo",
-      "debe_contener": "Último año del último periodo analizado."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "resumen_general": {
-      "marcador": "{{ resumen_general }}",
+      "marcador": "{resumen_general}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "diagnostico_general",
-      "debe_contener": "Dos o tres párrafos de interpretación del periodo completo."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "resumen_ultimo_periodo": {
-      "marcador": "{{ resumen_ultimo_periodo }}",
+      "marcador": "{resumen_ultimo_periodo}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "diagnostico_ultimo_periodo",
-      "debe_contener": "Dos o tres párrafos de interpretación del último periodo."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "resumen_proteccion_civil": {
+      "marcador": "{resumen_proteccion_civil}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "resumen_condiciones_personal": {
+      "marcador": "{resumen_condiciones_personal}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "resumen_inteligencia_eficiencia": {
+      "marcador": "{resumen_inteligencia_eficiencia}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "tendencia_general": {
+      "marcador": "{tendencia_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "recomendaciones_gobierno": {
+      "marcador": "{recomendaciones_gobierno}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "fortalezas_seguridad": {
+      "marcador": "{fortalezas_seguridad}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "areas_mejora_seguridad": {
+      "marcador": "{areas_mejora_seguridad}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "justificacion_prioridades": {
+      "marcador": "{justificacion_prioridades}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "benchmark_proteccion_civil": {
+      "marcador": "{benchmark_proteccion_civil}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_01": {
-      "marcador": "{{ analisis_indicador_01 }}",
+      "marcador": "{analisis_indicador_01}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_01",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 1."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "minimos_indicador_01": {
+      "marcador": "{minimos_indicador_01}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_01": {
+      "marcador": "{graficas_indicador_01}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_01": {
+      "marcador": "{tablas_indicador_01}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_01": {
+      "marcador": "{cierre_indicador_01}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_02": {
-      "marcador": "{{ analisis_indicador_02 }}",
+      "marcador": "{analisis_indicador_02}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_02",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 2."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "minimos_indicador_02": {
+      "marcador": "{minimos_indicador_02}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_02": {
+      "marcador": "{graficas_indicador_02}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_02": {
+      "marcador": "{tablas_indicador_02}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_02": {
+      "marcador": "{cierre_indicador_02}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_03": {
-      "marcador": "{{ analisis_indicador_03 }}",
+      "marcador": "{analisis_indicador_03}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_03",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 3."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "minimos_indicador_03": {
+      "marcador": "{minimos_indicador_03}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_03": {
+      "marcador": "{graficas_indicador_03}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_03": {
+      "marcador": "{tablas_indicador_03}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_03": {
+      "marcador": "{cierre_indicador_03}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "benchmark_condiciones_personal": {
+      "marcador": "{benchmark_condiciones_personal}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_04": {
-      "marcador": "{{ analisis_indicador_04 }}",
+      "marcador": "{analisis_indicador_04}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_04",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 4."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_04": {
+      "marcador": "{graficas_indicador_04}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_04": {
+      "marcador": "{tablas_indicador_04}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_04": {
+      "marcador": "{cierre_indicador_04}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_05": {
-      "marcador": "{{ analisis_indicador_05 }}",
+      "marcador": "{analisis_indicador_05}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_05",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 5."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_05": {
+      "marcador": "{graficas_indicador_05}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_05": {
+      "marcador": "{tablas_indicador_05}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_05": {
+      "marcador": "{cierre_indicador_05}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_06": {
-      "marcador": "{{ analisis_indicador_06 }}",
+      "marcador": "{analisis_indicador_06}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_06",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 6."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_06": {
+      "marcador": "{graficas_indicador_06}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_06": {
+      "marcador": "{tablas_indicador_06}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_06": {
+      "marcador": "{cierre_indicador_06}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_07": {
-      "marcador": "{{ analisis_indicador_07 }}",
+      "marcador": "{analisis_indicador_07}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_07",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 7."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_07": {
+      "marcador": "{graficas_indicador_07}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_07": {
+      "marcador": "{tablas_indicador_07}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_07": {
+      "marcador": "{cierre_indicador_07}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_08": {
-      "marcador": "{{ analisis_indicador_08 }}",
+      "marcador": "{analisis_indicador_08}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_08",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 8."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_08": {
+      "marcador": "{graficas_indicador_08}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_08": {
+      "marcador": "{tablas_indicador_08}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_08": {
+      "marcador": "{cierre_indicador_08}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_09": {
-      "marcador": "{{ analisis_indicador_09 }}",
+      "marcador": "{analisis_indicador_09}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_09",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 9."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_09": {
+      "marcador": "{graficas_indicador_09}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_09": {
+      "marcador": "{tablas_indicador_09}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_09": {
+      "marcador": "{cierre_indicador_09}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_10": {
-      "marcador": "{{ analisis_indicador_10 }}",
+      "marcador": "{analisis_indicador_10}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_10",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 10."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_10": {
+      "marcador": "{graficas_indicador_10}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_10": {
+      "marcador": "{tablas_indicador_10}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_10": {
+      "marcador": "{cierre_indicador_10}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "benchmark_inteligencia_policial": {
+      "marcador": "{benchmark_inteligencia_policial}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_11": {
-      "marcador": "{{ analisis_indicador_11 }}",
+      "marcador": "{analisis_indicador_11}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_11",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 11."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_11": {
+      "marcador": "{graficas_indicador_11}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_11": {
+      "marcador": "{tablas_indicador_11}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_11": {
+      "marcador": "{cierre_indicador_11}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_12": {
-      "marcador": "{{ analisis_indicador_12 }}",
+      "marcador": "{analisis_indicador_12}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_12",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 12."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_12": {
+      "marcador": "{graficas_indicador_12}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_12": {
+      "marcador": "{tablas_indicador_12}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_12": {
+      "marcador": "{cierre_indicador_12}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_13": {
-      "marcador": "{{ analisis_indicador_13 }}",
+      "marcador": "{analisis_indicador_13}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_13",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 13."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_13": {
+      "marcador": "{graficas_indicador_13}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_13": {
+      "marcador": "{tablas_indicador_13}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_13": {
+      "marcador": "{cierre_indicador_13}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_14": {
-      "marcador": "{{ analisis_indicador_14 }}",
+      "marcador": "{analisis_indicador_14}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_14",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 14."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_14": {
+      "marcador": "{graficas_indicador_14}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_14": {
+      "marcador": "{tablas_indicador_14}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_14": {
+      "marcador": "{cierre_indicador_14}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_15": {
-      "marcador": "{{ analisis_indicador_15 }}",
+      "marcador": "{analisis_indicador_15}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_15",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 15."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_15": {
+      "marcador": "{graficas_indicador_15}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_15": {
+      "marcador": "{tablas_indicador_15}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_15": {
+      "marcador": "{cierre_indicador_15}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_16": {
-      "marcador": "{{ analisis_indicador_16 }}",
+      "marcador": "{analisis_indicador_16}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_16",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 16."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_16": {
+      "marcador": "{graficas_indicador_16}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_16": {
+      "marcador": "{tablas_indicador_16}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_16": {
+      "marcador": "{cierre_indicador_16}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "benchmark_eficiencia_policial": {
+      "marcador": "{benchmark_eficiencia_policial}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "investigacion_verificada",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_17": {
-      "marcador": "{{ analisis_indicador_17 }}",
+      "marcador": "{analisis_indicador_17}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_17",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 17."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_17": {
+      "marcador": "{graficas_indicador_17}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_17": {
+      "marcador": "{tablas_indicador_17}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_17": {
+      "marcador": "{cierre_indicador_17}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     },
     "analisis_indicador_18": {
-      "marcador": "{{ analisis_indicador_18 }}",
+      "marcador": "{analisis_indicador_18}",
       "apariciones": 1,
       "tipo_dato": "string",
-      "alcance": "analisis_indicador_18",
-      "debe_contener": "Análisis y visualizaciones validadas del indicador 18."
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "graficas_indicador_18": {
+      "marcador": "{graficas_indicador_18}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "graficas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": false
+    },
+    "tablas_indicador_18": {
+      "marcador": "{tablas_indicador_18}",
+      "apariciones": 1,
+      "tipo_dato": "array",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "tablas",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "cierre_indicador_18": {
+      "marcador": "{cierre_indicador_18}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
+    },
+    "bibliografia": {
+      "marcador": "{bibliografia}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "evidencia_documental",
+      "debe_contener": "Contenido de seguridad sustentado; nunca convertir notas de investigación en afirmaciones verificadas.",
+      "obligatorio": true
     }
   },
   "campos_auxiliares": {
@@ -1587,6 +2092,32 @@
           "tipo_dato": "string"
         }
       }
+    },
+    "tabla_word_v3": {
+      "titulo": "string",
+      "ambito": "municipal|estatal",
+      "filas": "array de arrays de strings",
+      "tabla_fuente": "integer"
+    },
+    "grafica_word_v3": {
+      "tipo": "puntajes",
+      "titulo": "string",
+      "categorias": "array de strings",
+      "valores": "array de number|null",
+      "fuente": "string"
+    },
+    "investigacion_v3": {
+      "version": "1.0",
+      "lineas": "array de {id, estado: verificado, analisis, referencias}",
+      "referencia": {
+        "titulo": "string",
+        "url": "https URL primaria",
+        "fecha_consulta": "YYYY-MM-DD",
+        "localizador": "artículo, sección o página",
+        "aplicabilidad": "string",
+        "revisado_por": "string"
+      },
+      "minimos_indicadores": "object con claves 01, 02 y 03 y valores {texto, referencias: [urls declaradas]}"
     }
   },
   "catalogo_indicadores": [
@@ -2279,44 +2810,7 @@
       "prohibicion": "No imputar un resultado ni cambiar denominadores sin una regla documentada."
     }
   },
-  "marcadores_no_tratados_como_variables": {
-    "selectores_de_puntaje": {
-      "texto": "[ 1 · 2 · 3 · 4 · 5 ]",
-      "apariciones": 36,
-      "tratamiento": "Completar por indicador y periodo usando puntaje_final.",
-      "regla": "La primera selección de cada ficha es general y la segunda corresponde al último periodo."
-    },
-    "instrucciones_editoriales": {
-      "texto": "[borrar al finalizar]",
-      "apariciones": 12,
-      "tratamiento": "Instrucción de cierre editorial, no dato de captura.",
-      "accion_en_esta_respuesta": "Ninguna."
-    },
-    "etiquetas_de_causas": {
-      "textos": [
-        "[a]",
-        "[b]",
-        "[c]",
-        "[d]",
-        "[e]"
-      ],
-      "tratamiento": "Etiquetas de recursos, tamaño, continuidad, prioridades e información.",
-      "regla": "No confundirlas con variables."
-    },
-    "notas_de_verificacion": {
-      "textos": [
-        "[Verificar autores.]",
-        "[Verificar convenios con municipios.]",
-        "[Verificar denominación y resolución.]",
-        "[Verificar estatus en el Senado.]",
-        "[Verificar existencia y fecha en el periódico oficial y en el portal municipal.]",
-        "[Verificar si México es Estado parte.]",
-        "[verificar vigencia de la versión 0101.07]"
-      ],
-      "tratamiento": "Pendientes de verificación documental.",
-      "regla": "No convertirlos en afirmaciones confirmadas ni eliminarlos sin resolver la revisión."
-    }
-  },
+  "marcadores_no_tratados_como_variables": {},
   "decisiones_metodologicas_por_confirmar": [
     {
       "tema": "redondeo_para_clasificacion",

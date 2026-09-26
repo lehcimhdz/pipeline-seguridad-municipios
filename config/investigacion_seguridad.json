@@ -1,0 +1,396 @@
+{
+  "version": "1.0",
+  "origen": "templates/Machote general medicion version final rzg investigación.docx",
+  "origen_sha256": "ac7402dbf1e06061570934aea41fa7798b296abeed376886b61b70b9a98662b3",
+  "instrucciones_originales": [
+    {
+      "bloque": 0,
+      "texto": "SEGURIDAD"
+    },
+    {
+      "bloque": 1,
+      "texto": "CALIFICACIÓN GENERAL: EXCELENTE/MUY BIEN/REGULAR/MAL/CATASTRÓFICO"
+    },
+    {
+      "bloque": 2,
+      "texto": "CALIFICACIÓN DEL ÚLTIMO PERIODO: EXCELENTE/MUY BIEN/REGULAR/MAL/CATASTRÓFICO"
+    },
+    {
+      "bloque": 5,
+      "texto": "Resumir de forma general la interpretación de los indicadores en su conjunto, durante todo el periodo de análisis."
+    },
+    {
+      "bloque": 6,
+      "texto": "Un párrafo de los bienes a proteger (seguridad física, humana, derechos humanos)"
+    },
+    {
+      "bloque": 7,
+      "texto": "Un párrafo sobre la condición estatal vs la municipal"
+    },
+    {
+      "bloque": 8,
+      "texto": "Un párrafo sobre los avances del municipio a lo largo del periodo"
+    },
+    {
+      "bloque": 9,
+      "texto": "[INSERTAR DE DOS A TRES PÁRRAFOS]"
+    },
+    {
+      "bloque": 10,
+      "texto": "Resumir de forma general la interpretación de los indicadores en su conjunto, durante el último período, es decir, los 2 años más recientes."
+    },
+    {
+      "bloque": 11,
+      "texto": "[INSERTAR DE DOS A TRES PÁRRAFOS]"
+    },
+    {
+      "bloque": 12,
+      "texto": "Un párrafo de protección civil,"
+    },
+    {
+      "bloque": 13,
+      "texto": "Uno de condiciones laborales"
+    },
+    {
+      "bloque": 14,
+      "texto": "Uno de inteligencia policial y eficiencia"
+    },
+    {
+      "bloque": 16,
+      "texto": "Cuando se trata del producto de gobierno, en el análisis de indicadores hay dos preguntas por responder: 1) ¿qué dice la información? y 2) ¿qué hacer con esta información? Con base en eso, se hacen propuestas ligeras."
+    },
+    {
+      "bloque": 17,
+      "texto": "Tendencia general – la cosa va bien, mal, o no se ha movido"
+    },
+    {
+      "bloque": 18,
+      "texto": "Qué hacer: atender carencias, o mejorar procesos."
+    },
+    {
+      "bloque": 21,
+      "texto": "Cuando se trata del producto electoral, hay tres preguntas por responder: 1) ¿qué está bien?, 2) ¿qué está mal? y 3) ¿por qué?"
+    },
+    {
+      "bloque": 22,
+      "texto": "Qué está bien. No le muevas, trabajar sobre eso."
+    },
+    {
+      "bloque": 23,
+      "texto": "Qué está mal. Qué hay que mejorar. En protección civil, seguir los tratados. En condiciones laborales, procurar que los policías tengan mejores condiciones para operar. Eficiencia e inteligencia policial: prevención del delito."
+    },
+    {
+      "bloque": 25,
+      "texto": "Las gráficas y las tablas de los indicadores deben visualizar la explicación que se da en el párrafo o los párrafos que le antecedan, pero también deben acompañarse de un párrafo que cierre lo que visualizan."
+    },
+    {
+      "bloque": 27,
+      "texto": "Protección civil: Estándar benchmark. Tratados y leves en la materia."
+    },
+    {
+      "bloque": 28,
+      "texto": "Tratados y leyes en materia protección civil y prevención de desastres"
+    },
+    {
+      "bloque": 29,
+      "texto": "Recomendaciones de Naciones Unidas"
+    },
+    {
+      "bloque": 32,
+      "texto": "Plan o programa de protección civil"
+    },
+    {
+      "bloque": 33,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 34,
+      "texto": "Ver en leyes y tratados cuáles deberían ser los mínimos necesarios."
+    },
+    {
+      "bloque": 35,
+      "texto": "Capacitación en materia de protección civil"
+    },
+    {
+      "bloque": 36,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 37,
+      "texto": "Ver en leyes y tratados cuáles deberían ser los mínimos necesarios."
+    },
+    {
+      "bloque": 39,
+      "texto": "Temas de la capacitación (Protección Civil)"
+    },
+    {
+      "bloque": 40,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 41,
+      "texto": "Ver en leyes y tratados cuáles deberían ser los mínimos necesarios."
+    },
+    {
+      "bloque": 43,
+      "texto": "Condiciones del personal: Estándar benchmark. Condiciones laborales mínimas según leyes."
+    },
+    {
+      "bloque": 44,
+      "texto": "Leyes nacionales."
+    },
+    {
+      "bloque": 45,
+      "texto": "Reportes de UNDOC"
+    },
+    {
+      "bloque": 46,
+      "texto": "Revisiones sistemáticas de la literatura sobre la relación de condiciones laborales de la policía y seguridad pública"
+    },
+    {
+      "bloque": 48,
+      "texto": "Personal destinado a funciones de seguridad pública"
+    },
+    {
+      "bloque": 49,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 50,
+      "texto": "Personal destinado a funciones de seguridad pública"
+    },
+    {
+      "bloque": 51,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 52,
+      "texto": "Evaluaciones de control de confianza (policía)"
+    },
+    {
+      "bloque": 53,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 54,
+      "texto": "Instituto de formación, capacitación y/o profesionalización policial municipal"
+    },
+    {
+      "bloque": 55,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 56,
+      "texto": "Uniformes"
+    },
+    {
+      "bloque": 57,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 59,
+      "texto": "Equipamiento"
+    },
+    {
+      "bloque": 60,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 61,
+      "texto": "Temas de capacitación"
+    },
+    {
+      "bloque": 62,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 64,
+      "texto": "Información e inteligencia policial: Estándar benchmark. Capacidad de generar información suficiente para actividades policiales."
+    },
+    {
+      "bloque": 65,
+      "texto": "Revisiones sistemáticas de patrullaje policial"
+    },
+    {
+      "bloque": 66,
+      "texto": "Hotspots en policing"
+    },
+    {
+      "bloque": 67,
+      "texto": "Policing comunitario"
+    },
+    {
+      "bloque": 68,
+      "texto": "Evaluación y policing"
+    },
+    {
+      "bloque": 69,
+      "texto": "Policing y derechos humanos"
+    },
+    {
+      "bloque": 70,
+      "texto": "CCTV y policing"
+    },
+    {
+      "bloque": 71,
+      "texto": "Mediación de conflictos"
+    },
+    {
+      "bloque": 74,
+      "texto": "Sistemas de información georreferenciados"
+    },
+    {
+      "bloque": 75,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 77,
+      "texto": "Patrullajes estratégicos"
+    },
+    {
+      "bloque": 78,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 80,
+      "texto": "Atención a problemas comunitarios"
+    },
+    {
+      "bloque": 81,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 82,
+      "texto": "Cámaras de vigilancia"
+    },
+    {
+      "bloque": 83,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 85,
+      "texto": "Llamadas procedentes"
+    },
+    {
+      "bloque": 86,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 87,
+      "texto": "Informe anual de actividades"
+    },
+    {
+      "bloque": 88,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 89,
+      "texto": "Eficiencia policial: Estándar benchmark. Eficiencia general – más incremento, seguridad del personal."
+    },
+    {
+      "bloque": 90,
+      "texto": "Estándares de derechos humanos (México, sentencias, Naciones Unidas, COIDH OEA)"
+    },
+    {
+      "bloque": 91,
+      "texto": "Letalidad policial"
+    },
+    {
+      "bloque": 92,
+      "texto": "Problematización: detenciones vs seguridad, cifra negra, eficiencia general, abuso policial"
+    },
+    {
+      "bloque": 94,
+      "texto": "Cambio en el estado de fuerza, egresos y fallecimientos"
+    },
+    {
+      "bloque": 95,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    },
+    {
+      "bloque": 97,
+      "texto": "Puestas a disposición"
+    },
+    {
+      "bloque": 98,
+      "texto": "[INSERTAR ANÁLISIS E INTERCALAR GRÁFICAS Y/O TABLAS]"
+    }
+  ],
+  "lineas": [
+    {
+      "id": "proteccion_civil",
+      "variable": "benchmark_proteccion_civil",
+      "indicadores": [
+        1,
+        2,
+        3
+      ],
+      "temas_requeridos": [
+        "Tratados y leyes en materia de protección civil y prevención de desastres",
+        "Recomendaciones de Naciones Unidas",
+        "Mínimos necesarios para los indicadores 1, 2 y 3"
+      ],
+      "estado_inicial": "pendiente",
+      "fuentes_iniciales": []
+    },
+    {
+      "id": "condiciones_personal",
+      "variable": "benchmark_condiciones_personal",
+      "indicadores": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "temas_requeridos": [
+        "Leyes nacionales y condiciones laborales mínimas",
+        "Reportes de UNODC (UNDOC en el original)",
+        "Revisiones sistemáticas: condiciones laborales de la policía y seguridad pública"
+      ],
+      "estado_inicial": "pendiente",
+      "fuentes_iniciales": []
+    },
+    {
+      "id": "inteligencia_policial",
+      "variable": "benchmark_inteligencia_policial",
+      "indicadores": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "temas_requeridos": [
+        "Revisiones sistemáticas de patrullaje policial",
+        "Hotspots",
+        "Policía comunitaria",
+        "Evaluación policial",
+        "Policía y derechos humanos",
+        "CCTV",
+        "Mediación de conflictos"
+      ],
+      "estado_inicial": "pendiente",
+      "fuentes_iniciales": []
+    },
+    {
+      "id": "eficiencia_policial",
+      "variable": "benchmark_eficiencia_policial",
+      "indicadores": [
+        17,
+        18
+      ],
+      "temas_requeridos": [
+        "Estándares de derechos humanos: México, Naciones Unidas y sistema interamericano",
+        "Letalidad policial",
+        "Detenciones, seguridad, cifra negra, eficiencia y abuso policial"
+      ],
+      "estado_inicial": "pendiente",
+      "fuentes_iniciales": []
+    }
+  ],
+  "regla": "Los benchmarks deben sustentarse con referencias verificadas; no modifican los puntajes ni los candados."
+}

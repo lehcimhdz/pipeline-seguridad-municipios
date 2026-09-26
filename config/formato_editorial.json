@@ -1,0 +1,46 @@
+{
+  "version": "1.0",
+  "unidad": "puntos",
+  "interlineado": "exacto_en_cuerpo_minimo_en_titulos_menores_que_la_fuente",
+  "sangria_mm": 5,
+  "logo_ancho_cm": 5,
+  "medicion": {
+    "titulo": ["Archivo", 26, 40, "center"],
+    "capitulo": ["Archivo Light", 24, 14, "center"],
+    "subcapitulo": ["Archivo Light", 24, 14, "left"],
+    "cuerpo": ["Archivo Light", 12, 16, "both"],
+    "calificacion": ["Archivo Light", 9, 10, "center"],
+    "tabla_titulo": ["Archivo Medium", 12, 14, "center"],
+    "tabla_cuerpo": ["Archivo Light", 11, 14, "center"],
+    "nota": ["Archivo Light", 9, 11, "left"],
+    "bibliografia": ["Archivo Light", 12, 16, "both"]
+  },
+  "anexo": {
+    "titulo": ["Archivo", 30, 36, "center"],
+    "capitulo": ["Archivo Light", 24, 14, "center"],
+    "subcapitulo": ["Archivo Light", 18, 16, "left"],
+    "cuerpo": ["Archivo Light", 9, 10, "both"],
+    "calificacion": ["Archivo Light", 9, 10, "center"],
+    "tabla_titulo": ["Archivo Medium", 11, 14, "center"],
+    "tabla_cuerpo": ["Archivo Light", 9, 10, "center"],
+    "tabla_anios_titulo": ["Archivo Medium", 12, 14, "center"],
+    "tabla_anios_cuerpo": ["Archivo Light", 12, 14, "center"],
+    "nota": ["Archivo Light", 9, 10, "left"],
+    "bibliografia": ["Archivo Light", 12, 16, "both"]
+  },
+  "grafica": {
+    "titulo": ["Archivo Medium", 12, 14],
+    "ejes": ["Archivo Medium", 12, 14],
+    "categorias": ["Archivo Medium", 9, 10],
+    "datos": ["Archivo Light", 9, 10]
+  },
+  "colores_calificacion": {
+    "EXCELENTE": "008000",
+    "MUY BIEN": "548235",
+    "REGULAR": "BF9000",
+    "MAL": "C65911",
+    "CATASTRÓFICO": "C00000",
+    "PENDIENTE": "666666"
+  },
+  "resaltado_json": "FFFF00"
+}

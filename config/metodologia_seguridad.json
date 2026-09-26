@@ -1,10 +1,10 @@
 {
-  "version": "3.0",
+  "version": "1.0",
   "fuente": {
-    "archivo": "config/metodologia_seguridad.json",
-    "sha256": "a85630efb2087def34e0ecf2af2c0b2fd5470ffa17d9a6f94862f456fbc8b32c"
+    "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
+    "sha256": "375e8f58120fffec24367d4b57ced17151f78d175ca17cc7736f008c3d9a01e4"
   },
-  "alcance": "Metodología histórica de seguridad preservada. El machote rzg aporta instrucciones editoriales y de investigación, no nuevos umbrales.",
+  "alcance": "Transcripción de criterios internos; no verifica vigencia legal ni bibliográfica.",
   "criterio_operativo": {
     "prioridad": "Primera regla satisfecha. En binarios, ausencia en el último periodo aplica 2 antes de intermitencia (3).",
     "huecos": "No interpolar huecos entre umbrales ni asignar puntaje si no se satisface un criterio explícito.",
@@ -2407,10 +2407,5 @@
         "Distinguir delitos, faltas administrativas y limitaciones de la fuente."
       ]
     }
-  ],
-  "fuente_historica": {
-    "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "375e8f58120fffec24367d4b57ced17151f78d175ca17cc7736f008c3d9a01e4"
-  },
-  "investigacion_modifica_puntajes": false
+  ]
 }

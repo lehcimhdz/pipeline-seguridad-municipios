@@ -1,0 +1,88 @@
+{
+  "version": "3.0",
+  "alcance": "seguridad_investigacion",
+  "marcador": "{snake_case}",
+  "plantillas": {
+    "medicion": {
+      "archivo": "templates/seguridad_medicion_v3.docx",
+      "sha256": "d87a0854370eac3d60f008c5a167d249e96e75b0f9c64fb5f35851c82bc26643",
+      "origen": "templates/Machote general medicion version final rzg investigación.docx",
+      "origen_sha256": "ac7402dbf1e06061570934aea41fa7798b296abeed376886b61b70b9a98662b3"
+    }
+  },
+  "diccionario": {
+    "archivo": "diccionario_datos_diagnostico_seguridad_municipal.json",
+    "sha256": "0dea892469470bad6e02e673d0b0855fa9eccc04fb8cd6c7c691740b1886680b"
+  },
+  "reglas": {
+    "archivo": "reglas_calificacion.json",
+    "sha256": "83926c774c515af4658e0e260904f926ae6fae9ac8ba2a9bd59259bc6aec9ee7"
+  },
+  "formato": {
+    "archivo": "config/formato_editorial.json",
+    "sha256": "a3e4cfed6102da2dc3f2779e681a4505be4c804bd71be7eaeea450e25593f081"
+  },
+  "investigacion": {
+    "archivo": "config/investigacion_seguridad.json",
+    "sha256": "33f63b46fa1d0dd345e8f23f327284416ca4172a2374cf3ce51876a2a50214aa"
+  },
+  "metodologia": {
+    "archivo": "config/metodologia_seguridad.json",
+    "sha256": "a85630efb2087def34e0ecf2af2c0b2fd5470ffa17d9a6f94862f456fbc8b32c"
+  },
+  "tipografias": [
+    {
+      "archivo": "assets/fonts/Archivo-Regular.ttf",
+      "sha256": "59fbfd8a9bb41301bfe950e7b097fd42d52af224a07761e2c1b2c959a4c9cf9a"
+    },
+    {
+      "archivo": "assets/fonts/Archivo-Medium.ttf",
+      "sha256": "6d42123d7954e72600b2e29284a9c8c95cddb4372b21cd3d2a5e8cd4f231f36b"
+    },
+    {
+      "archivo": "assets/fonts/Archivo-Light.ttf",
+      "sha256": "950fc47e639af87cf403aa6617bffd72bd9cbfdfdacdc14141b374e059586892"
+    },
+    {
+      "archivo": "assets/fonts/Archivo-LightItalic.ttf",
+      "sha256": "1cd2e59510f36ba11015e6efc6e5f08e0506dfea7a59056f0a495e673992f39f"
+    }
+  ],
+  "logotipo": [
+    {
+      "archivo": "assets/institutionworks.jpeg",
+      "sha256": "dde94dd7c8b2b3488cb713ad27fc644ecad82731a8cc684ca923231b70dcf2e3"
+    },
+    {
+      "archivo": "assets/institutionworks_logo.xml",
+      "sha256": "d2ece901eb83adeb3649b5d59600be92234621eda1862dedcebb4a8a708bf6d8"
+    }
+  ],
+  "orden_indicadores": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "verificar_origen_en_cada_ejecucion": true,
+  "correcciones": [
+    "Duplicado de personal sustituido por el indicador 7 CUP, conservando orden 1–18."
+  ],
+  "observaciones": [
+    "El machote nuevo no incluye logo; la base reutiliza el logo de InstitutionWorks aprobado en pipeline-v2, a 5 cm y altura proporcional."
+  ]
+}

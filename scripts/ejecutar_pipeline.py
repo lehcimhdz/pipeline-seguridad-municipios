@@ -15,6 +15,8 @@ from datos_externos import fuente, leer_csv, seleccionar, serie, serie_estatal, 
 from inegi import consultar_poblacion, guardar_respuestas
 from componer_documento import componer
 from salidas import limpiar_salidas
+from contrato import huellas, cargar_contrato
+from investigacion import validar_aporte
 
 ROOT = Path(__file__).resolve().parents[1]
 SUFFIXES = (' Anexo.docx', ' PAQUETE SEGURIDAD.docx',
@@ -94,6 +96,8 @@ def main():
     parser.add_argument('--output', type=Path, default=ROOT / 'output')
     parser.add_argument('--population-csv', type=Path)
     parser.add_argument('--incidence-csv', type=Path)
+    parser.add_argument('--investigacion-json', type=Path,
+                        help='Benchmarks y mínimos con fuentes y revisión declarada; no cambia las reglas de puntuación.')
     parser.add_argument('--inegi-population', action='store_true',
                         help='Consulta población total en la API INEGI usando INEGI_TOKEN.')
     parser.add_argument('--inegi-timeout', type=float, default=30.0)
@@ -104,6 +108,12 @@ def main():
     parser.add_argument('--word', choices=('borrador', 'final', 'ninguno'), default='borrador',
                         help='Genera Word de revisión por defecto; final exige un JSON validado.')
     args = parser.parse_args()
+    try:
+        cargar_contrato()
+        research_input = (validar_aporte(json.loads(args.investigacion_json.read_text(encoding='utf-8')))
+                          if args.investigacion_json else None)
+    except (ValueError, OSError, KeyError) as error:
+        parser.error(str(error))
     municipality, documents = discover(args.input)
     run = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8]
     try:
@@ -167,10 +177,9 @@ def main():
                         'detalle': 'Los años son etiquetas de las tablas. Confirmar su relación con edición censal y años no observados antes de cerrar el diagnóstico.'})
     aggregates = {period: agregar(results, rules) for period, results in evaluations.items()}
     result = {
-        'version': '1.2', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
+        'version': '3.0', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
         'estado_ejecucion': 'requiere_revision',
-        'contrato': {'diccionario_sha256': sha256(dictionary_path), 'plantilla_sha256': sha256(template),
-                     'reglas_sha256': sha256(rules_path), 'normalizaciones_sha256': sha256(mappings_path),
+        'contrato': {**huellas(), 'normalizaciones_sha256': sha256(mappings_path),
                      'fuentes_externas_sha256': sha256(external_config_path)},
         'fuentes': [{'archivo': path.name, 'sha256': sha256(path),
                      'rol': 'primaria' if suffix == SUFFIXES[1] else 'control_cruzado_o_contexto'}
@@ -180,11 +189,15 @@ def main():
         'evidencia_documental': {documents[suffix].name: blocks for suffix, blocks in evidence.items()},
         'validaciones': validations,
     }
+    if research_input is not None:
+        result['investigacion_aportada'] = research_input
+        result['fuentes_investigacion'] = {'archivo': args.investigacion_json.name,
+                                         'sha256': sha256(args.investigacion_json)}
     componer(result, dictionary, rules)
     directory = args.output / 'json'
     directory.mkdir(parents=True, exist_ok=True)
     dest = directory / f'{slug(municipality)}_diagnostico_seguridad_municipal_{run}.json'
-    receipt = directory / f'{dest.stem}_renderizado.json'
+    receipt = directory / f'{slug(municipality)}_seguridad_medicion_{args.word}_renderizado.json'
     result['salida_word'] = {'modo_solicitado': args.word,
                             'recibo_renderizado': str(receipt) if args.word != 'ninguno' else None}
     temporary = dest.with_suffix('.json.tmp')

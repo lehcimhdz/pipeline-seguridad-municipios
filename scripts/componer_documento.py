@@ -1,5 +1,6 @@
 """Contenido editorial reproducible a partir de resultados y evidencia del JSON."""
 from decimal import Decimal, ROUND_HALF_UP
+from investigacion import integrar, narrativas
 
 PERIODOS = {'general': 'Periodo general', 'ultimo_periodo': 'Último periodo'}
 REVISION_EDITORIAL = 'REVISION_EDITORIAL_WORD'
@@ -73,12 +74,31 @@ def componer(result, dictionary, rules):
                      'ultimo_periodo': puntaje(evaluations['ultimo_periodo']['puntaje']),
                      'nota': ' '.join(notes)})
     grades = {p: result['calculos'][p]['calificacion_final'] or 'PENDIENTE' for p in PERIODOS}
-    active = ['municipio', 'estado', 'año_inicial', 'año_final', 'resumen_general', 'resumen_ultimo_periodo'] + [a['variable'] for a in analyses]
+    values.update(calificacion_general=grades['general'], calificacion_ultimo_periodo=grades['ultimo_periodo'])
+    for section, analysis in zip(sections, analyses):
+        number = section['numero']
+        tables = [{'titulo': f"Datos {table['ambito']} — PAQUETE SEGURIDAD, tabla {table['tabla']}",
+                   'ambito': table['ambito'], 'tabla_fuente': table['tabla'], 'filas': table['filas']}
+                  for table in section['tablas']]
+        values[f'tablas_indicador_{number:02d}'] = tables
+        values[f'cierre_indicador_{number:02d}'] = analysis['cierre']
+        scores = [section['evaluaciones'][period]['puntaje'] for period in PERIODOS]
+        values[f'graficas_indicador_{number:02d}'] = ([{
+            'tipo': 'puntajes', 'titulo': f"Indicador {number:02d}: puntajes calculados",
+            'categorias': list(PERIODOS.values()), 'valores': scores,
+            'fuente': 'Cálculo interno a partir de PAQUETE SEGURIDAD; escala 1–5.'
+        }] if any(score is not None for score in scores) else [])
+    sources = result.get('fuentes', [])
+    values['bibliografia'] = '\n\n'.join(
+        f"{source.get('archivo') or source.get('nombre') or source.get('tipo', 'Fuente externa')}. "
+        f"SHA-256: {source['sha256']}." if source.get('sha256') else str(source.get('nombre', 'Fuente externa declarada'))
+        for source in sources) or 'Referencias documentales registradas en el JSON fuente.'
+    active = list(dictionary['variables_documento'])
     result['contenido_word'] = {
-        'version': '1.0', 'perfil': 'diagnostico_desde_evidencia',
+        'version': '3.0', 'perfil': 'seguridad_investigacion_v3',
         'titulo': title,
         'aviso_borrador': 'BORRADOR DE REVISIÓN — evaluación pendiente de validación; no es un diagnóstico final.',
-        'periodo': f"Periodo documental: {values['año_inicial']}–{values['año_final']}. Los años se conservan como etiquetas de las tablas fuente.",
+        'periodo': f"Periodo documental: {values.get('año_inicial', 'pendiente')}–{values.get('año_final', 'pendiente')}. Los años se conservan como etiquetas de las tablas fuente.",
         'calificaciones': grades, 'hoja_computo': rows,
         'promedios_dimension': dimension_values,
         'promedios_generales': {p: result['calculos'][p].get('promedio_tres_dimensiones') for p in PERIODOS},
@@ -87,8 +107,12 @@ def componer(result, dictionary, rules):
         'analisis': analyses,
         'variables_activas': active,
         'variables_no_aplicables': sorted(set(dictionary['variables_documento']) - set(active)),
-        'decision_editorial': 'Se usan los resúmenes y análisis específicos. Se excluyen guía de captura, textos alternativos genéricos, productos de gobierno/electoral y bancos de fuentes sugeridas; se conserva el Anexo 1 metodológico. Esta selección no resuelve sus verificaciones ni acredita vigencia externa.',
+        'decision_editorial': 'Único perfil de medición de SEGURIDAD v3. Investigación en cuatro líneas, mínimos de protección civil, análisis, gráficas y tablas; propuestas y tendencias limitadas a evidencia. Los benchmarks no cambian puntajes.',
     }
+    result['validaciones'] = [v for v in result['validaciones'] if v['codigo'] not in
+        ('INVESTIGACION_PENDIENTE', 'MINIMOS_PROTECCION_CIVIL_PENDIENTES', 'VARIABLES_ACTIVAS_PENDIENTES')]
+    narrativas(result, rules)
+    integrar(result)
     # Quitar únicamente los bloqueos técnicos que esta composición sí resuelve.
     result['validaciones'] = [v for v in result['validaciones']
                               if v['codigo'] not in ('VARIABLES_PENDIENTES', 'COMPOSICION_WORD_PENDIENTE')]
@@ -97,5 +121,5 @@ def componer(result, dictionary, rules):
         result['validaciones'].append({'nivel': 'bloqueante', 'codigo': 'VARIABLES_ACTIVAS_PENDIENTES', 'variables': missing})
     if not any(v['codigo'] == REVISION_EDITORIAL for v in result['validaciones']):
         result['validaciones'].append({'nivel': 'revision', 'codigo': REVISION_EDITORIAL,
-                                      'detalle': 'Revisar prosa, correspondencia de años, criterios y referencias del Anexo 1 antes de validar la versión final.'})
+                                      'detalle': 'Revisar prosa, cobertura, comparaciones, investigación, aplicabilidad de referencias y mínimos antes de validar la versión final.'})
     return result
