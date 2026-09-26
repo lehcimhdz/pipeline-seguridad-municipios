@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "unidad": "puntos",
   "interlineado": "exacto_en_cuerpo_minimo_en_titulos_menores_que_la_fuente",
   "sangria_mm": 5,
@@ -40,7 +40,12 @@
     "REGULAR": "BF9000",
     "MAL": "C65911",
     "CATASTRÓFICO": "C00000",
-    "PENDIENTE": "666666"
+    "PENDIENTE": "666666",
+    "ACREDITACIÓN MUY ALTA": "008000",
+    "ACREDITACIÓN ALTA": "548235",
+    "ACREDITACIÓN PARCIAL": "BF9000",
+    "ACREDITACIÓN BAJA": "C65911",
+    "NO ACREDITADO": "666666"
   },
-  "resaltado_json": "FFFF00"
+  "resaltado_json": null
 }

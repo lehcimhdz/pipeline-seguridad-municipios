@@ -21,8 +21,6 @@ def rich(parent, text=None, size=12, font='Archivo Medium'):
     props = node(node(p, 'pPr', ns=A), 'defRPr', ns=A)
     props.set('sz', str(size * 100))
     ET.SubElement(props, A + 'latin', {'typeface': font})
-    highlight = ET.SubElement(props, A + 'highlight')
-    ET.SubElement(highlight, A + 'srgbClr', {'val': 'FFFF00'})
     if text is not None:
         r = node(p, 'r', ns=A)
         rpr = node(r, 'rPr', ns=A); rpr.set('sz', str(size * 100))
@@ -45,7 +43,7 @@ def agregar_grafica(files, spec, number):
     node(bar, 'barDir', 'col'); node(bar, 'grouping', 'clustered')
     series = node(bar, 'ser')
     node(series, 'idx', 0); node(series, 'order', 0)
-    node(node(series, 'tx'), 'v').text = 'Puntaje calculado (1–5)'
+    node(node(series, 'tx'), 'v').text = 'Calificación documental (1–5)'
     fill = node(node(series, 'spPr'), 'solidFill', ns=A)
     ET.SubElement(fill, A + 'srgbClr', {'val': '1F4E78'})
     cat = node(node(series, 'cat'), 'strLit')
@@ -80,8 +78,7 @@ def agregar_grafica(files, spec, number):
             node(axis, 'crossBetween', 'between'); node(axis, 'majorUnit', 1)
     node(chart, 'plotVisOnly', 1)
     node(chart, 'dispBlanksAs', 'gap')
-    fill = node(node(root, 'spPr'), 'solidFill', ns=A)
-    ET.SubElement(fill, A + 'srgbClr', {'val': 'FFFF00'})
+    node(node(root, 'spPr'), 'noFill', ns=A)
     rich(node(root, 'txPr'), size=12)
     chart_name = f'word/charts/pipeline_{number}.xml'
     files[chart_name] = ET.tostring(root, encoding='UTF-8', xml_declaration=True, standalone=True)

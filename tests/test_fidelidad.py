@@ -9,7 +9,7 @@ from lxml import etree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from fidelidad_machote import validar, controles, W
+from fidelidad_machote import validar, controles, retirar_resaltado_amarillo, W
 from migrar_machote_v3 import validar_encabezados
 
 
@@ -28,6 +28,15 @@ class FidelidadTests(unittest.TestCase):
         root = ET.fromstring(files['word/document.xml'])
         mutation(root)
         files['word/document.xml'] = ET.tostring(root)
+        return files
+
+    def without_yellow(self, files=None):
+        files = deepcopy(self.base if files is None else files)
+        for name, data in list(files.items()):
+            if name.startswith('word/') and name.endswith('.xml'):
+                root = ET.fromstring(data)
+                if retirar_resaltado_amarillo(root):
+                    files[name] = ET.tostring(root)
         return files
 
     def test_preserves_source_structure_lists_and_single_section(self):
@@ -97,7 +106,7 @@ class FidelidadTests(unittest.TestCase):
             validar(self.original, files, self.contract['fidelidad'], salida=True)
 
     def test_only_output_may_add_content_json_style(self):
-        files = deepcopy(self.base)
+        files = self.without_yellow()
         styles = ET.fromstring(files['word/styles.xml'])
         added = ET.SubElement(styles, W + 'style', {W + 'styleId': 'ContenidoJSON', W + 'type': 'character'})
         files['word/styles.xml'] = ET.tostring(styles)
@@ -108,6 +117,46 @@ class FidelidadTests(unittest.TestCase):
         files['word/styles.xml'] = ET.tostring(styles)
         with self.assertRaisesRegex(ValueError, 'estilos ajenos'):
             validar(self.original, files, self.contract['fidelidad'], salida=True)
+
+    def test_only_output_may_remove_original_yellow_marks(self):
+        files = self.without_yellow()
+        self.assertNotEqual(files['word/document.xml'], self.base['word/document.xml'])
+        self.assertTrue(validar(self.original, files, self.contract['fidelidad'], salida=True)['fidelidad_machote_verificada'])
+        with self.assertRaisesRegex(ValueError, 'Contenido fijo|Formato'):
+            validar(self.original, files, self.contract['fidelidad'])
+
+    def test_yellow_exception_does_not_allow_other_format_changes(self):
+        for kind in ('color', 'highlight', 'shd'):
+            files = self.without_yellow()
+            root = ET.fromstring(files['word/document.xml'])
+            props = controles(root)['origen_027'][0].find('.//' + W + 'rPr')
+            if props is None:
+                props = ET.SubElement(controles(root)['origen_027'][0].find('.//' + W + 'r'), W + 'rPr')
+            ET.SubElement(props, W + kind, {W + ('fill' if kind == 'shd' else 'val'): 'FFFF00' if kind == 'shd' else 'yellow' if kind == 'highlight' else 'FF0000'})
+            files['word/document.xml'] = ET.tostring(root)
+            with self.subTest(kind=kind), self.assertRaisesRegex(ValueError, 'Contenido fijo'):
+                validar(self.original, files, self.contract['fidelidad'], salida=True)
+
+    def test_output_removes_yellow_in_original_styles_but_keeps_other_shading(self):
+        originals = deepcopy(self.original)
+        current = deepcopy(self.base)
+        for files in (originals, current):
+            root = ET.fromstring(files['word/styles.xml'])
+            style = root.find(W + 'style')
+            props = style.find(W + 'rPr')
+            if props is None:
+                props = ET.SubElement(style, W + 'rPr')
+            ET.SubElement(props, W + 'highlight', {W + 'val': 'yellow'})
+            ET.SubElement(props, W + 'shd', {W + 'fill': 'DAE3F3'})
+            files['word/styles.xml'] = ET.tostring(root)
+        current = self.without_yellow(current)
+        self.assertTrue(validar(originals, current, self.contract['fidelidad'], salida=True)['fidelidad_machote_verificada'])
+        styles = ET.fromstring(current['word/styles.xml'])
+        shade = styles.find(W + 'style/' + W + 'rPr/' + W + 'shd')
+        shade.getparent().remove(shade)
+        current['word/styles.xml'] = ET.tostring(styles)
+        with self.assertRaisesRegex(ValueError, 'estilo original'):
+            validar(originals, current, self.contract['fidelidad'], salida=True)
 
     def test_heading_validation_accepts_current_aliases_and_explicit_duplicate(self):
         blocks = list(ET.fromstring(self.original['word/document.xml']).find(W + 'body'))

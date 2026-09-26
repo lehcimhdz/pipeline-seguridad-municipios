@@ -1,15 +1,15 @@
 {
-  "version": "3.1",
+  "version": "3.2",
   "fuente": {
     "archivo": "config/metodologia_seguridad.json",
     "sha256": "a85630efb2087def34e0ecf2af2c0b2fd5470ffa17d9a6f94862f456fbc8b32c"
   },
-  "alcance": "Criterios históricos conservados; último periodo común de dos años consecutivos conforme al machote.",
+  "alcance": "Puntaje observado según fichas y calificación documental siempre emitida; la falta de evidencia no acredita desempeño deficiente.",
   "criterio_operativo": {
     "prioridad": "Primera regla satisfecha. En binarios, ausencia en el último periodo aplica 2 antes de intermitencia (3).",
-    "huecos": "No interpolar huecos entre umbrales ni asignar puntaje si no se satisface un criterio explícito.",
-    "faltantes": "Una celda vacía no demuestra falta de respuesta municipal; requiere clasificación.",
-    "periodos": "General: todas las observaciones documentadas. Último: dos etiquetas temporales más recientes, sin saltar vacíos.",
+    "huecos": "No interpolar: puntaje observado null si no hay criterio inequívoco; aplicar la política documental declarada.",
+    "faltantes": "Una celda vacía no demuestra falta de respuesta ni desempeño deficiente; conservar motivo y asignar nota documental.",
+    "periodos": "General: observaciones documentadas. Último: dos años calendario consecutivos comunes a los 18 indicadores.",
     "cobertura": "No inferir que una variable no existía en las ediciones ausentes; declarar cobertura observada.",
     "redondeo": "Agregación: ROUND_HALF_UP a dos decimales para clasificar; precisión interna conservada.",
     "ajustes": "No se aplican ajustes discrecionales automáticos."
@@ -2416,6 +2416,46 @@
   "periodo_reciente": {
     "criterio": "dos_anios_consecutivos",
     "anclaje": "maximo_anio_municipal_documental",
-    "faltantes": "null; no sustituir un año ausente por una observación anterior"
+    "faltantes": "puntaje observado null y calificación documental no acreditada; no sustituir años"
+  },
+  "calificacion_documental": {
+    "version": "1.0",
+    "piso_no_acreditado": 1,
+    "techo_sensibilidad": 5,
+    "pesos_dimension": {
+      "proteccion_civil": 1,
+      "condiciones_del_personal": 1,
+      "inteligencia_y_eficiencia_policial": 1
+    },
+    "escala_documental": [
+      {
+        "minimo": 4.5,
+        "calificacion": "ACREDITACIÓN MUY ALTA"
+      },
+      {
+        "minimo": 3.5,
+        "calificacion": "ACREDITACIÓN ALTA"
+      },
+      {
+        "minimo": 2.5,
+        "calificacion": "ACREDITACIÓN PARCIAL"
+      },
+      {
+        "minimo": 1.5,
+        "calificacion": "ACREDITACIÓN BAJA"
+      },
+      {
+        "minimo": 1,
+        "calificacion": "NO ACREDITADO"
+      }
+    ],
+    "candados": {
+      "dimension_colapsada_minimo": 1.5,
+      "excelente_dimension_minimo": 4,
+      "muy_bien_dimension_minimo": 2.5,
+      "falta_respuesta_umbral": 10
+    },
+    "interpretacion": "El puntaje asignado acredita evidencia contra criterios internos; no demuestra desempeño deficiente cuando falta evidencia. El puntaje observado permanece null. No es una acreditación oficial ni certificación legal.",
+    "sensibilidad": "Rango de promedios antes de candados, con faltantes en 1 y 5; no es intervalo de confianza."
   }
 }

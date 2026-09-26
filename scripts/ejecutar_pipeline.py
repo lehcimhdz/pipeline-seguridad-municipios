@@ -11,6 +11,7 @@ from uuid import uuid4
 
 from documentos import leer_docx, seccion_seguridad, sha256
 from calificar import agregar, calificar_indicador, definir_periodos, dependencias
+from calificacion_documental import agregar_documental, asignar_calificaciones, validar_politica
 from datos_externos import fuente, leer_csv, seleccionar, serie, serie_estatal, validar_campos
 from inegi import consultar_poblacion, guardar_respuestas
 from componer_documento import componer
@@ -91,6 +92,7 @@ def cargar_externos(args, run):
 
 
 def evaluar_periodos(sections, rules, mappings=None, external=None):
+    validar_politica(rules)
     periods = definir_periodos(sections)
     evaluations = {}
     for period in ('general', 'ultimo_periodo'):
@@ -101,6 +103,7 @@ def evaluar_periodos(sections, rules, mappings=None, external=None):
             for section, ficha in zip(sections, rules['fichas'])
         }
         dependencias(calculations)
+        asignar_calificaciones(calculations, rules)
         evaluations[period] = calculations
     return periods, evaluations
 
@@ -171,8 +174,11 @@ def main():
                                 'detalle': 'Diferencia documental detectada; revisar si es sustantiva o de formato.'})
         for period, calculation in section['evaluaciones'].items():
             if calculation['puntaje'] is None:
-                validations.append({'nivel': 'bloqueante', 'codigo': 'INDICADOR_PENDIENTE',
-                                    'indicador': number, 'periodo': period, 'detalle': calculation['motivo']})
+                validations.append({'nivel': 'revision', 'codigo': 'PUNTAJE_NO_ACREDITADO',
+                                    'indicador': number, 'periodo': period,
+                                    'detalle': (f"Indicador {number}, {period}: nota documental "
+                                                f"{calculation['puntaje_asignado']}/5; puntaje observado no disponible. "
+                                                + calculation['motivo'])})
     years = periods['general']['años_objetivo']
     values = {key: None for key in dictionary['variables_documento']}
     values.update(municipio=municipality, estado=state)
@@ -183,9 +189,9 @@ def main():
                        'año_ultimo_periodo_final': periods['ultimo_periodo']['año_final']})
     validations.append({'nivel': 'revision', 'codigo': 'COBERTURA_EDICIONES',
                         'detalle': 'Los años son etiquetas de las tablas. El último periodo exige los mismos dos años calendario consecutivos en los 18 indicadores. Confirmar la relación entre esas etiquetas y los años de referencia de cada edición censal antes de cerrar el diagnóstico.'})
-    aggregates = {period: agregar(results, rules) for period, results in evaluations.items()}
+    aggregates = {period: agregar_documental(results, rules) for period, results in evaluations.items()}
     result = {
-        'version': '3.1', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
+        'version': '3.2', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
         'estado_ejecucion': 'requiere_revision',
         'contrato': {**huellas(), 'normalizaciones_sha256': sha256(mappings_path),
                      'fuentes_externas_sha256': sha256(external_config_path)},
@@ -218,7 +224,10 @@ def main():
         temporary.unlink(missing_ok=True)
     print(f'JSON: {dest}')
     for period, results in evaluations.items():
-        print(f'{period}: {sum(value["puntaje"] is not None for value in results.values())}/18 indicadores calculados.')
+        aggregate = aggregates[period]
+        print(f'{period}: 18/18 notas documentales; '
+              f'{sum(value["puntaje"] is not None for value in results.values())}/18 puntajes observados. '
+              f"Calificación: {aggregate['promedio_tres_dimensiones']} — {aggregate['calificacion_final']}.")
     print('Estado: requiere_revision. Los motivos específicos constan en validaciones.')
     if args.word != 'ninguno':
         from renderizar_word import renderizar, guardar_recibo
@@ -228,7 +237,7 @@ def main():
         except (ValueError, OSError) as error:
             parser.error(f'JSON conservado; no se completó la salida Word: {error}')
         print(f"Word ({args.word}): {report['archivo']}")
-        print(f"Resaltado amarillo verificado: {report['segmentos_json']} segmentos. Recibo: {receipt}")
+        print(f"Sin resaltado amarillo: {report['segmentos_json']} segmentos JSON trazables. Recibo: {receipt}")
         removidos = limpiar_salidas(directory, args.output / 'word', json_actual=dest,
                                     word_actual=Path(report['archivo']), recibo_actual=receipt)
     else:

@@ -14,6 +14,7 @@ from documentos import sha256
 from editorial import FORMATO
 from fuentes_word import incrustar, FONTS
 from fidelidad_machote import envolver, validar as validar_fidelidad
+from estructurar_reglas import construir
 
 ROOT = Path(__file__).resolve().parents[1]
 W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
@@ -49,6 +50,8 @@ TEXT_FIELDS = {
 }
 SLOTS = {33: 1, 36: 2, 40: 3, 49: 4, 51: 7, 53: 5, 55: 6, 57: 8, 60: 9,
          62: 10, 75: 11, 78: 12, 81: 13, 83: 14, 86: 15, 88: 16, 95: 17, 98: 18}
+METHOD_FIELDS = ['metodologia_calificacion', 'cobertura_general', 'cobertura_ultimo_periodo',
+                 'sensibilidad_general', 'sensibilidad_ultimo_periodo']
 ALIASES_ENCABEZADOS = {
     3: ('Temas de la capacitación (Protección Civil)',),
     5: ('Evaluaciones de control de confianza (policía)',),
@@ -143,7 +146,7 @@ def migrar(source):
     dictionary = json.loads(dictionary_path.read_text(encoding='utf-8'))
     rules_path = ROOT / 'reglas_calificacion.json'
     methodology = ROOT / 'config/metodologia_seguridad.json'
-    historical = json.loads(methodology.read_text(encoding='utf-8'))
+    rules = construir()
     catalog = dictionary['catalogo_indicadores']
     if [item['id'] for item in catalog] != list(range(1, 19)):
         raise ValueError('Se requieren los 18 indicadores del catálogo.')
@@ -151,7 +154,7 @@ def migrar(source):
     research = {'version': '1.1', 'origen': str(source.relative_to(ROOT)), 'origen_sha256': sha256(source),
                 'instrucciones_originales': notes, 'lineas': [],
                 'regla': 'Cada tema conserva su posición y requiere evidencia citada. Los benchmarks no modifican puntajes.'}
-    append_fields = {0: ['municipio', 'estado']}
+    append_fields = {0: ['municipio', 'estado'], 3: METHOD_FIELDS}
     for index, code, ids, topics in GROUPS:
         append_fields[index] = ['benchmark_' + code]
         parts = []
@@ -173,6 +176,7 @@ def migrar(source):
             'Trasladar bloques 50/51 (personal duplicado) después de 55; título cambia a CUP.',
             'Identidad municipal bajo SEGURIDAD y bibliografía al final; sin portada añadida.',
             'Instrucciones de redacción sustituidas por variables en la misma posición.',
+            'Metodología, cobertura y sensibilidad en el bloque inicial; dos calificaciones documentales explícitas por indicador.',
             'Temas de investigación y encabezados conservados con su desarrollo inmediatamente después.']}
     controls = {}
     for i in order:
@@ -193,7 +197,8 @@ def migrar(source):
             action = 'parametrizar'
         elif i in SLOTS:
             number = SLOTS[i]
-            keys = [f'{kind}_indicador_{number:02d}' for kind in ('analisis', 'graficas', 'tablas', 'cierre')]
+            keys = [f'calificacion_indicador_{number:02d}_{period}' for period in ('general', 'ultimo_periodo')]
+            keys += [f'{kind}_indicador_{number:02d}' for kind in ('analisis', 'graficas', 'tablas', 'cierre')]
             content.remove(content[0])
             for key in keys:
                 content.append(copiar_texto(source_block, '{' + key + '}'))
@@ -245,8 +250,13 @@ def migrar(source):
             'origen_contenido': 'investigacion_verificada' if key in research_keys else 'evidencia_documental',
             'bloques_origen': [b['indice'] for b in manifest['bloques'] if key in b['variables']],
             'obligatorio': not key.startswith('graficas_')}
+        if key in METHOD_FIELDS or key.startswith('calificacion_'):
+            variables[key]['origen_contenido'] = 'metodologia_documental_calculada'
+            variables[key]['reglas'] = 'reglas_calificacion.json#/calificacion_documental'
+            variables[key]['descripcion'] = (
+                'Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado.')
     dictionary['variables_documento'] = variables
-    dictionary['metadatos'].update(version='3.1', fuente=str(source.relative_to(ROOT)), documento_modificado=False,
+    dictionary['metadatos'].update(version='3.2', fuente=str(source.relative_to(ROOT)), documento_modificado=False,
         alcance_activo='SEGURIDAD parametrizada sobre el original: estructura conservada y cada instrucción trazable.')
     dictionary['metadatos']['cobertura_verificada'] = {'marcadores_de_variables_unicos': len(variables),
         'apariciones_de_variables': sum(counts.values()), 'indicadores': 18, 'dimensiones': 3,
@@ -255,19 +265,67 @@ def migrar(source):
         'formato_de_clave_json': 'nombre_variable', 'regla': 'Llaves simples, snake_case ASCII y posición del original.'}
     dictionary['marcadores_no_tratados_como_variables'] = {}
     dictionary['modelos_reutilizables']['investigacion_v3']['apartados'] = 'object por línea, claves del contrato y textos con URL citada'
+    dictionary['modelos_reutilizables']['calificacion_documental'] = {
+        'puntaje': 'integer 1–5 o null; sólo evidencia observable y criterio inequívoco',
+        'puntaje_asignado': 'integer 1–5 siempre; puntaje observado o base documental no acreditada',
+        'base_calificacion': 'observado | no_acreditado',
+        'motivo_asignacion': 'string; criterio o faltante que justifica la nota',
+        'cobertura': 'Indicadores observados y porcentaje simple/ponderado; no probabilidad de certeza',
+        'sensibilidad': 'Rango de promedios con pendientes en 1/5; no intervalo de confianza',
+    }
+    dictionary['convenciones']['valores_pendientes']['regla'] = (
+        'No sustituir el dato ni el puntaje observado null. La política documental asigna por separado '
+        'puntaje_asignado=1 con base_calificacion=no_acreditado y motivo; no implica desempeño deficiente.')
+    dictionary['catalogos']['calificaciones_documentales'] = deepcopy(rules['calificacion_documental']['escala_documental'])
+    dictionary['modelos_reutilizables']['grafica_word_v3']['valores'] = 'array de integer 1–5: puntaje_asignado de cada periodo'
+    dictionary['modelos_reutilizables']['grafica_word_v3']['fuente'] = (
+        'string; identifica la metodología documental y los periodos con asignación por no acreditación')
+    dictionary['modelos_reutilizables']['evaluacion_indicador']['alcance'] = (
+        'Esquema histórico de referencia; la ejecución v3.2 utiliza calificacion_documental con puntaje y puntaje_asignado separados. '
+        'No se aplican ajustes discrecionales ni se infiere falta de respuesta de un vacío.')
+    dictionary['calculos_derivados']['estructura'].update(
+        modelo_comun='resultado_documental',
+        regla='Ambos periodos tienen nota documental, cobertura y sensibilidad; la evidencia faltante permanece null.')
+    dictionary['calculos_derivados']['resultado_evaluacion']['alcance'] = (
+        'Referencia histórica no operativa de la agregación anterior; ver resultado_documental y reglas activas.')
+    dictionary['calculos_derivados']['resultado_documental'] = {
+        'promedios_dimension': 'Promedio de puntaje_asignado de todos los indicadores de cada dimensión',
+        'promedio_tres_dimensiones': 'sum(promedio_dimension * peso_dimension) / sum(pesos_dimension)',
+        'calificacion_final': 'Categoría de escala_documental después de candados; siempre emitida',
+        'categoria_desempeno': 'Categoría histórica sólo con 18 puntajes observados; null si existe algún faltante',
+        'cobertura': 'observados, asignados, total, no_acreditados, porcentaje y ponderada_porcentaje',
+        'sensibilidad': 'minimo y maximo del promedio antes de candados con no acreditados en 1 y 5',
+        'indicadores_pendientes': 'IDs sin puntaje observado; cada uno sí tiene puntaje_asignado',
+        'referencia_parametros': 'reglas_calificacion.json#/calificacion_documental',
+    }
+    dictionary['tratamiento_datos_faltantes']['pendiente_de_captura']['accion'] = (
+        'Conservar dato y puntaje observado null; asignar la base documental con motivo explícito.')
+    dictionary['tratamiento_datos_faltantes']['sin_respuesta_municipal']['accion_documental'] = (
+        'No inferir esta condición de vacíos. El candado requiere clasificación explícita; no se activa automáticamente.')
+    dictionary['tratamiento_datos_faltantes']['variable_no_existente_en_edicion']['accion_documental'] = (
+        'Conservar null y documentar la ausencia. No sustituir ni excluir años del intervalo reciente común; '
+        'asignar la base documental si impide comprobar el criterio.')
+    dictionary['tratamiento_datos_faltantes']['no_aplicable']['accion'] = (
+        'Conservar explicación y puntaje observado null, con nota documental de no acreditación hasta resolver la aplicabilidad; '
+        'no excluir indicadores ni cambiar denominadores.')
+    dictionary['tratamiento_datos_faltantes']['serie_sin_observaciones_evaluables']['accion'] = (
+        'Conservar puntaje observado null y motivo; emitir puntaje_asignado conforme a la política documental.')
+    for decision in dictionary['decisiones_metodologicas_por_confirmar']:
+        decision['alcance'] = 'Antecedente histórico; prevalecen las decisiones activas versionadas en reglas_calificacion.json.'
+    for validation in dictionary['validaciones_finales']:
+        if validation['id'] == 'cobertura_periodos':
+            validation['regla'] = '18 notas documentales por periodo, conservando null y motivo en todo puntaje observado no acreditado.'
+        elif validation['id'] == 'puntajes_consistentes':
+            validation['regla'] = 'Variables, hoja y gráficas usan el mismo puntaje_asignado; nunca lo presentan como observado si falta evidencia.'
     dump(dictionary_path, dictionary)
-    rules = deepcopy(historical)
-    rules['version'] = '3.1'
-    rules['fuente_historica'] = historical['fuente']
-    rules['fuente'] = {'archivo': str(methodology.relative_to(ROOT)), 'sha256': sha256(methodology)}
-    rules['alcance'] = 'Criterios históricos conservados; último periodo común de dos años consecutivos conforme al machote.'
-    rules['investigacion_modifica_puntajes'] = False
-    rules['periodo_reciente'] = {'criterio': 'dos_anios_consecutivos', 'anclaje': 'maximo_anio_municipal_documental',
-        'faltantes': 'null; no sustituir un año ausente por una observación anterior'}
     dump(rules_path, rules)
     research_path = ROOT / 'config/investigacion_seguridad.json'
     dump(research_path, research)
-    contract = {'version': '3.1', 'alcance': 'seguridad_investigacion', 'marcador': '{snake_case}',
+    contract = {'version': '3.2', 'alcance': 'seguridad_investigacion', 'marcador': '{snake_case}',
+        'politica_calificacion': {'archivo': 'reglas_calificacion.json', 'seccion': 'calificacion_documental',
+                                 'puntajes_documentales_siempre': True, 'puntajes_observados_admiten_null': True},
+        'contenido_generado': {'resaltado_amarillo': False, 'trazabilidad_estilo': 'ContenidoJSON',
+                              'excepcion_fidelidad_salida': 'Eliminar exclusivamente resaltado/sombreado amarillo, también heredado del original; no modificar el DOCX de origen.'},
         'plantillas': {'medicion': {'archivo': str(target.relative_to(ROOT)), 'sha256': sha256(target),
                                   'origen': str(source.relative_to(ROOT)), 'origen_sha256': sha256(source)}},
         'diccionario': {'archivo': str(dictionary_path.relative_to(ROOT)), 'sha256': sha256(dictionary_path)},

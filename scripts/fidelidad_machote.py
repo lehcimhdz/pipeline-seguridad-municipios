@@ -12,6 +12,24 @@ def firma(node):
             tuple(firma(child) for child in node))
 
 
+def retirar_resaltado_amarillo(root):
+    """Excepción editorial de salida: quitar sólo marcas amarillas de revisión."""
+    removed = 0
+    for node in list(root.iter()):
+        if ((node.tag == W + 'highlight' and node.get(W + 'val') == 'yellow')
+                or (node.tag == W + 'shd' and node.get(W + 'fill', '').upper() == 'FFFF00')):
+            node.getparent().remove(node)
+            removed += 1
+    return removed
+
+
+def firma_esperada(node, salida=False):
+    if salida and node is not None:
+        node = deepcopy(node)
+        retirar_resaltado_amarillo(node)
+    return firma(node)
+
+
 def envolver(block, index):
     control = ET.Element(W + 'sdt')
     props = ET.SubElement(control, W + 'sdtPr')
@@ -34,7 +52,7 @@ def controles(root):
 def validar_estilos(original_files, actual_files, salida=False):
     source = ET.fromstring(original_files['word/styles.xml'])
     current = ET.fromstring(actual_files['word/styles.xml'])
-    if source.attrib != current.attrib or [firma(n) for n in source if n.tag != W + 'style'] != [
+    if source.attrib != current.attrib or [firma_esperada(n, salida) for n in source if n.tag != W + 'style'] != [
             firma(n) for n in current if n.tag != W + 'style']:
         raise ValueError('Cambió la configuración global de estilos del machote original.')
     original_styles = {node.get(W + 'styleId'): node for node in source.findall(W + 'style')}
@@ -42,7 +60,7 @@ def validar_estilos(original_files, actual_files, salida=False):
     if len(current_styles) != len(current.findall(W + 'style')) or None in current_styles:
         raise ValueError('Estilos sin identificador único.')
     for style_id, node in original_styles.items():
-        if firma(node) != firma(current_styles.get(style_id)):
+        if firma_esperada(node, salida) != firma(current_styles.get(style_id)):
             raise ValueError(f'Cambió el estilo original del machote: {style_id}.')
     allowed = {'ContenidoJSON'} if salida else set()
     if set(current_styles) - set(original_styles) - allowed:
@@ -60,12 +78,14 @@ def validar(original_files, actual_files, manifest, salida=False):
         raise ValueError('El Word cambió el orden o perdió bloques del machote original.')
     if any(n.tag not in (W + 'sdt', W + 'sectPr') for n in actual_body):
         raise ValueError('Contenido agregado fuera de las posiciones del machote.')
-    if firma(original_body.find(W + 'sectPr')) != firma(actual_body.find(W + 'sectPr')):
+    if firma_esperada(original_body.find(W + 'sectPr'), salida) != firma(actual_body.find(W + 'sectPr')):
         raise ValueError('Cambió la configuración de página del machote original.')
     validar_estilos(original_files, actual_files, salida)
     for name, data in original_files.items():
         if name == 'word/numbering.xml' or name.startswith(('word/header', 'word/footer')):
-            if actual_files.get(name) != data:
+            current = actual_files.get(name)
+            equal = (current is not None and firma_esperada(ET.fromstring(data), True) == firma(ET.fromstring(current))) if salida else current == data
+            if not equal:
                 raise ValueError(f'Cambió el formato de origen: {name}.')
     for item in manifest['bloques']:
         index = item['indice']
@@ -75,9 +95,9 @@ def validar(original_files, actual_files, manifest, salida=False):
             raise ValueError(f'Bloque del machote vacío: {index}.')
         first = content[0]
         if item['accion'] in ('conservar', 'ampliar'):
-            if firma(source) != firma(first):
+            if firma_esperada(source, salida) != firma(first):
                 raise ValueError(f'Contenido fijo del machote alterado: bloque {index}.')
-        elif firma(source.find(W + 'pPr')) != firma(first.find(W + 'pPr')):
+        elif firma_esperada(source.find(W + 'pPr'), salida) != firma(first.find(W + 'pPr')):
             raise ValueError(f'Formato o numeración original alterados: bloque {index}.')
         if not salida and item['accion'] == 'conservar' and len(content) != 1:
             raise ValueError(f'Contenido inesperado en bloque original {index}.')

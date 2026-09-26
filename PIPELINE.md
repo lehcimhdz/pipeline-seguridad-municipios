@@ -1,4 +1,4 @@
-# Pipeline de seguridad municipal — v3.1
+# Pipeline de seguridad municipal — v3.2
 
 ## Alcance y origen
 
@@ -16,6 +16,10 @@ El original añade investigación, no nuevos umbrales. Se conservan
 **18 indicadores, 90 criterios, tres dimensiones de puntuación y dos periodos**.
 Las cuatro líneas de investigación son bloques editoriales independientes
 de las dimensiones. No se generan un anexo adicional ni una plataforma electoral.
+
+Siempre se asignan 18 notas documentales por periodo, separadas de los
+puntajes observados que pueden seguir pendientes. La política, fórmula y
+parámetros se explican en [METODOLOGIA_CALIFICACION.md](METODOLOGIA_CALIFICACION.md).
 
 Las orientaciones de gobierno y prioridades del machote se expresan con
 evidencia disponible. Un puntaje interno no demuestra causalidad, cumplimiento
@@ -90,21 +94,25 @@ No se incorpora portada ni logotipo ausentes en el nuevo machote.
 
 [config/metodologia_seguridad.json](config/metodologia_seguridad.json) conserva
 los criterios históricos. [reglas_calificacion.json](reglas_calificacion.json)
-pasa a v3.1 sin cambiar los 90 criterios, sus umbrales, dimensiones ni
-agregación. Se corrige la selección del último periodo: dos años calendario
+es la configuración activa v3.2: conserva las fichas y añade la política
+`calificacion_documental`. La migración conserva las decisiones activas,
+sin restablecer parámetros desde la referencia histórica. Cambiar reglas
+obliga a migrar de nuevo, actualizar el contrato y regenerar resultados.
+El último periodo comprende dos años calendario
 consecutivos, comunes a todos los indicadores, terminados en el último año
 municipal documentado. Si falta cualquiera de esos años, el puntaje queda
-pendiente; una observación anterior no reemplaza al año faltante.
+observado en `null`; se asigna un piso documental de 1/5 con motivo explícito.
+Una observación anterior no reemplaza al año faltante.
 `investigacion_modifica_puntajes=false`: un benchmark no cambia puntajes
 automáticamente. Una modificación metodológica requiere decisión explícita.
 
 `normalizar_plantilla.py` y `contextualizar_variables.py` remiten a la
-migración v3.1. Repetirla con el mismo original produce la misma base y contrato.
+migración v3.2. Repetirla con los mismos insumos y reglas produce la misma base y contrato.
 
 ## Variables y composición
 
 El [diccionario](diccionario_datos_diagnostico_seguridad_municipal.json)
-declara **116 variables y 116 apariciones**, con llaves simples y snake_case ASCII:
+declara **157 variables y 157 apariciones**, con llaves simples y snake_case ASCII:
 
 - `{municipio}`, `{estado}`, calificaciones y resúmenes por periodo.
 - Bienes a proteger, comparación estatal/municipal, avances y resúmenes
@@ -115,7 +123,11 @@ declara **116 variables y 116 apariciones**, con llaves simples y snake_case ASC
   inmediatamente después de la instrucción temática conservada.
 - Por cada indicador: `{analisis_indicador_XX}`,
   `{graficas_indicador_XX}`, `{tablas_indicador_XX}`,
-  `{cierre_indicador_XX}`.
+  `{cierre_indicador_XX}`, `{calificacion_indicador_XX_general}` y
+  `{calificacion_indicador_XX_ultimo_periodo}`.
+- `{metodologia_calificacion}`, `{cobertura_general}`,
+  `{cobertura_ultimo_periodo}`, `{sensibilidad_general}` y
+  `{sensibilidad_ultimo_periodo}`: explican la nota y sus límites en el propio Word.
 - `{bibliografia}`.
 
 Los análisis identifican periodo, criterio, puntaje y pendientes.
@@ -125,14 +137,26 @@ Los cierres explican hallazgos y límites específicos de cada indicador,
 en lugar de repetir un mismo párrafo. No atribuyen causas por una variación
 de conteos ni confunden bajas de personal con letalidad policial.
 Las tablas son estructuras de filas/celdas. Las gráficas nativas de Word
-comparan puntajes internos de ambos periodos: **no son series de incidencia
-ni benchmarks**. Los puntos pendientes se omiten, nunca se dibujan como cero.
+comparan notas documentales asignadas de ambos periodos: **no son series de
+incidencia ni benchmarks**. Un 1 asignado por evidencia insuficiente no es
+un cero ni prueba mal desempeño; la nota y la explicación conservan su origen.
 
 El JSON conserva hoja de cómputo y promedios para auditoría.
 `periodos_evaluacion` documenta el intervalo común reciente; las evaluaciones
 conservan años observados, evaluados y faltantes por ámbito cuando corresponde.
-Falta de datos no equivale a desempeño deficiente; no se presenta un promedio
-parcial como calificación final. Las narrativas requieren revisión editorial.
+Falta de datos no equivale a desempeño deficiente. Se conserva `puntaje`
+como observado o `null` y se añaden `puntaje_asignado`, `base_calificacion`
+y `motivo_asignacion`. El promedio documental incluye siempre los 18
+indicadores, no sólo los favorables o disponibles. La categoría tradicional
+de desempeño se publica por separado sólo con los 18 puntajes observados.
+Las narrativas requieren revisión editorial.
+
+Con pesos predeterminados iguales para las tres dimensiones, se promedian
+primero sus indicadores y después sus tres promedios. La escala documental
+va de NO ACREDITADO a ACREDITACIÓN MUY ALTA; los candados limitan la categoría,
+no el promedio mostrado. La cobertura ponderada respeta esos mismos pesos.
+El rango de sensibilidad reemplaza los puntajes no observados por 1 y 5
+antes de los candados: no es intervalo de confianza ni estimación del desempeño.
 
 ## Investigación revisada
 
@@ -236,9 +260,9 @@ No requiere API de IA ni ejecuta investigación web automática.
     python3 scripts/ejecutar_pipeline.py
 
 Flujo: validar contrato y base → validar cuatro Word → extraer →
-fijar intervalos comunes y calificar → componer análisis específicos e
+fijar intervalos comunes → puntuar evidencia y asignar notas documentales → componer análisis específicos e
 integrar investigación por tema → JSON → rellenar las posiciones del
-machote y auditar fidelidad/amarillo → recibo → limpiar.
+machote y auditar fidelidad/ausencia de amarillo → recibo → limpiar.
 Diagrama editable: [flujo_pipeline.drawio](flujo_pipeline.drawio).
 
     output/json/{municipio}_diagnostico_seguridad_municipal_{corrida}.json
@@ -248,7 +272,7 @@ Diagrama editable: [flujo_pipeline.drawio](flujo_pipeline.drawio).
 El JSON es una instancia municipal, no una copia del diccionario:
 contiene evidencia, cálculos, validaciones, investigación, contrato y
 `valores_plantilla`. El recibo vincula SHA-256 de JSON/Word y registra
-las auditorías de resaltado y fidelidad. El nombre del Word es estable por municipio,
+las auditorías de ausencia de amarillo y fidelidad. El nombre del Word es estable por municipio,
 documento y modo; el ID de corrida sólo aparece en el JSON trazable.
 
 El modo predeterminado es borrador. `--word ninguno` genera únicamente JSON.
@@ -259,10 +283,10 @@ Para renderizar una instancia compatible:
 Los JSON anteriores no se renderizan contra el nuevo contrato:
 deben regenerarse desde la evidencia.
 
-## Formato editorial y amarillo
+## Formato editorial sin resaltado amarillo
 
 [config/formato_editorial.json](config/formato_editorial.json) conserva el
-perfil del manual de Mediciones de Funcionamiento Municipal. En v3.1,
+perfil del manual de Mediciones de Funcionamiento Municipal. En v3.2,
 el texto que sustituye una variable hereda la sangría, lista, color y
 formato local de su posición en el original. Los títulos y contenido fijo
 se conservan; los párrafos adicionales, tablas y gráficas usan el perfil
@@ -292,27 +316,40 @@ portada; los recursos históricos de `assets/` no alteran la estructura activa.
 La fidelidad es estructural: la paginación final puede crecer al incorporar
 análisis, investigación, tablas y gráficas.
 
-Todo contenido agregado desde JSON lleva amarillo: texto con
-`w:highlight` y sombreado `FFFF00`, celdas y fondo de gráficas.
-La auditoría reabre el DOCX y rechaza inserciones sin resaltado, bloques
+El Word de salida no contiene resaltado amarillo en texto, celdas ni fondo
+de gráficas. También se retiran en la salida las marcas amarillas heredadas
+del original; es una excepción de fidelidad explícita, junto con las
+adaptaciones editoriales documentadas. No se cambian los demás colores ni
+se borra la identificación técnica de contenido procedente del JSON.
+La auditoría reabre el DOCX y rechaza marcas amarillas, bloques
 perdidos/reordenados fuera de la adaptación declarada o cambios de formato
 fijo y configuración de página.
 La plantilla original no se modifica al procesar municipios.
 
 ## Revisión, final y limpieza
 
-Un final exige `estado_ejecucion=validado`, ninguna revisión/bloqueo,
-18 puntajes por periodo, ambas calificaciones, cuatro benchmarks revisados,
+Un final documental exige `estado_ejecucion=validado`, ninguna revisión/bloqueo
+abierto, 18 notas asignadas por periodo, ambas calificaciones, cuatro benchmarks revisados,
 quince apartados y tres mínimos. Se comprueban tipos, identidad, contrato,
 intervalo reciente común, fidelidad, tablas frente a evidencia, gráficas
 frente a puntajes, hoja de cómputo y agregados.
-Cambiar sólo el estado o borrar las validaciones no basta.
+Puede conservar puntajes observados `null` cuando sus límites se declaran y
+la revisión explícita queda resuelta. No se presenta como desempeño validado.
+Cambiar el estado o borrar avisos no sustituye la revisión humana: el
+software comprueba coherencia y declaraciones, pero no certifica que esa
+revisión realmente ocurrió. Tener 18 notas asignadas no cierra las fuentes
+ni las revisiones editoriales pendientes.
 
 Con el conjunto local disponible, el periodo general tiene 12 de 18
-indicadores calculables; siguen pendientes 4, 8, 9, 14, 17 y 18.
+puntajes observados; siguen pendientes 4, 8, 9, 14, 17 y 18.
+La nota documental general es 3.12/5 — ACREDITACIÓN PARCIAL, con cobertura
+simple 66.67 %, ponderada 73.21 % y sensibilidad 3.12–4.19/5.
 El último periodo común es 2023–2024 y tiene 0 de 18 calculables: falta
 2023 en los indicadores 1–16 y los indicadores 17–18 mantienen sus
-pendientes metodológicos. La selección anterior de las dos observaciones
+pendientes metodológicos. Ambos periodos tienen ahora 18/18 notas asignadas.
+El reciente obtiene 1.00/5 — NO ACREDITADO, con 0 % de cobertura observada
+y sensibilidad 1.00–5.00/5. No se etiqueta como CATASTRÓFICO por falta de datos.
+La selección anterior de las dos observaciones
 disponibles podía usar 2022–2024; esa sustitución dejó de admitirse.
 Los pendientes no equivalen a cero ni prueban desempeño deficiente.
 
@@ -348,4 +385,9 @@ La investigación puede guardarse en `input/revision/`; no versionar tokens.
 Cubren reglas, limpieza, contrato y cambios del original, conservación
 de bloques/formato/listas/sección, alteraciones de fidelidad, selección
 del intervalo reciente, análisis de evidencia, tablas/gráficas, tipografías,
-amarillo, apartados de investigación y rechazo de finales incompletos.
+ausencia de amarillo, apartados de investigación y rechazo de finales con
+incoherencias, fuentes incompletas o revisiones abiertas. Un final documental
+revisado puede conservar puntajes observados faltantes debidamente explicados.
+También cubren separación observado/asignado, parámetros, pisos, pesos,
+candados, cobertura, sensibilidad, huecos metodológicos, divisores cero
+y rechazo de alteraciones de la nota documental.

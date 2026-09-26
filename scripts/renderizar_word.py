@@ -13,14 +13,15 @@ import tempfile
 import unicodedata
 import zipfile
 from lxml import etree as ET
-from calificar import agregar, cobertura_periodo, definir_periodos
-from componer_documento import PERIODOS, decimal_corto
+from calificar import cobertura_periodo, definir_periodos
+from calificacion_documental import agregar_documental
+from componer_documento import PERIODOS, decimal_corto, nota_documental, textos_metodologia
 from contrato import ROOT, CONTRACT, cargar_contrato, huellas
 from documentos import sha256
 from editorial import configurar
 from graficas_word import agregar_grafica
 from salidas import limpiar_salidas
-from fidelidad_machote import controles, validar as validar_fidelidad
+from fidelidad_machote import controles, retirar_resaltado_amarillo, validar as validar_fidelidad
 
 TEMPLATE = ROOT / 'templates/seguridad_medicion_v3.docx'
 DICTIONARY = ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json'
@@ -50,12 +51,17 @@ def run(value, model=None, generated=True):
     element = ET.Element(W + 'r')
     props = deepcopy(model.find(W + 'rPr')) if model is not None and model.find(W + 'rPr') is not None else ET.Element(W + 'rPr')
     if generated:
-        for key in ('rStyle', 'highlight', 'shd'):
-            for child in props.findall(W + key):
+        for child in props.findall(W + 'rStyle'):
+            props.remove(child)
+        # Retirar sólo las marcas amarillas de revisión; los otros colores
+        # y sombreados locales del machote siguen siendo formato editorial.
+        for child in props.findall(W + 'highlight'):
+            if child.get(W + 'val') == 'yellow':
+                props.remove(child)
+        for child in props.findall(W + 'shd'):
+            if child.get(W + 'fill', '').upper() == 'FFFF00':
                 props.remove(child)
         props.insert(0, ET.Element(W + 'rStyle', {W + 'val': STYLE}))
-        ET.SubElement(props, W + 'highlight', {W + 'val': 'yellow'})
-        ET.SubElement(props, W + 'shd', {W + 'val': 'clear', W + 'color': 'auto', W + 'fill': 'FFFF00'})
         if props.find(W + 'rFonts') is None:
             props.insert(1, ET.Element(W + 'rFonts', {W + key: 'Archivo Light' for key in ('ascii', 'hAnsi', 'eastAsia', 'cs')}))
     element.append(props)
@@ -192,32 +198,52 @@ def validar_resultado(result, mode):
                      'ambito': t['ambito'], 'tabla_fuente': t['tabla'], 'filas': t['filas']} for t in section['tablas']]
         if result['valores_plantilla'][f'tablas_indicador_{number:02d}'] != expected:
             raise ValueError(f'Tablas diferentes a la evidencia del indicador {number}.')
-        scores = [section['evaluaciones'][p]['puntaje'] for p in PERIODOS]
+        scores = [section['evaluaciones'][p].get('puntaje_asignado') for p in PERIODOS]
         graphs = result['valores_plantilla'][f'graficas_indicador_{number:02d}']
-        if len(graphs) > 1 or (any(s is not None for s in scores) and not graphs):
+        if len(graphs) != 1:
             raise ValueError('Gráfica de puntajes ausente o duplicada.')
         for graph in graphs:
             if graph.get('tipo') != 'puntajes' or graph.get('categorias') != list(PERIODOS.values()) or graph.get('valores') != scores:
                 raise ValueError('La gráfica difiere de las evaluaciones.')
+            missing = [PERIODOS[p] for p in PERIODOS if section['evaluaciones'][p]['puntaje'] is None]
+            expected_source = ('Metodología documental interna; escala 1–5. '
+                               + ('Base por no acreditación (no desempeño observado): ' + ', '.join(missing) + '. ' if missing else '')
+                               + 'Las diferencias de cobertura no demuestran una tendencia de desempeño.')
+            if (graph.get('titulo') != f'Indicador {number:02d}: calificaciones documentales'
+                    or graph.get('fuente') != expected_source):
+                raise ValueError('La gráfica debe declarar su carácter documental y los puntajes no acreditados.')
+        for period, label in PERIODOS.items():
+            evaluation = section['evaluaciones'][period]
+            assigned = evaluation.get('puntaje_asignado')
+            note = (f'{label}: {assigned}/5 — NO ACREDITADO (asignación documental; puntaje observado no disponible).'
+                    if evaluation['puntaje'] is None else f'{label}: {assigned}/5 — sustentado en puntaje observado.')
+            if result['valores_plantilla'].get(f'calificacion_indicador_{number:02d}_{period}') != note:
+                raise ValueError('Calificación individual distinta de su asignación documental.')
     for period in PERIODOS:
         scores = {s['numero']: s['evaluaciones'][period] for s in sections}
-        computed = agregar(scores, rules)
+        # La agregación recalcula las anotaciones desde el puntaje observado y
+        # rechaza asignaciones o motivos manipulados, aunque todas las vistas
+        # del JSON hayan sido modificadas de manera consistente.
+        computed = agregar_documental(scores, rules)
         if computed != result['calculos'][period]:
             raise ValueError(f'Cálculos agregados inconsistentes en {period}.')
-        grade = computed['calificacion_final'] or 'PENDIENTE'
+        grade = nota_documental(computed)
         if content['calificaciones'][period] != grade or result['valores_plantilla'][f'calificacion_{period}'] != grade:
             raise ValueError('Calificación editorial inconsistente.')
         for row in content['hoja_computo']:
-            value = scores[row['indicador']]['puntaje']
-            if row[period] != (str(value) if value is not None else 'Pendiente'):
+            value = scores[row['indicador']]['puntaje_asignado']
+            if row[period] != str(value):
                 raise ValueError('La hoja de cómputo difiere de las evaluaciones.')
         for dimension, numbers in rules['dimensiones'].items():
-            values = [scores[i]['puntaje'] for i in numbers]
-            mean = None if None in values else decimal_corto(sum(Decimal(v) for v in values) / len(values))
+            values = [scores[i]['puntaje_asignado'] for i in numbers]
+            mean = decimal_corto(sum(Decimal(v) for v in values) / len(values))
             if content['promedios_dimension'][period][dimension] != mean:
                 raise ValueError('Promedio de dimensión inconsistente.')
         if content['promedios_generales'][period] != computed.get('promedio_tres_dimensiones'):
             raise ValueError('Promedio general inconsistente.')
+    for key, expected in textos_metodologia(result, rules).items():
+        if result['valores_plantilla'].get(key) != expected:
+            raise ValueError('Metodología, cobertura o sensibilidad editorial inconsistente.')
     if mode == 'final':
         if result.get('estado_ejecucion') != 'validado':
             raise ValueError('La versión final exige estado_ejecucion=validado.')
@@ -263,9 +289,11 @@ def seleccionar_documento(root, result, mode, perfil, files):
     body = root.find(W + 'body')
     positions = controles(root)
     identification = positions['origen_003']
+    offset = 1  # Conservar el párrafo original y mostrar el estado antes de la metodología.
     if mode == 'borrador':
-        identification.append(parrafo(result['contenido_word']['aviso_borrador'], perfil=perfil, rol='nota'))
-    identification.append(parrafo(result['contenido_word']['periodo'], perfil=perfil, rol='nota'))
+        identification.insert(offset, parrafo(result['contenido_word']['aviso_borrador'], perfil=perfil, rol='nota'))
+        offset += 1
+    identification.insert(offset, parrafo(result['contenido_word']['periodo'], perfil=perfil, rol='nota'))
     chart_number = 0
     format_config = json.loads((ROOT / 'config/formato_editorial.json').read_text(encoding='utf-8'))
     for p in list(root.iter(W + 'p')):
@@ -315,7 +343,8 @@ def seleccionar_documento(root, result, mode, perfil, files):
                         if rpr is not None and rpr.find(W + 'rStyle') is not None and rpr.find(W + 'rStyle').get(W + 'val') == STYLE:
                             for n in rpr.findall(W + 'color'):
                                 rpr.remove(n)
-                            ET.SubElement(rpr, W + 'color', {W + 'val': format_config['colores_calificacion'].get(value, '666666')})
+                            grade = str(value).rsplit(' — ', 1)[-1]
+                            ET.SubElement(rpr, W + 'color', {W + 'val': format_config['colores_calificacion'].get(grade, '666666')})
     if mode == 'borrador':
         appendix = positions['adicional_fuentes']
         appendix.append(parrafo('Pendientes de revisión', generated=False, perfil=perfil, rol='subcapitulo'))
@@ -334,12 +363,22 @@ def auditar(path, expected_generated=None):
             if not name.startswith('word/') or not name.endswith('.xml'):
                 continue
             root = ET.fromstring(archive.read(name), PARSER)
+            for node in root.iter():
+                if ((node.tag == W + 'highlight' and node.get(W + 'val') == 'yellow')
+                        or (node.tag == W + 'shd' and node.get(W + 'fill', '').upper() == 'FFFF00')):
+                    raise ValueError(f'El Word conserva resaltado o sombreado amarillo en {name}.')
             if name.startswith('word/charts/pipeline_'):
-                c = '{http://schemas.openxmlformats.org/drawingml/2006/chart}'
                 a = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
-                fill = root.find(c + 'spPr/' + a + 'solidFill/' + a + 'srgbClr')
-                if fill is None or fill.get('val') != 'FFFF00':
-                    raise ValueError('Gráfica JSON sin marca amarilla.')
+                if root.find('.//' + a + 'highlight') is not None:
+                    raise ValueError('Gráfica JSON con resaltado automático.')
+                for node in root.iter(a + 'srgbClr'):
+                    if node.get('val', '').upper() == 'FFFF00':
+                        raise ValueError('Gráfica JSON con marca amarilla.')
+            if name == 'word/styles.xml':
+                for style in root.findall(W + 'style'):
+                    if style.get(W + 'styleId') == STYLE:
+                        if any(node.tag in (W + 'highlight', W + 'shd') for node in style.iter()):
+                            raise ValueError('El estilo de trazabilidad JSON no debe añadir resaltado ni sombreado.')
             for p in root.iter(W + 'p'):
                 if re.search(r'[{}]|\[INSERTAR', texto(p), re.I):
                     raise ValueError(f'Marcador editorial pendiente en {name}.')
@@ -349,17 +388,14 @@ def auditar(path, expected_generated=None):
                     continue
                 count += 1; characters += len(texto(r))
                 props = r.find(W + 'rPr')
-                highlight = props.find(W + 'highlight'); shade = props.find(W + 'shd')
-                if highlight is None or highlight.get(W + 'val') != 'yellow':
-                    raise ValueError('Contenido JSON sin resaltado amarillo.')
-                if shade is None or shade.get(W + 'fill') != 'FFFF00':
-                    raise ValueError('Contenido JSON sin sombreado amarillo.')
                 fonts = props.find(W + 'rFonts')
                 if fonts is None or fonts.get(W + 'ascii') not in ('Archivo', 'Archivo Medium', 'Archivo Light'):
                     raise ValueError('Contenido JSON sin fuente editorial Archivo.')
     if not count or (expected_generated is not None and count != expected_generated):
         raise ValueError('Inserciones distintas a la auditoría.')
-    return {'segmentos_json': count, 'caracteres_json': characters, 'resaltado_amarillo_verificado': True, 'marcadores_pendientes': 0}
+    return {'segmentos_json': count, 'caracteres_json': characters,
+            'resaltado_amarillo': False, 'sin_resaltado_amarillo_verificado': True,
+            'marcadores_pendientes': 0}
 
 
 def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='medicion'):
@@ -394,10 +430,14 @@ def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='me
         styles.remove(existing)
     style = ET.SubElement(styles, W + 'style', {W + 'type': 'character', W + 'styleId': STYLE})
     ET.SubElement(style, W + 'name', {W + 'val': 'Contenido procedente del JSON'})
-    props = ET.SubElement(style, W + 'rPr')
-    ET.SubElement(props, W + 'highlight', {W + 'val': 'yellow'})
-    ET.SubElement(props, W + 'shd', {W + 'val': 'clear', W + 'color': 'auto', W + 'fill': 'FFFF00'})
     files['word/styles.xml'] = xml_bytes(styles)
+    # La petición editorial incluye el amarillo que ya venía en el original.
+    # Sólo se retira de la salida, no del original ni de la base parametrizada.
+    for name, data in list(files.items()):
+        if name.startswith('word/') and name.endswith('.xml'):
+            part = ET.fromstring(data, PARSER)
+            if retirar_resaltado_amarillo(part):
+                files[name] = xml_bytes(part)
     fidelity = validar_fidelidad(original_files, files, contract['fidelidad'], salida=True)
     output_dir.mkdir(parents=True, exist_ok=True)
     municipality = slug(result['municipio'])
@@ -441,7 +481,7 @@ def main():
             report = renderizar(args.json, args.output, args.modo, perfil=perfil)
             word = Path(report['archivo']); receipt = args.output.parent / 'json' / (word.stem + '_renderizado.json')
             guardar_recibo(report, receipt); words.append(word); receipts.append(receipt)
-            print(f"Word ({perfil}): {word}. Amarillo: {report['segmentos_json']} segmentos.")
+            print(f"Word ({perfil}): {word}. Sin resaltado amarillo: {report['segmentos_json']} segmentos JSON.")
         removidos = limpiar_salidas(args.output.parent / 'json', args.output, json_actual=args.json,
                                     word_actual=words[0], recibo_actual=receipts[0])
     except (ValueError, KeyError, OSError, zipfile.BadZipFile) as error:

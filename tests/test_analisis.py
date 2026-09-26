@@ -8,7 +8,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from analisis_evidencia import analizar_indicador
-from calificar import agregar
+from calificacion_documental import agregar_documental, asignar_calificaciones
 from componer_documento import componer
 
 
@@ -113,13 +113,17 @@ class AnalisisTests(unittest.TestCase):
                               [['2022', str(ficha['id'])], ['2024', str(ficha['id'] * 10)]], ficha['id'])
                     for ficha in rules['fichas']]
         source_tables = deepcopy([section['tablas'] for section in sections])
+        calculations = {}
+        for period in ('general', 'ultimo_periodo'):
+            evaluations = {section['numero']: section['evaluaciones'][period] for section in sections}
+            asignar_calificaciones(evaluations, rules)
+            calculations[period] = agregar_documental(evaluations, rules)
         result = {'municipio': 'Municipio de prueba', 'estado': 'Estado de prueba',
                   'valores_plantilla': {key: None for key in dictionary['variables_documento']},
                   'indicadores': sections, 'validaciones': [],
                   'fuentes': [{'archivo': 'Municipio PAQUETE SEGURIDAD.docx', 'sha256': 'Prueba'}],
                   'periodos_evaluacion': {'ultimo_periodo': {'años_objetivo': [2023, 2024]}},
-                  'calculos': {period: agregar({section['numero']: section['evaluaciones'][period] for section in sections}, rules)
-                               for period in ('general', 'ultimo_periodo')}}
+                  'calculos': calculations}
         composed = componer(result, dictionary, rules)
         values = composed['valores_plantilla']
         self.assertIn('1 (2022) a 10 (2024)', values['cierre_indicador_01'])
@@ -129,7 +133,9 @@ class AnalisisTests(unittest.TestCase):
         self.assertEqual(len({values[f'cierre_indicador_{number:02d}'] for number in range(1, 19)}), 18)
         for number, expected in enumerate(source_tables, 1):
             self.assertEqual(values[f'tablas_indicador_{number:02d}'][0]['filas'], expected[0]['filas'])
-            self.assertEqual(values[f'graficas_indicador_{number:02d}'][0]['valores'], [5, None])
+            self.assertEqual(values[f'graficas_indicador_{number:02d}'][0]['valores'], [5, 1])
+            self.assertIn('no acreditación', values[f'graficas_indicador_{number:02d}'][0]['fuente'])
+            self.assertIsNone(sections[number - 1]['evaluaciones']['ultimo_periodo']['puntaje'])
         self.assertEqual(sections[0]['tablas'], source_tables[0])
         self.assertEqual(composed['contenido_word']['analisis'][0]['evidencia'][0]['tabla'], 1)
 

@@ -1,6 +1,6 @@
 {
   "metadatos": {
-    "version": "3.1",
+    "version": "3.2",
     "nombre": "diccionario_variables_diagnostico_seguridad_municipal",
     "idioma": "es",
     "tipo_documento": "diccionario_de_datos_y_especificacion_de_contenido",
@@ -8,8 +8,8 @@
     "descripcion": "Define los marcadores existentes, sus contenidos esperados, los campos auxiliares y las reglas de consistencia para completar el documento.",
     "fuente": "templates/Machote general medicion version final rzg investigación.docx",
     "cobertura_verificada": {
-      "marcadores_de_variables_unicos": 116,
-      "apariciones_de_variables": 116,
+      "marcadores_de_variables_unicos": 157,
+      "apariciones_de_variables": 157,
       "indicadores": 18,
       "dimensiones": 3,
       "lineas_de_investigacion": 4,
@@ -55,7 +55,7 @@
     "valores_pendientes": {
       "valor": null,
       "estado": "pendiente",
-      "regla": "No sustituir automáticamente un dato pendiente por cero, falso, una cadena vacía o una calificación de 1."
+      "regla": "No sustituir el dato ni el puntaje observado null. La política documental asigna por separado puntaje_asignado=1 con base_calificacion=no_acreditado y motivo; no implica desempeño deficiente."
     },
     "listas": {
       "almacenamiento": "array",
@@ -228,6 +228,28 @@
       "gobierno",
       "electoral",
       "ambos"
+    ],
+    "calificaciones_documentales": [
+      {
+        "minimo": 4.5,
+        "calificacion": "ACREDITACIÓN MUY ALTA"
+      },
+      {
+        "minimo": 3.5,
+        "calificacion": "ACREDITACIÓN ALTA"
+      },
+      {
+        "minimo": 2.5,
+        "calificacion": "ACREDITACIÓN PARCIAL"
+      },
+      {
+        "minimo": 1.5,
+        "calificacion": "ACREDITACIÓN BAJA"
+      },
+      {
+        "minimo": 1,
+        "calificacion": "NO ACREDITADO"
+      }
     ]
   },
   "variables_documento": {
@@ -267,11 +289,13 @@
         "medicion": 1
       },
       "tipo_contenido": "texto",
-      "origen_contenido": "evidencia_documental",
+      "origen_contenido": "metodologia_documental_calculada",
       "bloques_origen": [
         1
       ],
-      "obligatorio": true
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
     },
     "calificacion_ultimo_periodo": {
       "marcador": "{calificacion_ultimo_periodo}",
@@ -281,11 +305,93 @@
         "medicion": 1
       },
       "tipo_contenido": "texto",
-      "origen_contenido": "evidencia_documental",
+      "origen_contenido": "metodologia_documental_calculada",
       "bloques_origen": [
         2
       ],
-      "obligatorio": true
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "metodologia_calificacion": {
+      "marcador": "{metodologia_calificacion}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        3
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "cobertura_general": {
+      "marcador": "{cobertura_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        3
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "cobertura_ultimo_periodo": {
+      "marcador": "{cobertura_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        3
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "sensibilidad_general": {
+      "marcador": "{sensibilidad_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        3
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "sensibilidad_ultimo_periodo": {
+      "marcador": "{sensibilidad_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        3
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
     },
     "introduccion_periodo_general": {
       "marcador": "{introduccion_periodo_general}",
@@ -567,6 +673,38 @@
       ],
       "obligatorio": true
     },
+    "calificacion_indicador_01_general": {
+      "marcador": "{calificacion_indicador_01_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        33
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_01_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_01_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        33
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
     "analisis_indicador_01": {
       "marcador": "{analisis_indicador_01}",
       "apariciones": 1,
@@ -637,6 +775,38 @@
       ],
       "obligatorio": true
     },
+    "calificacion_indicador_02_general": {
+      "marcador": "{calificacion_indicador_02_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        36
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_02_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_02_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        36
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
     "analisis_indicador_02": {
       "marcador": "{analisis_indicador_02}",
       "apariciones": 1,
@@ -706,6 +876,38 @@
         37
       ],
       "obligatorio": true
+    },
+    "calificacion_indicador_03_general": {
+      "marcador": "{calificacion_indicador_03_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        40
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_03_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_03_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        40
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
     },
     "analisis_indicador_03": {
       "marcador": "{analisis_indicador_03}",
@@ -833,6 +1035,38 @@
       ],
       "obligatorio": true
     },
+    "calificacion_indicador_04_general": {
+      "marcador": "{calificacion_indicador_04_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        49
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_04_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_04_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        49
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
     "analisis_indicador_04": {
       "marcador": "{analisis_indicador_04}",
       "apariciones": 1,
@@ -888,6 +1122,38 @@
         49
       ],
       "obligatorio": true
+    },
+    "calificacion_indicador_05_general": {
+      "marcador": "{calificacion_indicador_05_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        53
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_05_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_05_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        53
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
     },
     "analisis_indicador_05": {
       "marcador": "{analisis_indicador_05}",
@@ -945,6 +1211,38 @@
       ],
       "obligatorio": true
     },
+    "calificacion_indicador_06_general": {
+      "marcador": "{calificacion_indicador_06_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        55
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_06_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_06_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        55
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
     "analisis_indicador_06": {
       "marcador": "{analisis_indicador_06}",
       "apariciones": 1,
@@ -1000,6 +1298,38 @@
         55
       ],
       "obligatorio": true
+    },
+    "calificacion_indicador_07_general": {
+      "marcador": "{calificacion_indicador_07_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        51
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_07_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_07_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        51
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
     },
     "analisis_indicador_07": {
       "marcador": "{analisis_indicador_07}",
@@ -1057,6 +1387,38 @@
       ],
       "obligatorio": true
     },
+    "calificacion_indicador_08_general": {
+      "marcador": "{calificacion_indicador_08_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        57
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_08_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_08_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        57
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
     "analisis_indicador_08": {
       "marcador": "{analisis_indicador_08}",
       "apariciones": 1,
@@ -1113,6 +1475,38 @@
       ],
       "obligatorio": true
     },
+    "calificacion_indicador_09_general": {
+      "marcador": "{calificacion_indicador_09_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        60
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_09_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_09_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        60
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
     "analisis_indicador_09": {
       "marcador": "{analisis_indicador_09}",
       "apariciones": 1,
@@ -1168,6 +1562,38 @@
         60
       ],
       "obligatorio": true
+    },
+    "calificacion_indicador_10_general": {
+      "marcador": "{calificacion_indicador_10_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        62
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_10_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_10_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        62
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
     },
     "analisis_indicador_10": {
       "marcador": "{analisis_indicador_10}",
@@ -1337,6 +1763,38 @@
       ],
       "obligatorio": true
     },
+    "calificacion_indicador_11_general": {
+      "marcador": "{calificacion_indicador_11_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        75
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_11_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_11_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        75
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
     "analisis_indicador_11": {
       "marcador": "{analisis_indicador_11}",
       "apariciones": 1,
@@ -1392,6 +1850,38 @@
         75
       ],
       "obligatorio": true
+    },
+    "calificacion_indicador_12_general": {
+      "marcador": "{calificacion_indicador_12_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        78
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_12_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_12_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        78
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
     },
     "analisis_indicador_12": {
       "marcador": "{analisis_indicador_12}",
@@ -1449,6 +1939,38 @@
       ],
       "obligatorio": true
     },
+    "calificacion_indicador_13_general": {
+      "marcador": "{calificacion_indicador_13_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        81
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_13_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_13_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        81
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
     "analisis_indicador_13": {
       "marcador": "{analisis_indicador_13}",
       "apariciones": 1,
@@ -1504,6 +2026,38 @@
         81
       ],
       "obligatorio": true
+    },
+    "calificacion_indicador_14_general": {
+      "marcador": "{calificacion_indicador_14_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        83
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_14_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_14_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        83
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
     },
     "analisis_indicador_14": {
       "marcador": "{analisis_indicador_14}",
@@ -1561,6 +2115,38 @@
       ],
       "obligatorio": true
     },
+    "calificacion_indicador_15_general": {
+      "marcador": "{calificacion_indicador_15_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        86
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_15_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_15_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        86
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
     "analisis_indicador_15": {
       "marcador": "{analisis_indicador_15}",
       "apariciones": 1,
@@ -1616,6 +2202,38 @@
         86
       ],
       "obligatorio": true
+    },
+    "calificacion_indicador_16_general": {
+      "marcador": "{calificacion_indicador_16_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        88
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_16_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_16_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        88
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
     },
     "analisis_indicador_16": {
       "marcador": "{analisis_indicador_16}",
@@ -1729,6 +2347,38 @@
       ],
       "obligatorio": true
     },
+    "calificacion_indicador_17_general": {
+      "marcador": "{calificacion_indicador_17_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        95
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_17_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_17_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        95
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
     "analisis_indicador_17": {
       "marcador": "{analisis_indicador_17}",
       "apariciones": 1,
@@ -1784,6 +2434,38 @@
         95
       ],
       "obligatorio": true
+    },
+    "calificacion_indicador_18_general": {
+      "marcador": "{calificacion_indicador_18_general}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        98
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
+    },
+    "calificacion_indicador_18_ultimo_periodo": {
+      "marcador": "{calificacion_indicador_18_ultimo_periodo}",
+      "apariciones": 1,
+      "tipo_dato": "string",
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_contenido": "texto",
+      "origen_contenido": "metodologia_documental_calculada",
+      "bloques_origen": [
+        98
+      ],
+      "obligatorio": true,
+      "reglas": "reglas_calificacion.json#/calificacion_documental",
+      "descripcion": "Nota documental, fundamento y/o cobertura; no sustituye el puntaje observado ni implica desempeño comprobado."
     },
     "analisis_indicador_18": {
       "marcador": "{analisis_indicador_18}",
@@ -2300,7 +2982,8 @@
         "Las 36 selecciones de las fichas deben reutilizar los mismos 36 puntajes de la hoja de cómputo.",
         "No mantener valores independientes para una misma calificación.",
         "El puntaje final debe permanecer entre 1 y 5."
-      ]
+      ],
+      "alcance": "Esquema histórico de referencia; la ejecución v3.2 utiliza calificacion_documental con puntaje y puntaje_asignado separados. No se aplican ajustes discrecionales ni se infiere falta de respuesta de un vacío."
     },
     "observacion_serie": {
       "campos": {
@@ -2562,8 +3245,8 @@
       "tipo": "puntajes",
       "titulo": "string",
       "categorias": "array de strings",
-      "valores": "array de number|null",
-      "fuente": "string"
+      "valores": "array de integer 1–5: puntaje_asignado de cada periodo",
+      "fuente": "string; identifica la metodología documental y los periodos con asignación por no acreditación"
     },
     "investigacion_v3": {
       "version": "1.0",
@@ -2578,6 +3261,14 @@
       },
       "minimos_indicadores": "object con claves 01, 02 y 03 y valores {texto, referencias: [urls declaradas]}",
       "apartados": "object por línea, claves del contrato y textos con URL citada"
+    },
+    "calificacion_documental": {
+      "puntaje": "integer 1–5 o null; sólo evidencia observable y criterio inequívoco",
+      "puntaje_asignado": "integer 1–5 siempre; puntaje observado o base documental no acreditada",
+      "base_calificacion": "observado | no_acreditado",
+      "motivo_asignacion": "string; criterio o faltante que justifica la nota",
+      "cobertura": "Indicadores observados y porcentaje simple/ponderado; no probabilidad de certeza",
+      "sensibilidad": "Rango de promedios con pendientes en 1/5; no intervalo de confianza"
     }
   },
   "catalogo_indicadores": [
@@ -3103,8 +3794,8 @@
         "general",
         "ultimo_periodo"
       ],
-      "modelo_comun": "resultado_evaluacion",
-      "regla": "Calcular ambos periodos por separado y conservar trazabilidad hasta los puntajes de cada indicador."
+      "modelo_comun": "resultado_documental",
+      "regla": "Ambos periodos tienen nota documental, cobertura y sensibilidad; la evidencia faltante permanece null."
     },
     "resultado_evaluacion": {
       "promedio_proteccion_civil": {
@@ -3181,7 +3872,8 @@
         "tipo_dato": "string",
         "tipo_contenido": "explicacion",
         "debe_contener": "Síntesis del promedio, los candados y su efecto en la categoría final."
-      }
+      },
+      "alcance": "Referencia histórica no operativa de la agregación anterior; ver resultado_documental y reglas activas."
     },
     "reglas_generales_del_documento": [
       {
@@ -3239,21 +3931,31 @@
       "Conservar precisión interna suficiente y documentar la regla de redondeo.",
       "No calcular promedios de dimensión con un subconjunto de indicadores sin una regla metodológica explícita.",
       "Distinguir exclusión de un año no aplicable de exclusión de un indicador completo."
-    ]
+    ],
+    "resultado_documental": {
+      "promedios_dimension": "Promedio de puntaje_asignado de todos los indicadores de cada dimensión",
+      "promedio_tres_dimensiones": "sum(promedio_dimension * peso_dimension) / sum(pesos_dimension)",
+      "calificacion_final": "Categoría de escala_documental después de candados; siempre emitida",
+      "categoria_desempeno": "Categoría histórica sólo con 18 puntajes observados; null si existe algún faltante",
+      "cobertura": "observados, asignados, total, no_acreditados, porcentaje y ponderada_porcentaje",
+      "sensibilidad": "minimo y maximo del promedio antes de candados con no acreditados en 1 y 5",
+      "indicadores_pendientes": "IDs sin puntaje observado; cada uno sí tiene puntaje_asignado",
+      "referencia_parametros": "reglas_calificacion.json#/calificacion_documental"
+    }
   },
   "tratamiento_datos_faltantes": {
     "pendiente_de_captura": {
       "valor": null,
-      "accion": "Mantener pendiente; no calificar automáticamente."
+      "accion": "Conservar dato y puntaje observado null; asignar la base documental con motivo explícito."
     },
     "sin_respuesta_municipal": {
       "valor": null,
-      "accion_documental": "Asignar 1 en ese año conforme a la guía y aplicar la ficha del indicador al periodo.",
+      "accion_documental": "No inferir esta condición de vacíos. El candado requiere clasificación explícita; no se activa automáticamente.",
       "registro": "Identificar la falta de respuesta y su efecto sobre el puntaje del indicador."
     },
     "variable_no_existente_en_edicion": {
       "valor": null,
-      "accion_documental": "Excluir ese año del cálculo correspondiente.",
+      "accion_documental": "Conservar null y documentar la ausencia. No sustituir ni excluir años del intervalo reciente común; asignar la base documental si impide comprobar el criterio.",
       "registro": "Documentar qué edición carece de la variable y por qué."
     },
     "dato_dudoso": {
@@ -3262,11 +3964,11 @@
     },
     "no_aplicable": {
       "valor": null,
-      "accion": "Explicar por qué no aplica y resolver su tratamiento antes del cálculo.",
+      "accion": "Conservar explicación y puntaje observado null, con nota documental de no acreditación hasta resolver la aplicabilidad; no excluir indicadores ni cambiar denominadores.",
       "nota": "No usar esta categoría para evitar una calificación desfavorable."
     },
     "serie_sin_observaciones_evaluables": {
-      "accion": "Registrar una incidencia metodológica.",
+      "accion": "Conservar puntaje observado null y motivo; emitir puntaje_asignado conforme a la política documental.",
       "prohibicion": "No imputar un resultado ni cambiar denominadores sin una regla documentada."
     }
   },
@@ -3276,33 +3978,39 @@
       "tema": "redondeo_para_clasificacion",
       "observacion": "La guía menciona redondeo convencional y presenta rangos a dos decimales, pero no desarrolla todos los detalles operativos.",
       "propuesta_tecnica": "Conservar precisión interna y fijar explícitamente un redondeo convencional a dos decimales para clasificar.",
-      "estado": "propuesta_no_confirmada"
+      "estado": "propuesta_no_confirmada",
+      "alcance": "Antecedente histórico; prevalecen las decisiones activas versionadas en reglas_calificacion.json."
     },
     {
       "tema": "denominacion_del_ultimo_periodo",
       "observacion": "La guía distingue dos ediciones recientes del censo y dos años recientes para las series anuales, mientras algunos textos hablan de dos años.",
       "criterio_documental_para_los_datos": "Seguir la definición específica de la guía para cada indicador.",
-      "pendiente": "Definir una presentación narrativa que no confunda edición con año de referencia."
+      "pendiente": "Definir una presentación narrativa que no confunda edición con año de referencia.",
+      "alcance": "Antecedente histórico; prevalecen las decisiones activas versionadas en reglas_calificacion.json."
     },
     {
       "tema": "alcance_del_limite_de_tres_ajustes",
       "observacion": "El documento establece un máximo de tres ajustes por evaluación.",
-      "pendiente": "Dejar explícito si el control operativo se lleva por cada periodo evaluado o por el caso completo."
+      "pendiente": "Dejar explícito si el control operativo se lleva por cada periodo evaluado o por el caso completo.",
+      "alcance": "Antecedente histórico; prevalecen las decisiones activas versionadas en reglas_calificacion.json."
     },
     {
       "tema": "numero_de_candados_en_la_hoja",
       "observacion": "La fila dice Candados aplicados (número).",
-      "propuesta_tecnica": "Guardar tanto identificadores de reglas como cantidad de candados para evitar ambigüedad."
+      "propuesta_tecnica": "Guardar tanto identificadores de reglas como cantidad de candados para evitar ambigüedad.",
+      "alcance": "Antecedente histórico; prevalecen las decisiones activas versionadas en reglas_calificacion.json."
     },
     {
       "tema": "periodo_del_producto_electoral",
       "observacion": "La clasificación de fortalezas y debilidades requiere elegir un periodo consistente.",
-      "pendiente": "Definir general o ultimo_periodo antes de derivar las listas."
+      "pendiente": "Definir general o ultimo_periodo antes de derivar las listas.",
+      "alcance": "Antecedente histórico; prevalecen las decisiones activas versionadas en reglas_calificacion.json."
     },
     {
       "tema": "prioridad_entre_ajustes_y_reglas_especificas",
       "observacion": "Existen ajustes generales y límites o dependencias particulares de varias fichas.",
-      "pendiente": "Documentar su orden de aplicación y resolver cualquier conflicto sin ignorar límites explícitos."
+      "pendiente": "Documentar su orden de aplicación y resolver cualquier conflicto sin ignorar límites explícitos.",
+      "alcance": "Antecedente histórico; prevalecen las decisiones activas versionadas en reglas_calificacion.json."
     }
   ],
   "validaciones_finales": [
@@ -3312,11 +4020,11 @@
     },
     {
       "id": "cobertura_periodos",
-      "regla": "Cada indicador debe tener evaluación general y del último periodo, o una incidencia pendiente explícita."
+      "regla": "18 notas documentales por periodo, conservando null y motivo en todo puntaje observado no acreditado."
     },
     {
       "id": "puntajes_consistentes",
-      "regla": "La hoja de cómputo y las fichas deben mostrar el mismo puntaje para cada indicador y periodo."
+      "regla": "Variables, hoja y gráficas usan el mismo puntaje_asignado; nunca lo presentan como observado si falta evidencia."
     },
     {
       "id": "notas_completas",

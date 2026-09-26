@@ -11,7 +11,8 @@ from lxml import etree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from calificar import agregar, definir_periodos
+from calificar import definir_periodos
+from calificacion_documental import agregar_documental, asignar_calificaciones
 from componer_documento import componer
 from documentos import sha256
 from contrato import huellas, cargar_contrato
@@ -60,12 +61,16 @@ def ejemplo(pending=True, research=None):
                                            'filas': [['Año', 'Valor'], ['2021', '30'], ['2022', '40']]})
     values = {k: None for k in dictionary['variables_documento']}
     values.update(municipio='Municipio de prueba', estado='Entidad de prueba', año_inicial=2021, año_final=2022)
+    calculations = {}
+    for period in ('general', 'ultimo_periodo'):
+        evaluations = {section['numero']: section['evaluaciones'][period] for section in sections}
+        asignar_calificaciones(evaluations, rules)
+        calculations[period] = agregar_documental(evaluations, rules)
     result = {'municipio': values['municipio'], 'estado': values['estado'], 'estado_ejecucion': 'requiere_revision',
               'contrato': huellas(),
               'periodos_evaluacion': definir_periodos(sections),
               'valores_plantilla': values, 'indicadores': sections,
-              'calculos': {p: agregar({s['numero']: s['evaluaciones'][p] for s in sections}, rules)
-                          for p in ('general', 'ultimo_periodo')},
+              'calculos': calculations,
               'validaciones': [{'nivel': 'bloqueante', 'codigo': 'COMPOSICION_WORD_PENDIENTE'},
                                {'nivel': 'bloqueante', 'codigo': 'VARIABLES_PENDIENTES'}]}
     if pending:
@@ -91,21 +96,38 @@ class WordTests(unittest.TestCase):
             self.assertIsNotNone(r.find(W + 'rPr/' + W + 'i'))
         self.assertIsNone(runs[0].find(W + 'rPr/' + W + 'highlight'))
         self.assertIsNone(runs[2].find(W + 'rPr/' + W + 'highlight'))
-        self.assertEqual(runs[1].find(W + 'rPr/' + W + 'highlight').get(W + 'val'), 'yellow')
-        self.assertEqual(runs[1].find(W + 'rPr/' + W + 'shd').get(W + 'fill'), 'FFFF00')
+        self.assertIsNone(runs[1].find(W + 'rPr/' + W + 'highlight'))
+        self.assertIsNone(runs[1].find(W + 'rPr/' + W + 'shd'))
+        self.assertEqual(runs[1].find(W + 'rPr/' + W + 'rStyle').get(W + 'val'), STYLE)
+
+    def test_generated_run_preserves_editorial_colors_without_yellow_marks(self):
+        model = run('Marcador', generated=False)
+        props = model.find(W + 'rPr')
+        ET.SubElement(props, W + 'color', {W + 'val': '1F4E78'})
+        ET.SubElement(props, W + 'shd', {W + 'fill': 'DAE3F3'})
+        ET.SubElement(props, W + 'highlight', {W + 'val': 'yellow'})
+        generated = run('Texto JSON', model)
+        self.assertEqual(generated.find(W + 'rPr/' + W + 'color').get(W + 'val'), '1F4E78')
+        self.assertEqual(generated.find(W + 'rPr/' + W + 'shd').get(W + 'fill'), 'DAE3F3')
+        self.assertIsNone(generated.find(W + 'rPr/' + W + 'highlight'))
+        self.assertIsNotNone(model.find(W + 'rPr/' + W + 'highlight'))
+        props.find(W + 'shd').set(W + 'fill', 'ffff00')
+        self.assertIsNone(run('Texto JSON', model).find(W + 'rPr/' + W + 'shd'))
 
     def test_composition_keeps_missing_scores_and_inactive_variables(self):
         result = ejemplo()
         self.assertIn('4', result['valores_plantilla']['resumen_general'])
         self.assertNotIn('condicion_critica', result['valores_plantilla'])
         self.assertEqual(result['contenido_word']['variables_no_aplicables'], [])
-        self.assertIsNone(result['calculos']['general']['calificacion_final'])
+        self.assertIsNotNone(result['calculos']['general']['calificacion_final'])
+        self.assertIsNone(result['indicadores'][3]['evaluaciones']['general']['puntaje'])
+        self.assertEqual(result['indicadores'][3]['evaluaciones']['general']['puntaje_asignado'], 1)
         codes = {v['codigo'] for v in result['validaciones']}
         self.assertNotIn('COMPOSICION_WORD_PENDIENTE', codes)
         self.assertIn('INDICADOR_PENDIENTE', codes)
         self.assertIn('REVISION_EDITORIAL_WORD', codes)
 
-    def test_draft_roundtrip_highlight_hashes_and_replaces_current_output(self):
+    def test_draft_roundtrip_no_highlight_hashes_and_replaces_current_output(self):
         result = ejemplo()
         before = sha256(TEMPLATE)
         with tempfile.TemporaryDirectory() as directory:
@@ -116,7 +138,8 @@ class WordTests(unittest.TestCase):
             self.assertEqual(word.name, 'municipio_de_prueba_seguridad_medicion_borrador.docx')
             self.assertEqual(report['json_sha256'], sha256(path))
             self.assertEqual(report['sha256'], sha256(word))
-            self.assertTrue(report['resaltado_amarillo_verificado'])
+            self.assertTrue(report['sin_resaltado_amarillo_verificado'])
+            self.assertFalse(report['resaltado_amarillo'])
             with zipfile.ZipFile(word) as archive:
                 root = ET.fromstring(archive.read('word/document.xml'))
                 text = texto(root)
@@ -136,20 +159,26 @@ class WordTests(unittest.TestCase):
                 for r in root.iter(W + 'r'):
                     style = r.find(W + 'rPr/' + W + 'rStyle')
                     if style is not None and style.get(W + 'val') == STYLE:
-                        self.assertEqual(r.find(W + 'rPr/' + W + 'highlight').get(W + 'val'), 'yellow')
-                        self.assertEqual(r.find(W + 'rPr/' + W + 'shd').get(W + 'fill'), 'FFFF00')
+                        self.assertIsNone(r.find(W + 'rPr/' + W + 'highlight'))
+                        shade = r.find(W + 'rPr/' + W + 'shd')
+                        self.assertTrue(shade is None or shade.get(W + 'fill', '').upper() != 'FFFF00')
                         self.assertIn(r.find(W + 'rPr/' + W + 'rFonts').get(W + 'ascii'), ('Archivo Light', 'Archivo Medium', 'Archivo'))
+                styles = ET.fromstring(archive.read('word/styles.xml'))
+                trace_style = next(s for s in styles.findall(W + 'style') if s.get(W + 'styleId') == STYLE)
+                self.assertIsNone(trace_style.find(W + 'rPr'))
             again = renderizar(path, word.parent)
             self.assertEqual(report['archivo'], again['archivo'])
             self.assertEqual(again['sha256'], sha256(word))
         self.assertEqual(before, sha256(TEMPLATE))
 
-    def test_final_refuses_partial_data_even_if_state_is_changed(self):
+    def test_reviewed_final_keeps_documental_grade_separate_from_missing_observation(self):
         result = ejemplo(research=True)
         result['estado_ejecucion'] = 'validado'
         result['validaciones'] = []
-        with self.assertRaisesRegex(ValueError, 'todos los puntajes'):
-            validar_resultado(result, 'final')
+        validar_resultado(result, 'final')
+        self.assertEqual(result['calculos']['general']['cobertura']['asignados'], 18)
+        self.assertEqual(result['calculos']['general']['cobertura']['observados'], 17)
+        self.assertIsNone(result['calculos']['general']['categoria_desempeno'])
 
     def test_final_requires_review_and_accepts_complete_validated_json(self):
         result = ejemplo(pending=False)
@@ -162,10 +191,13 @@ class WordTests(unittest.TestCase):
             path.write_text(json.dumps(result), encoding='utf-8')
             report = renderizar(path, Path(directory) / 'word', 'final')
             with zipfile.ZipFile(report['archivo']) as archive:
-                text = texto(ET.fromstring(archive.read('word/document.xml')))
+                root = ET.fromstring(archive.read('word/document.xml'))
+                text = texto(root)
+            grade_run = next(r for r in root.iter(W + 'r') if texto(r) == '5.00/5 — ACREDITACIÓN MUY ALTA')
+            self.assertEqual(grade_run.find(W + 'rPr/' + W + 'color').get(W + 'val'), '008000')
             self.assertNotIn('BORRADOR', text)
             self.assertNotIn('PENDIENTE', text)
-            self.assertIn('CALIFICACIÓN GENERAL: EXCELENTE', text)
+            self.assertIn('CALIFICACIÓN GENERAL: 5.00/5 — ACREDITACIÓN MUY ALTA', text)
 
     def test_contract_mismatch_blocks_output(self):
         result = ejemplo()
@@ -187,16 +219,84 @@ class WordTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 validar_resultado(result, 'borrador')
 
-    def test_audit_rejects_unhighlighted_generated_text(self):
-        p = parrafo('Texto procedente del JSON')
-        props = p.find(W + 'r/' + W + 'rPr')
-        props.remove(props.find(W + 'highlight'))
+    def test_assignment_tampering_is_rejected_even_when_editorial_views_match(self):
+        rules = json.loads(RULES.read_text())
+        dictionary = json.loads(DICTIONARY.read_text())
+        for field, replacement in (('puntaje_asignado', 5), ('base_calificacion', 'observado'),
+                                   ('motivo_asignacion', 'Desempeño excelente sin evidencia.')):
+            result = ejemplo()
+            result['indicadores'][3]['evaluaciones']['general'][field] = replacement
+            # Rehacer las vistas no legitima una asignación que contradice
+            # la política; el renderizador debe recalcular la anotación.
+            componer(result, dictionary, rules)
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, 'Asignación documental inconsistente'):
+                validar_resultado(result, 'borrador')
+
+    def test_methodology_and_individual_grades_cannot_hide_missing_evidence(self):
+        fields = ('metodologia_calificacion', 'cobertura_general', 'sensibilidad_ultimo_periodo',
+                  'calificacion_indicador_04_general')
+        for field in fields:
+            result = ejemplo()
+            result['valores_plantilla'][field] = 'Todos los datos están acreditados.'
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, 'editorial inconsistente|Calificación individual'):
+                validar_resultado(result, 'borrador')
+
+    def test_graph_cannot_label_unobserved_scores_as_confirmed_performance(self):
+        result = ejemplo()
+        result['valores_plantilla']['graficas_indicador_04'][0]['fuente'] = 'Desempeño confirmado.'
+        with self.assertRaisesRegex(ValueError, 'carácter documental'):
+            validar_resultado(result, 'borrador')
+
+    def test_audit_rejects_yellow_marks_in_generated_text(self):
+        for tag, attributes in (('highlight', {'val': 'yellow'}), ('shd', {'fill': 'ffff00'})):
+            p = parrafo('Texto procedente del JSON')
+            props = p.find(W + 'r/' + W + 'rPr')
+            ET.SubElement(props, W + tag, {W + k: v for k, v in attributes.items()})
+            with self.subTest(tag=tag), tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / 'bad.docx'
+                with zipfile.ZipFile(path, 'w') as archive:
+                    archive.writestr('word/document.xml', ET.tostring(p))
+                with self.assertRaisesRegex(ValueError, 'amarillo'):
+                    auditar(path)
+
+    def test_audit_rejects_automatic_highlight_in_trace_style(self):
+        styles = ET.Element(W + 'styles')
+        style = ET.SubElement(styles, W + 'style', {W + 'styleId': STYLE})
+        ET.SubElement(ET.SubElement(style, W + 'rPr'), W + 'highlight', {W + 'val': 'yellow'})
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'bad.docx'
             with zipfile.ZipFile(path, 'w') as archive:
-                archive.writestr('word/document.xml', ET.tostring(p))
-            with self.assertRaisesRegex(ValueError, 'sin resaltado'):
+                archive.writestr('word/document.xml', ET.tostring(parrafo('Texto JSON')))
+                archive.writestr('word/styles.xml', ET.tostring(styles))
+            with self.assertRaisesRegex(ValueError, 'amarillo'):
                 auditar(path)
+
+    def test_audit_rejects_yellow_in_original_fixed_text(self):
+        root = ET.Element(W + 'document')
+        root.append(parrafo('Texto JSON'))
+        original = parrafo('Texto original', generated=False)
+        ET.SubElement(original.find(W + 'r/' + W + 'rPr'), W + 'highlight', {W + 'val': 'yellow'})
+        root.append(original)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'bad.docx'
+            with zipfile.ZipFile(path, 'w') as archive:
+                archive.writestr('word/document.xml', ET.tostring(root))
+            with self.assertRaisesRegex(ValueError, 'amarillo'):
+                auditar(path)
+
+    def test_audit_rejects_yellow_background_or_highlight_in_generated_chart(self):
+        c = '{http://schemas.openxmlformats.org/drawingml/2006/chart}'
+        a = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
+        for tag in ('solidFill', 'highlight'):
+            graph = ET.Element(c + 'chartSpace')
+            ET.SubElement(ET.SubElement(graph, a + tag), a + 'srgbClr', {'val': 'FFFF00'})
+            with self.subTest(tag=tag), tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / 'bad.docx'
+                with zipfile.ZipFile(path, 'w') as archive:
+                    archive.writestr('word/document.xml', ET.tostring(parrafo('Texto JSON')))
+                    archive.writestr('word/charts/pipeline_1.xml', ET.tostring(graph))
+                with self.assertRaisesRegex(ValueError, 'Gráfica JSON con'):
+                    auditar(path)
 
     def test_measurement_uses_editorial_fonts_and_native_chart_relationships(self):
         result = ejemplo()
@@ -215,12 +315,14 @@ class WordTests(unittest.TestCase):
                 self.assertEqual(header.find(W + 'pPr/' + W + 'spacing').get(W + 'line'), '280')
                 self.assertEqual(len([n for n in archive.namelist() if n.endswith('.odttf')]), len(FONTS))
                 charts = [n for n in archive.namelist() if n.startswith('word/charts/pipeline_')]
-                self.assertEqual(len(charts), 17)  # El indicador 4 está pendiente en ambos periodos.
+                self.assertEqual(len(charts), 18)  # Incluye base documental, sin inventar observaciones.
                 for name in charts:
                     graph = ET.fromstring(archive.read(name))
-                    self.assertEqual(graph.find('{http://schemas.openxmlformats.org/drawingml/2006/chart}spPr/'
-                                                '{http://schemas.openxmlformats.org/drawingml/2006/main}solidFill/'
-                                                '{http://schemas.openxmlformats.org/drawingml/2006/main}srgbClr').get('val'), 'FFFF00')
+                    c = '{http://schemas.openxmlformats.org/drawingml/2006/chart}'
+                    a = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
+                    self.assertIsNotNone(graph.find(c + 'spPr/' + a + 'noFill'))
+                    self.assertIsNone(graph.find('.//' + a + 'highlight'))
+                    self.assertTrue(all(color.get('val', '').upper() != 'FFFF00' for color in graph.iter(a + 'srgbClr')))
                 relations = ET.fromstring(archive.read('word/_rels/document.xml.rels'))
                 chart_targets = [r.get('Target') for r in relations if r.get('Type', '').endswith('/chart')]
                 self.assertEqual(len(chart_targets), len(charts))

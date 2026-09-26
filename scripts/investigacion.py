@@ -130,14 +130,16 @@ def narrativas(result, rules):
         'La interpretación general integra las capacidades reportadas y sus cambios, con los años faltantes identificados en cada indicador.')
     values['introduccion_ultimo_periodo'] = (
         f'El último periodo corresponde a {recent_text}, con un mismo intervalo para los 18 indicadores. '
-        'Cuando falta alguno de esos años, se presenta la evidencia disponible y la puntuación del periodo queda pendiente.')
+        'Cuando falta alguno de esos años, se conserva el puntaje observado como no disponible y se emite '
+        'la calificación documental de no acreditación. No se arrastra la nota de otro año ni se atribuye desempeño deficiente.')
     values['enfoque_gobierno'] = (
         'La información se examina para identificar capacidades reportadas, carencias documentales y acciones de seguimiento. '
         'Las propuestas se relacionan con los hallazgos de cada indicador y con las referencias que se desarrollan a continuación.')
     values['criterio_lectura_graficas'] = (
         'Las tablas conservan los valores y años de las fuentes; los análisis y cierres explican sus cambios y limitaciones. '
-        'Las gráficas comparan los puntajes internos del periodo general y del reciente cuando se pueden calcular; '
-        'una puntuación pendiente no se representa como cero. Las series originales deben leerse en las tablas correspondientes.')
+        'Las gráficas muestran las calificaciones documentales asignadas de ambos periodos; '
+        'su nota distingue el puntaje observado de la base por no acreditación. Esta base no es un cero ni un dato imputado '
+        'a las tablas. Diferencias de cobertura no prueban cambios de desempeño. Las series originales se conservan en las tablas.')
     values['bienes_a_proteger'] = (
         'La medición examina la protección civil, las condiciones del personal y la información y eficiencia policial '
         'como aspectos relacionados con la seguridad física, humana y el respeto de los derechos humanos. '
@@ -169,9 +171,10 @@ def narrativas(result, rules):
         label = {'proteccion_civil': 'Protección civil',
                  'condiciones_del_personal': 'Condiciones del personal',
                  'inteligencia_y_eficiencia_policial': 'Inteligencia y eficiencia policial'}[dimension]
-        values[key] = f"{label}: {len(ids) - len(pending)} de {len(ids)} indicadores evaluables en el último periodo. " + (
-            'Promedio pendiente por los indicadores ' + ', '.join(map(str, pending)) + '.' if pending
-            else f'Promedio interno calculado: {mean}/5. Este valor no sustituye la evaluación de resultados ni el benchmark externo.')
+        values[key] = (f"{label}: promedio documental {mean}/5. "
+                       f"{len(ids) - len(pending)} de {len(ids)} indicadores con puntaje observado en el último periodo. "
+                       + ('La base de no acreditación se asignó a los indicadores ' + ', '.join(map(str, pending)) + '. ' if pending else '')
+                       + 'Este valor no sustituye la evaluación de resultados ni el benchmark externo.')
     values['tendencia_general'] = 'La tendencia general requiere revisar series compatibles y cobertura temporal. ' + values['avances_municipales']
     strong = [s['numero'] for s in sections if s['evaluaciones']['ultimo_periodo']['puntaje'] is not None
               and s['evaluaciones']['ultimo_periodo']['puntaje'] >= 4]
@@ -186,7 +189,9 @@ def narrativas(result, rules):
         'Los indicadores con puntaje interno de 1 o 2 en el último periodo son ' + ', '.join(map(str, weak)) + '. '
         if weak else 'No hay indicadores con puntaje interno de 1 o 2 confirmado para el último periodo. ')
     if pending:
-        values['areas_mejora_seguridad'] += 'Los indicadores ' + ', '.join(map(str, pending)) + ' siguen pendientes; falta de datos no equivale a desempeño deficiente.'
+        values['areas_mejora_seguridad'] += ('Los indicadores ' + ', '.join(map(str, pending))
+                                           + ' tienen nota documental de no acreditación y puntaje observado no disponible; '
+                                           'falta de datos no equivale a desempeño deficiente.')
     values['recomendaciones_gobierno'] = (
         ('Completar y clasificar la evidencia de los indicadores ' + ', '.join(map(str, pending)) + ' antes de priorizar intervenciones. '
          if pending else 'Conservar la trazabilidad de todos los indicadores y revisar los hallazgos con el municipio. ')

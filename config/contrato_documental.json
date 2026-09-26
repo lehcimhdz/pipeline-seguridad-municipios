@@ -1,26 +1,37 @@
 {
-  "version": "3.1",
+  "version": "3.2",
   "alcance": "seguridad_investigacion",
   "marcador": "{snake_case}",
+  "politica_calificacion": {
+    "archivo": "reglas_calificacion.json",
+    "seccion": "calificacion_documental",
+    "puntajes_documentales_siempre": true,
+    "puntajes_observados_admiten_null": true
+  },
+  "contenido_generado": {
+    "resaltado_amarillo": false,
+    "trazabilidad_estilo": "ContenidoJSON",
+    "excepcion_fidelidad_salida": "Eliminar exclusivamente resaltado/sombreado amarillo, también heredado del original; no modificar el DOCX de origen."
+  },
   "plantillas": {
     "medicion": {
       "archivo": "templates/seguridad_medicion_v3.docx",
-      "sha256": "2d993ee0b8856d069f6b2b67fc596a0b426eebec95e3f3730125401003109ffc",
+      "sha256": "55fc90dc011e1ab09c426a4661cc61f4ae507398580c8fc42d76123b9d36bf8c",
       "origen": "templates/Machote general medicion version final rzg investigación.docx",
       "origen_sha256": "ac7402dbf1e06061570934aea41fa7798b296abeed376886b61b70b9a98662b3"
     }
   },
   "diccionario": {
     "archivo": "diccionario_datos_diagnostico_seguridad_municipal.json",
-    "sha256": "f0f6ae08a95f920e6ea36b1d37695b509fcab2a872cbf29a6a3b5554c15e9f90"
+    "sha256": "e7b732534ce691fe7f387c69059c89c033f1ad526d9e45d1f23a74527d45bc9f"
   },
   "reglas": {
     "archivo": "reglas_calificacion.json",
-    "sha256": "fb0559f172e27cb35eb778de83dbb52a200ccf5c65843f38984c6c42479d34b7"
+    "sha256": "c8e2b06d28783d917bb58f8fad166559ad882bb848461b28958c825ea189692e"
   },
   "formato": {
     "archivo": "config/formato_editorial.json",
-    "sha256": "a3e4cfed6102da2dc3f2779e681a4505be4c804bd71be7eaeea450e25593f081"
+    "sha256": "ab0c6b49a32bc2a10a22e4a04407202e393cae622a02e489445c5d3f6dd40106"
   },
   "investigacion": {
     "archivo": "config/investigacion_seguridad.json",
@@ -186,8 +197,14 @@
       },
       {
         "indice": 3,
-        "accion": "conservar",
-        "variables": []
+        "accion": "ampliar",
+        "variables": [
+          "metodologia_calificacion",
+          "cobertura_general",
+          "cobertura_ultimo_periodo",
+          "sensibilidad_general",
+          "sensibilidad_ultimo_periodo"
+        ]
       },
       {
         "indice": 4,
@@ -378,6 +395,8 @@
         "indice": 33,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_01_general",
+          "calificacion_indicador_01_ultimo_periodo",
           "analisis_indicador_01",
           "graficas_indicador_01",
           "tablas_indicador_01",
@@ -400,6 +419,8 @@
         "indice": 36,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_02_general",
+          "calificacion_indicador_02_ultimo_periodo",
           "analisis_indicador_02",
           "graficas_indicador_02",
           "tablas_indicador_02",
@@ -427,6 +448,8 @@
         "indice": 40,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_03_general",
+          "calificacion_indicador_03_ultimo_periodo",
           "analisis_indicador_03",
           "graficas_indicador_03",
           "tablas_indicador_03",
@@ -487,6 +510,8 @@
         "indice": 49,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_04_general",
+          "calificacion_indicador_04_ultimo_periodo",
           "analisis_indicador_04",
           "graficas_indicador_04",
           "tablas_indicador_04",
@@ -502,6 +527,8 @@
         "indice": 53,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_05_general",
+          "calificacion_indicador_05_ultimo_periodo",
           "analisis_indicador_05",
           "graficas_indicador_05",
           "tablas_indicador_05",
@@ -517,6 +544,8 @@
         "indice": 55,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_06_general",
+          "calificacion_indicador_06_ultimo_periodo",
           "analisis_indicador_06",
           "graficas_indicador_06",
           "tablas_indicador_06",
@@ -532,6 +561,8 @@
         "indice": 51,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_07_general",
+          "calificacion_indicador_07_ultimo_periodo",
           "analisis_indicador_07",
           "graficas_indicador_07",
           "tablas_indicador_07",
@@ -547,6 +578,8 @@
         "indice": 57,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_08_general",
+          "calificacion_indicador_08_ultimo_periodo",
           "analisis_indicador_08",
           "graficas_indicador_08",
           "tablas_indicador_08",
@@ -567,6 +600,8 @@
         "indice": 60,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_09_general",
+          "calificacion_indicador_09_ultimo_periodo",
           "analisis_indicador_09",
           "graficas_indicador_09",
           "tablas_indicador_09",
@@ -582,6 +617,8 @@
         "indice": 62,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_10_general",
+          "calificacion_indicador_10_ultimo_periodo",
           "analisis_indicador_10",
           "graficas_indicador_10",
           "tablas_indicador_10",
@@ -668,6 +705,8 @@
         "indice": 75,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_11_general",
+          "calificacion_indicador_11_ultimo_periodo",
           "analisis_indicador_11",
           "graficas_indicador_11",
           "tablas_indicador_11",
@@ -688,6 +727,8 @@
         "indice": 78,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_12_general",
+          "calificacion_indicador_12_ultimo_periodo",
           "analisis_indicador_12",
           "graficas_indicador_12",
           "tablas_indicador_12",
@@ -708,6 +749,8 @@
         "indice": 81,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_13_general",
+          "calificacion_indicador_13_ultimo_periodo",
           "analisis_indicador_13",
           "graficas_indicador_13",
           "tablas_indicador_13",
@@ -723,6 +766,8 @@
         "indice": 83,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_14_general",
+          "calificacion_indicador_14_ultimo_periodo",
           "analisis_indicador_14",
           "graficas_indicador_14",
           "tablas_indicador_14",
@@ -743,6 +788,8 @@
         "indice": 86,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_15_general",
+          "calificacion_indicador_15_ultimo_periodo",
           "analisis_indicador_15",
           "graficas_indicador_15",
           "tablas_indicador_15",
@@ -758,6 +805,8 @@
         "indice": 88,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_16_general",
+          "calificacion_indicador_16_ultimo_periodo",
           "analisis_indicador_16",
           "graficas_indicador_16",
           "tablas_indicador_16",
@@ -806,6 +855,8 @@
         "indice": 95,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_17_general",
+          "calificacion_indicador_17_ultimo_periodo",
           "analisis_indicador_17",
           "graficas_indicador_17",
           "tablas_indicador_17",
@@ -826,6 +877,8 @@
         "indice": 98,
         "accion": "parametrizar",
         "variables": [
+          "calificacion_indicador_18_general",
+          "calificacion_indicador_18_ultimo_periodo",
           "analisis_indicador_18",
           "graficas_indicador_18",
           "tablas_indicador_18",
@@ -847,6 +900,7 @@
       "Trasladar bloques 50/51 (personal duplicado) después de 55; título cambia a CUP.",
       "Identidad municipal bajo SEGURIDAD y bibliografía al final; sin portada añadida.",
       "Instrucciones de redacción sustituidas por variables en la misma posición.",
+      "Metodología, cobertura y sensibilidad en el bloque inicial; dos calificaciones documentales explícitas por indicador.",
       "Temas de investigación y encabezados conservados con su desarrollo inmediatamente después."
     ]
   },

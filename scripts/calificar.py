@@ -104,12 +104,17 @@ def calificar_temas_proteccion(section, period, mappings, años_objetivo=None):
     for year in selected:
         for row in rows[year]:
             topic = row['celdas'].get('Tema impartido', '')
+            if not topic.strip() or normalizar(topic) in ('no especificado', 'no identificado', 'n/d', 's/d'):
+                return {**coverage, 'motivo': 'Tema de protección civil vacío o no identificado; no acredita ausencia de capacitación.'}
             for core, patterns in mappings['proteccion_civil_temas_nucleo'].items():
                 if coincide(topic, patterns):
                     found.add(core)
     count = len(found)
     if count >= 5 and 'identificacion_y_analisis_de_riesgos' in found:
         score = 5
+    elif count >= 5:
+        return {**coverage, 'motivo': 'Cinco o más temas sin análisis de riesgos: combinación no cubierta por la ficha.',
+                'temas_nucleo': sorted(found)}
     elif count == 4:
         score = 4
     elif count in (2, 3):
@@ -136,9 +141,15 @@ def calificar_temas_policiales(section, period, mappings, años_objetivo=None):
             topic = row['celdas'].get('Tema', '')
             percentage = numero(row['celdas'].get('Porcentaje', ''))
             total = numero(row['celdas'].get('Total', ''))
+            if (not topic.strip() or normalizar(topic) in ('no especificado', 'no identificado', 'n/d', 's/d')
+                    or total is None or total < 0 or total != total.to_integral_value()
+                    or percentage is None or not 0 <= percentage <= 100
+                    or (total == 0 and percentage != 0)):
+                return {**period_coverage,
+                        'motivo': 'Tema, total o porcentaje de capacitación vacío, inconsistente o fuera de rango.'}
             for core, patterns in mappings['capacitacion_policial_nucleo'].items():
-                if coincide(topic, patterns) and total is not None and total > 0:
-                    coverage[year][core] = max(coverage[year].get(core, Decimal(0)), percentage or Decimal(0))
+                if coincide(topic, patterns) and total > 0:
+                    coverage[year][core] = max(coverage[year].get(core, Decimal(0)), percentage)
     with_two_or_more = [year for year, topics in coverage.items()
                          if sum(value >= 50 for value in topics.values()) >= 2]
     with_any = [year for year, topics in coverage.items() if topics]
@@ -173,12 +184,13 @@ def calificar_llamadas(section, period, años_objetivo=None):
             continue
         local_value = numero(local[0]['celdas'].get('Porcentaje', ''))
         state_value = numero(entity[0]['celdas'].get('Porcentaje', ''))
-        if local_value is None or state_value is None:
+        if (local_value is None or state_value is None
+                or not 0 <= local_value <= 100 or not 0 <= state_value <= 100):
             incomplete = True
             continue
         comparisons[year] = {'municipal': local_value, 'estatal': state_value}
     if not comparisons:
-        return {'puntaje': 1, 'criterio_aplicado': 'Ficha 15: no hay dato comparable',
+        return {'puntaje': None, 'motivo': 'No hay porcentajes de llamadas válidos y comparables; la ausencia de dato no es desempeño observado.',
                 'años_observados': years, 'años_evaluados': selected}
     all_at_or_above = len(comparisons) == len(selected) and all(
         value['municipal'] >= value['estatal'] for value in comparisons.values())
@@ -186,7 +198,8 @@ def calificar_llamadas(section, period, años_objetivo=None):
     if all_at_or_above:
         score = 5 if period == 'general' else 4
     elif incomplete:
-        score = 2
+        return {'puntaje': None, 'motivo': 'Comparación de llamadas incompleta, duplicada o con porcentajes fuera de rango.',
+                'años_observados': years, 'años_evaluados': selected}
     elif any_below:
         score = 3
     else:
@@ -212,7 +225,7 @@ def calificar_personal(section, period, external, años_objetivo=None):
             return {'puntaje': None, 'motivo': 'Falta personal o población municipal comparable.',
                     'años_observados': years, 'años_evaluados': selected}
         staff = numero(records[0]['celdas'].get('Total', ''))
-        if staff is None or population[year] <= 0:
+        if staff is None or staff < 0 or staff != staff.to_integral_value() or population[year] <= 0:
             return {'puntaje': None, 'motivo': 'Personal o población no válido.',
                     'años_observados': years, 'años_evaluados': selected}
         rates[year] = staff / population[year] * 1000
@@ -250,7 +263,9 @@ def calificar_camaras(section, period, external, años_objetivo=None):
             return {'puntaje': None, 'motivo': 'Faltan cámaras o población comparable municipal/estatal.',
                     'años_observados': years, 'años_evaluados': selected}
         local_total, state_total = numero(local[0]['celdas'].get('Total', '')), numero(entity[0]['celdas'].get('Total', ''))
-        if local_total is None or state_total is None or local_population[year] <= 0 or state_population[year] <= 0:
+        if (local_total is None or state_total is None or local_total < 0 or state_total < 0
+                or local_total != local_total.to_integral_value() or state_total != state_total.to_integral_value()
+                or local_population[year] <= 0 or state_population[year] <= 0):
             return {'puntaje': None, 'motivo': 'Cámaras o población no válidas.',
                     'años_observados': years, 'años_evaluados': selected}
         rates[year] = {'municipal': local_total / local_population[year] * 1000,
@@ -293,7 +308,9 @@ def calificar_puestas_a_disposicion(section, period, external, años_objetivo=No
             return {'puntaje': None, 'motivo': 'Faltan incidencia o puestas a disposición comparables.',
                     'años_observados': years, 'años_evaluados': selected}
         local_total, state_total = numero(local[0]['celdas'].get('Total de personas', '')), numero(entity[0]['celdas'].get('Total', ''))
-        if local_total is None or state_total is None or municipal_incidence[year] <= 0 or state_incidence[year] <= 0:
+        if (local_total is None or state_total is None or local_total < 0 or state_total <= 0
+                or local_total != local_total.to_integral_value() or state_total != state_total.to_integral_value()
+                or municipal_incidence[year] <= 0 or state_incidence[year] <= 0):
             return {'puntaje': None, 'motivo': 'Incidencia o puestas a disposición no válidas.',
                     'años_observados': years, 'años_evaluados': selected}
         ratios[year] = {'municipal': local_total / municipal_incidence[year],
@@ -357,7 +374,9 @@ def calificar_indicador(section, ficha, period, mappings=None, external=None, a�
         else:
             courses = numero(cells.get('Número de cursos', ''))
             trained = numero(cells.get('Número de servidores capacitados', ''))
-            if courses is None or trained is None or courses < 0 or trained < 0:
+            if (courses is None or trained is None or courses < 0 or trained < 0
+                    or courses != courses.to_integral_value() or trained != trained.to_integral_value()
+                    or (courses == 0 and trained > 0)):
                 value = None
             else:
                 value = courses > 0
