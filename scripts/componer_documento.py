@@ -1,7 +1,12 @@
-"""Contenido editorial reproducible a partir de resultados y evidencia del JSON."""
+"""Compone la medición consultiva; cálculos y trazabilidad permanecen separados."""
 from decimal import Decimal, ROUND_HALF_UP
 
-PERIODOS = {'general': 'Periodo general', 'ultimo_periodo': 'Último periodo'}
+from analisis_evidencia import analizar_indicador
+from documentos import registros
+from redaccion_consultoria import (PERIODOS, bibliografia_documental, enumerar,
+                                  fuente_grafica, notas_alcance, periodo_texto,
+                                  texto_pendiente, titulo_tabla, validar_publicacion)
+
 REVISION_EDITORIAL = 'REVISION_EDITORIAL_WORD'
 
 
@@ -13,114 +18,117 @@ def decimal_corto(value):
     return str(Decimal(str(value)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
 
 
-def componer(result, dictionary, rules):
-    """Completa sólo prosa sustentada; conserva null en variantes descartadas.
+def _resumen(analyses, numbers, reciente=False):
+    key = 'hallazgo_reciente' if reciente else 'hallazgo_municipal'
+    return ' '.join(analyses[number][key] for number in numbers
+                    if number in analyses and analyses[number][key])
 
-    La composición no decide causas, vigencia jurídica ni revisiones humanas.
-    Cada análisis remite a las tablas municipales/estatales originales.
-    """
+
+def componer(result, dictionary, rules):
     values = result['valores_plantilla']
     sections = result['indicadores']
-    title = f"Diagnóstico de seguridad municipal — {result['municipio']}, {result.get('estado') or 'entidad pendiente'}"
-    analyses = []
+    municipality, state = result['municipio'], result.get('estado') or 'la entidad'
+    for key in list(values):
+        if key == 'tabla_calificaciones' or key.startswith(('tablas_municipales_', 'tablas_estatales_')):
+            del values[key]
+    analyses = {section['numero']: analizar_indicador(section, municipality, state,
+                                                    result.get('periodos_evaluacion'))
+                for section in sections}
     for section in sections:
         number = section['numero']
-        paragraphs = []
-        for period, label in PERIODOS.items():
-            evaluation = section['evaluaciones'][period]
-            years = ', '.join(map(str, evaluation.get('años_evaluados', []))) or 'sin cobertura confirmada'
-            if evaluation['puntaje'] is None:
-                sentence = f"{label} ({years}): calificación pendiente. {evaluation.get('motivo', 'Requiere revisión de evidencia.')}"
-            else:
-                sentence = f"{label} ({years}): {evaluation['puntaje']}/5. Criterio aplicado: {evaluation['criterio_aplicado']}."
-            if evaluation.get('nota'):
-                sentence += ' ' + evaluation['nota']
-            paragraphs.append(sentence)
-        refs = [f"tabla {table['tabla']} ({table['ambito']})" for table in section['tablas']]
-        paragraphs.append('Evidencia: PAQUETE SEGURIDAD, ' + '; '.join(refs) + '. Las tablas siguientes conservan los valores reportados; una celda vacía representa un dato pendiente de clasificar.')
-        if not all(section.get('control_cruzado_anexo', {}).get(key, False)
-                   for key in ('tablas_identicas', 'calificacion_reportada_coincide')):
-            paragraphs.append('El control cruzado con el Anexo requiere revisión.')
-        key = f'analisis_indicador_{number:02d}'
-        values[key] = '\n\n'.join(paragraphs)
-        analyses.append({'indicador': number, 'variable': key,
-                         'cierre': 'Las puntuaciones anteriores corresponden a los criterios internos de la ficha. Los datos autodeclarados no acreditan por sí solos calidad operativa ni efectos sobre el delito.'})
-    dimension_names = {item['codigo']: item['nombre'] for item in dictionary['catalogos']['dimensiones']}
-    dimension_values = {period: {} for period in PERIODOS}
-    for period, label in PERIODOS.items():
-        pending = [s['numero'] for s in sections if s['evaluaciones'][period]['puntaje'] is None]
-        grade = result['calculos'][period]['calificacion_final']
-        sentences = [f"{label}: {len(sections) - len(pending)} de 18 indicadores cuentan con puntaje calculado."]
-        if pending:
-            sentences.append('La calificación global permanece pendiente por los indicadores ' + ', '.join(map(str, pending)) + '.')
-        else:
-            sentences.append(f"La calificación global calculada es {grade}, después de aplicar los candados de la metodología interna.")
-        dims = []
-        for name, ids in rules['dimensiones'].items():
-            scores = [s['evaluaciones'][period]['puntaje'] for s in sections if s['numero'] in ids]
-            mean = None if any(s is None for s in scores) else decimal_corto(sum(Decimal(s) for s in scores) / len(scores))
-            dimension_values[period][name] = mean
-            dims.append(f"{dimension_names[name]}: {mean + '/5' if mean else 'promedio pendiente'}")
-        values[f'resumen_{period}'] = ' '.join(sentences) + '\n\n' + '; '.join(dims) + '. No se infiere una tendencia temporal ni una posición frente al estado a partir de información incompleta.'
-    rows = []
-    for section in sections:
-        evaluations = section['evaluaciones']
-        notes = [f"{PERIODOS[p]}: {v['motivo']}" for p, v in evaluations.items() if v['puntaje'] is None]
-        if len(notes) == 2 and evaluations['general']['motivo'] == evaluations['ultimo_periodo']['motivo']:
-            notes = ['Ambos periodos: ' + evaluations['general']['motivo']]
-        rows.append({'indicador': section['numero'],
-                     'general': puntaje(evaluations['general']['puntaje']),
-                     'ultimo_periodo': puntaje(evaluations['ultimo_periodo']['puntaje']),
-                     'nota': ' '.join(notes)})
-    grades = {p: result['calculos'][p]['calificacion_final'] or 'PENDIENTE' for p in PERIODOS}
-    values.update(calificacion_general=grades['general'], calificacion_ultimo_periodo=grades['ultimo_periodo'])
-    for section, analysis in zip(sections, analyses):
-        number = section['numero']
-        tables = [{'titulo': f"Datos {table['ambito']} — PAQUETE SEGURIDAD, tabla {table['tabla']}",
-                   'ambito': table['ambito'], 'tabla_fuente': table['tabla'], 'filas': table['filas']}
-                  for table in section['tablas']]
-        values[f'tablas_indicador_{number:02d}'] = tables
-        for scope, label in [('municipal', 'municipales'), ('estatal', 'estatales')]:
-            values[f'tablas_{label}_indicador_{number:02d}'] = [t for t in tables if t['ambito'] == scope]
+        analysis = analyses[number]
+        values[f'analisis_indicador_{number:02d}'] = '\n\n'.join(analysis['parrafos'])
         values[f'cierre_indicador_{number:02d}'] = analysis['cierre']
+        values[f'tablas_indicador_{number:02d}'] = [
+            {'titulo': titulo_tabla(table), 'ambito': table['ambito'],
+             'tabla_fuente': table['tabla'], 'filas': table['filas']}
+            for table in section['tablas']]
         scores = [section['evaluaciones'][period]['puntaje'] for period in PERIODOS]
         values[f'graficas_indicador_{number:02d}'] = ([{
-            'tipo': 'puntajes', 'titulo': f"Indicador {number:02d}: puntajes calculados",
+            'tipo': 'puntajes', 'titulo': f"Valoración: {section['nombre']}",
             'categorias': list(PERIODOS.values()), 'valores': scores,
-            'fuente': 'Cálculo interno a partir de PAQUETE SEGURIDAD; escala 1–5.'
+            'fuente': fuente_grafica(section),
         }] if any(score is not None for score in scores) else [])
-    values['tabla_calificaciones'] = [{'titulo': 'Calificaciones calculadas por indicador',
-        'filas': [['Indicador', 'General', 'Último periodo']] +
-                 [[f"{s['numero']}. {s['nombre']}", *[puntaje(s['evaluaciones'][p]['puntaje']) for p in PERIODOS]]
-                  for s in sections]}]
-    sources = result.get('fuentes', [])
-    values['bibliografia'] = '\n\n'.join(
-        f"{source.get('archivo') or source.get('nombre') or source.get('tipo', 'Fuente externa')}. "
-        f"SHA-256: {source['sha256']}." if source.get('sha256') else str(source.get('nombre', 'Fuente externa declarada'))
-        for source in sources) or 'Referencias documentales registradas en el JSON fuente.'
-    active = list(dictionary['variables_documento'])
+    years = [value for value in (values.get('año_inicial'), values.get('año_final')) if value is not None]
+    if not years:
+        years = sorted({row['año'] for section in sections for table in section['tablas']
+                        if table.get('ambito') == 'municipal' for row in registros(table)})
+    period_label = periodo_texto(years)
+    values['introduccion_seguridad'] = (
+        f'Esta medición examina las capacidades de seguridad de {municipality}, {state}, durante {period_label}, '
+        'para identificar avances, problemas que requieren atención y prioridades de gestión. '
+        'Los dieciocho indicadores abarcan protección civil, condiciones del personal e información y eficiencia policial.\n\n'
+        f'El análisis utiliza el Paquete Seguridad y el Anexo de {municipality}. Presenta la evolución municipal '
+        f'y la información de {state} como contexto, distinguiendo los conteos, los porcentajes y la existencia de capacidades. '
+        'Las recomendaciones se apoyan en esos hallazgos; no suponen causas, suficiencia operativa ni resultados sobre el delito que los documentos no permiten establecer.')
+    historic = [_resumen(analyses, group) for group in ((1, 2), (4, 7), (14, 15))]
+    values['resumen_general'] = '\n\n'.join(part for part in historic if part) or (
+        f'La información de {municipality} requiere ampliarse para identificar cambios en sus capacidades de seguridad.')
+    recent_years = sorted({year for section in sections
+                           for year in section['evaluaciones']['ultimo_periodo'].get('años_evaluados', [])})
+    missing_years = sorted({year for section in sections
+                            for year in section['evaluaciones']['ultimo_periodo'].get('años_faltantes', [])})
+    if missing_years:
+        recent_intro = (f'La valoración de {periodo_texto(recent_years)} está incompleta por falta de información '
+                        f'de {enumerar(missing_years)} en varios indicadores. Los hallazgos disponibles describen '
+                        'los años que se indican a continuación y no cubren por sí solos todo el periodo reciente.')
+    else:
+        recent_intro = (f'Para valorar la situación reciente de {municipality}, las últimas observaciones disponibles '
+                        'permiten identificar las siguientes prioridades, respetando la cobertura temporal de cada indicador.')
+    values['resumen_ultimo_periodo'] = recent_intro + '\n\n' + _resumen(analyses, (5, 10, 16), reciente=True)
+    conclusions = []
+    for numbers, recommendation in (
+        ((1, 2), 'La prioridad en protección civil es dar continuidad a la planeación y comprobar que la capacitación se traduzca en capacidad de respuesta ante los riesgos locales.'),
+        ((4, 7), 'En la gestión del personal conviene revisar la estabilidad de la fuerza, sostener la certificación y vincular la formación con las necesidades de los turnos y las funciones operativas.'),
+        ((15, 18), 'La actividad policial debe acompañarse de seguimiento a la atención ciudadana y a la resolución de los procedimientos. Estas decisiones requieren revisar calidad y resultados, además del volumen de actividad.'),
+    ):
+        findings = _resumen(analyses, numbers, reciente=True)
+        conclusions.append((findings + ' ' if findings else '') + recommendation)
+    values['conclusiones_seguridad'] = '\n\n'.join(conclusions)
+    values['bibliografia'] = '\n\n'.join(bibliografia_documental(result))
+    grades = {period: result['calculos'][period]['calificacion_final'] or 'PENDIENTE' for period in PERIODOS}
+    values.update(calificacion_general=grades['general'], calificacion_ultimo_periodo=grades['ultimo_periodo'])
+    dimensions = {period: {} for period in PERIODOS}
+    for period in PERIODOS:
+        for name, ids in rules['dimensiones'].items():
+            scores = [section['evaluaciones'][period]['puntaje'] for section in sections if section['numero'] in ids]
+            dimensions[period][name] = (None if not scores or any(score is None for score in scores)
+                                        else decimal_corto(sum(Decimal(str(score)) for score in scores) / len(scores)))
+    active = [key for key, definition in dictionary['variables_documento'].items()
+              if definition.get('apariciones_por_documento', {}).get('medicion', 1)
+              and key != 'tabla_calificaciones'
+              and not key.startswith(('tablas_municipales_', 'tablas_estatales_'))]
+    active_set = set(active)
+    for key in list(values):
+        if key not in active_set:
+            del values[key]
+    result['version'] = '2.1'
     result['contenido_word'] = {
-        'version': '2.0', 'perfil': 'seguridad_v2',
-        'titulo': title,
-        'aviso_borrador': 'BORRADOR DE REVISIÓN — evaluación pendiente de validación; no es un diagnóstico final.',
-        'periodo': f"Periodo documental: {values.get('año_inicial', 'pendiente')}–{values.get('año_final', 'pendiente')}. Los años se conservan como etiquetas de las tablas fuente.",
-        'calificaciones': grades, 'hoja_computo': rows,
-        'promedios_dimension': dimension_values,
+        'version': '2.1', 'perfil': 'seguridad_medicion_v2',
+        'titulo': f'Medición de seguridad de {municipality}, {state} ({period_label})',
+        'aviso_borrador': 'Versión de trabajo para revisión de hallazgos y recomendaciones.',
+        'periodo': f'Periodo de observaciones: {period_label}. La cobertura varía entre indicadores.',
+        'calificaciones': grades, 'promedios_dimension': dimensions,
         'promedios_generales': {p: result['calculos'][p].get('promedio_tres_dimensiones') for p in PERIODOS},
-        'candados': {p: ', '.join(str(c['regla_id']) for c in result['calculos'][p].get('candados_aplicados', []))
-                    if grades[p] != 'PENDIENTE' else 'Pendiente' for p in PERIODOS},
-        'analisis': analyses,
-        'variables_activas': active,
-        'variables_no_aplicables': sorted(set(dictionary['variables_documento']) - set(active)),
-        'decision_editorial': 'Sólo SEGURIDAD: medición y anexo. Análisis, gráficas de puntajes y tablas tipadas; metodología histórica independiente. La revisión humana sigue siendo obligatoria.',
+        'hoja_computo': [{'indicador': section['numero'],
+                         **{p: puntaje(section['evaluaciones'][p]['puntaje']) for p in PERIODOS}}
+                        for section in sections],
+        'analisis': [{'indicador': number, 'variable': f'analisis_indicador_{number:02d}',
+                     'cierre': analysis['cierre'], 'evidencia': analysis['evidencia'],
+                     'limite_periodo_reciente': analysis['limite_periodo_reciente']}
+                    for number, analysis in analyses.items()],
+        'variables_activas': active, 'variables_no_aplicables': [],
+        'decision_editorial': 'Medición de seguridad: dieciocho indicadores, dos fuentes municipales y redacción consultiva. Los puntajes pendientes permanecen sin asignación.',
     }
-    # Quitar únicamente los bloqueos técnicos que esta composición sí resuelve.
-    result['validaciones'] = [v for v in result['validaciones']
-                              if v['codigo'] not in ('VARIABLES_PENDIENTES', 'COMPOSICION_WORD_PENDIENTE')]
+    result['validaciones'] = [item for item in result.get('validaciones', [])
+                             if item['codigo'] not in ('VARIABLES_PENDIENTES', 'COMPOSICION_WORD_PENDIENTE', 'VARIABLES_ACTIVAS_PENDIENTES')]
     missing = [key for key in active if values.get(key) is None or values.get(key) == '']
     if missing:
         result['validaciones'].append({'nivel': 'bloqueante', 'codigo': 'VARIABLES_ACTIVAS_PENDIENTES', 'variables': missing})
-    if not any(v['codigo'] == REVISION_EDITORIAL for v in result['validaciones']):
+    if not any(item['codigo'] == REVISION_EDITORIAL for item in result['validaciones']):
         result['validaciones'].append({'nivel': 'revision', 'codigo': REVISION_EDITORIAL,
-                                      'detalle': 'Revisar prosa, correspondencia de años, criterios y referencias del Anexo 1 antes de validar la versión final.'})
+                                      'detalle': 'Revisar hallazgos, comparaciones, cobertura temporal y recomendaciones antes de aprobar la medición.'})
+    result['contenido_word']['notas_alcance'] = notas_alcance(result)
+    result['contenido_word']['textos_pendientes'] = {key: texto_pendiente(key) for key in missing}
+    result['contenido_word']['control_redaccion'] = validar_publicacion(result)
     return result

@@ -1,6 +1,10 @@
 __pycache__/
 *.py[cod]
 .DS_Store
+.env
+.env.*
+!.env.example
+~$*
 
 # Archivos municipales de entrada y resultados generados.
 input/**/*.docx

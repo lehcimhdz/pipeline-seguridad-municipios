@@ -1,10 +1,10 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "fuente": {
     "archivo": "config/metodologia_seguridad.json",
     "sha256": "a85630efb2087def34e0ecf2af2c0b2fd5470ffa17d9a6f94862f456fbc8b32c"
   },
-  "alcance": "Metodología de seguridad preservada; los machotes editoriales nuevos no contienen criterios de calificación.",
+  "alcance": "Sólo SEGURIDAD en el documento de medición general; evidencia exclusiva del paquete de seguridad y su anexo.",
   "criterio_operativo": {
     "prioridad": "Primera regla satisfecha. En binarios, ausencia en el último periodo aplica 2 antes de intermitencia (3).",
     "huecos": "No interpolar huecos entre umbrales ni asignar puntaje si no se satisface un criterio explícito.",
@@ -2411,5 +2411,21 @@
   "fuente_historica": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
     "sha256": "375e8f58120fffec24367d4b57ced17151f78d175ca17cc7736f008c3d9a01e4"
+  },
+  "politica_evidencia": {
+    "fuentes_admitidas": [
+      "{municipio} PAQUETE SEGURIDAD.docx",
+      "{municipio} Anexo.docx"
+    ],
+    "fuente_primaria": "PAQUETE SEGURIDAD",
+    "control_cruzado": "Anexo",
+    "fuentes_externas": false,
+    "muestra_estilo": "Referencia editorial; no aporta datos, calificaciones ni estándares.",
+    "faltantes": "Puntaje null cuando falta evidencia comparable; no convertir vacíos en cero, ausencia municipal o puntaje 1.",
+    "calificaciones_reportadas": "Se conservan para contraste, sin sustituir los puntajes calculados.",
+    "agregacion": "Requiere los 18 puntajes del periodo; no completar ni promediar un subconjunto.",
+    "ultimo_periodo": "Dos años calendario consecutivos de cierre comunes a los 18 indicadores; no sustituir un año faltante por una edición anterior.",
+    "parametros_conservados": "18 indicadores, 90 criterios, escala 1–5, tres dimensiones, dependencias y candados de la transcripción histórica.",
+    "limites": "Los umbrales históricos no acreditan vigencia normativa ni estándares externos. Las tasas requieren denominadores documentados en las dos fuentes."
   }
 }

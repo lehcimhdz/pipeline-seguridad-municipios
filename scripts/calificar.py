@@ -35,6 +35,16 @@ def coincide(value, patterns):
     return any(re.search(pattern, value) for pattern in patterns)
 
 
+def tema_sin_informacion(value):
+    """Distingue un tema desconocido de una ausencia explícita como «Ninguno»."""
+    normalized = re.sub(r'\s+', ' ', normalizar(value)).rstrip('.')
+    abbreviation = re.sub(r'[.\s/]', '', normalized)
+    return abbreviation in ('nd', 'sd') or normalized in {
+        '', 'sin informacion', 'no disponible', 'no especificado',
+        'no identificado', 'sin dato', 'sin datos', 'no se reporta', 'no aplica',
+    }
+
+
 def filas_por_año(section, scope='municipal'):
     result = {}
     for table in section['tablas']:
@@ -45,14 +55,36 @@ def filas_por_año(section, scope='municipal'):
     return result
 
 
-def calificar_temas_proteccion(section, period, mappings):
+def definir_periodos(sections):
+    years = sorted({year for section in sections for year in filas_por_año(section)})
+    recent = [years[-1] - 1, years[-1]] if years else []
+    return {name: {'años_objetivo': selected,
+                   'año_inicial': selected[0] if selected else None,
+                   'año_final': selected[-1] if selected else None}
+            for name, selected in (('general', years), ('ultimo_periodo', recent))}
+
+
+def cobertura_periodo(section, target_years):
+    scopes = ('municipal', 'estatal') if section['numero'] == 15 else ('municipal',)
+    missing = {scope: sorted(set(target_years) - set(filas_por_año(section, scope))) for scope in scopes}
+    missing = {scope: years for scope, years in missing.items() if years}
+    consecutive = len(target_years) == 2 and target_years[1] == target_years[0] + 1
+    return {'cobertura_temporal_insuficiente': bool(missing) or not consecutive,
+            'años_faltantes': sorted({year for years in missing.values() for year in years}),
+            'años_faltantes_por_ambito': missing}
+
+
+def calificar_temas_proteccion(section, period, mappings, años_objetivo=None):
     rows = filas_por_año(section)
     years = sorted(rows)
-    selected = years[-2:] if period == 'ultimo_periodo' else years
+    selected = años_objetivo if años_objetivo is not None else years
     found = set()
     for year in selected:
-        for row in rows[year]:
+        for row in rows.get(year, []):
             topic = row['celdas'].get('Tema impartido', '')
+            if tema_sin_informacion(topic):
+                return {'puntaje': None, 'motivo': 'Falta identificar el tema de capacitación.',
+                        'años_observados': years, 'años_evaluados': selected}
             for core, patterns in mappings['proteccion_civil_temas_nucleo'].items():
                 if coincide(topic, patterns):
                     found.add(core)
@@ -72,20 +104,27 @@ def calificar_temas_proteccion(section, period, mappings):
             'temas_nucleo': sorted(found)}
 
 
-def calificar_temas_policiales(section, period, mappings):
+def calificar_temas_policiales(section, period, mappings, años_objetivo=None):
     rows = filas_por_año(section)
     years = sorted(rows)
-    selected = years[-2:] if period == 'ultimo_periodo' else years
+    selected = años_objetivo if años_objetivo is not None else years
     coverage = {}
     for year in selected:
         coverage[year] = {}
-        for row in rows[year]:
+        for row in rows.get(year, []):
             topic = row['celdas'].get('Tema', '')
+            if tema_sin_informacion(topic):
+                return {'puntaje': None, 'motivo': 'Falta identificar el tema de capacitación policial.',
+                        'años_observados': years, 'años_evaluados': selected}
             percentage = numero(row['celdas'].get('Porcentaje', ''))
             total = numero(row['celdas'].get('Total', ''))
             for core, patterns in mappings['capacitacion_policial_nucleo'].items():
-                if coincide(topic, patterns) and total is not None and total > 0:
-                    coverage[year][core] = max(coverage[year].get(core, Decimal(0)), percentage or Decimal(0))
+                if coincide(topic, patterns):
+                    if total is None or total < 0 or percentage is None or not 0 <= percentage <= 100:
+                        return {'puntaje': None, 'motivo': 'Falta precisar la cantidad o el porcentaje de personal capacitado.',
+                                'años_observados': years, 'años_evaluados': selected}
+                    if total > 0:
+                        coverage[year][core] = max(coverage[year].get(core, Decimal(0)), percentage)
     with_two_or_more = [year for year, topics in coverage.items()
                          if sum(value >= 50 for value in topics.values()) >= 2]
     with_any = [year for year, topics in coverage.items() if topics]
@@ -103,11 +142,11 @@ def calificar_temas_policiales(section, period, mappings):
                                   for year, values in coverage.items()}}
 
 
-def calificar_llamadas(section, period):
+def calificar_llamadas(section, period, años_objetivo=None):
     municipal = filas_por_año(section, 'municipal')
     state = filas_por_año(section, 'estatal')
     years = sorted(set(municipal) | set(state))
-    selected = years[-2:] if period == 'ultimo_periodo' else years
+    selected = años_objetivo if años_objetivo is not None else years
     comparisons = {}
     incomplete = False
     for year in selected:
@@ -118,20 +157,19 @@ def calificar_llamadas(section, period):
             continue
         local_value = numero(local[0]['celdas'].get('Porcentaje', ''))
         state_value = numero(entity[0]['celdas'].get('Porcentaje', ''))
-        if local_value is None or state_value is None:
+        if (local_value is None or state_value is None
+                or not 0 <= local_value <= 100 or not 0 <= state_value <= 100):
             incomplete = True
             continue
         comparisons[year] = {'municipal': local_value, 'estatal': state_value}
-    if not comparisons:
-        return {'puntaje': 1, 'criterio_aplicado': 'Ficha 15: no hay dato comparable',
+    if not comparisons or incomplete:
+        return {'puntaje': None, 'motivo': 'Faltan porcentajes comparables de llamadas municipales y estatales para completar el periodo.',
                 'años_observados': years, 'años_evaluados': selected}
     all_at_or_above = len(comparisons) == len(selected) and all(
         value['municipal'] >= value['estatal'] for value in comparisons.values())
     any_below = any(value['municipal'] < value['estatal'] for value in comparisons.values())
     if all_at_or_above:
         score = 5 if period == 'general' else 4
-    elif incomplete:
-        score = 2
     elif any_below:
         score = 3
     else:
@@ -142,138 +180,31 @@ def calificar_llamadas(section, period):
             'comparacion': {str(year): {key: str(value) for key, value in values.items()}
                             for year, values in comparisons.items()}}
 
-
-def calificar_personal(section, period, external):
-    rows = filas_por_año(section)
-    years = sorted(rows)
-    selected = years[-2:] if period == 'ultimo_periodo' else years
-    population = external.get('poblacion_municipal', {})
-    rates = {}
-    for year in selected:
-        records = rows.get(year, [])
-        if len(records) != 1 or year not in population:
-            return {'puntaje': None, 'motivo': 'Falta personal o población municipal comparable.',
-                    'años_observados': years, 'años_evaluados': selected}
-        staff = numero(records[0]['celdas'].get('Total', ''))
-        if staff is None or population[year] <= 0:
-            return {'puntaje': None, 'motivo': 'Personal o población no válido.',
-                    'años_observados': years, 'años_evaluados': selected}
-        rates[year] = staff / population[year] * 1000
-    average = sum(rates.values()) / len(rates)
-    all_standard = all(value >= Decimal('1.8') for value in rates.values())
-    if all_standard:
-        score = 5 if period == 'general' else 4
-    elif Decimal('1.2') <= average <= Decimal('1.79') or (rates[selected[-1]] >= Decimal('1.8') and sum(value >= Decimal('1.8') for value in rates.values()) == 1):
-        score = 3
-    elif Decimal('0.8') <= average <= Decimal('1.19'):
-        score = 2
-    elif average < Decimal('0.8'):
-        score = 1
-    else:
-        return {'puntaje': None, 'motivo': 'Promedio de personal cae en un hueco no definido por la ficha.',
-                'años_observados': years, 'años_evaluados': selected}
-    return {'puntaje': score, 'criterio_aplicado': f'Ficha 4: promedio {average:.3f} por mil habitantes',
-            'años_observados': years, 'años_evaluados': selected,
-            'tasas_por_mil': {str(year): str(value) for year, value in rates.items()}}
-
-
-def calificar_camaras(section, period, external):
-    municipal = filas_por_año(section, 'municipal')
-    state = filas_por_año(section, 'estatal')
-    years = sorted(set(municipal) | set(state))
-    selected = years[-2:] if period == 'ultimo_periodo' else years
-    local_population = external.get('poblacion_municipal', {})
-    state_population = external.get('poblacion_estatal', {})
-    rates = {}
-    for year in selected:
-        local, entity = municipal.get(year, []), state.get(year, [])
-        if len(local) != 1 or len(entity) != 1 or year not in local_population or year not in state_population:
-            return {'puntaje': None, 'motivo': 'Faltan cámaras o población comparable municipal/estatal.',
-                    'años_observados': years, 'años_evaluados': selected}
-        local_total, state_total = numero(local[0]['celdas'].get('Total', '')), numero(entity[0]['celdas'].get('Total', ''))
-        if local_total is None or state_total is None or local_population[year] <= 0 or state_population[year] <= 0:
-            return {'puntaje': None, 'motivo': 'Cámaras o población no válidas.',
-                    'años_observados': years, 'años_evaluados': selected}
-        rates[year] = {'municipal': local_total / local_population[year] * 1000,
-                       'estatal': state_total / state_population[year] * 1000,
-                       'camaras': local_total}
-    all_at_or_above = all(value['municipal'] >= value['estatal'] for value in rates.values())
-    no_setbacks = all(rates[year]['municipal'] >= rates[previous]['municipal']
-                      for previous, year in zip(selected, selected[1:]))
-    if all(value['camaras'] > 0 for value in rates.values()) and all_at_or_above and no_setbacks:
-        score = 5
-    elif period == 'ultimo_periodo' and all_at_or_above:
-        score = 4
-    elif any(value['camaras'] > 0 for value in rates.values()) and any(value['municipal'] < value['estatal'] for value in rates.values()):
-        score = 3
-    elif sum(value['camaras'] > 0 for value in rates.values()) == 1:
-        score = 2
-    elif not any(value['camaras'] > 0 for value in rates.values()):
-        score = 1
-    else:
-        return {'puntaje': None, 'motivo': 'Serie de cámaras no cubierta por un criterio inequívoco.',
-                'años_observados': years, 'años_evaluados': selected}
-    return {'puntaje': score, 'criterio_aplicado': 'Ficha 14: tasas de cámaras municipal y estatal',
-            'años_observados': years, 'años_evaluados': selected,
-            'tasas_por_mil': {str(year): {key: str(value) for key, value in values.items()} for year, values in rates.items()}}
-
-
-def calificar_puestas_a_disposicion(section, period, external):
-    municipal = filas_por_año(section, 'municipal')
-    state = filas_por_año(section, 'estatal')
-    years = sorted(set(municipal) | set(state))
-    selected = years[-2:] if period == 'ultimo_periodo' else years
-    municipal_incidence = external.get('incidencia_municipal', {})
-    state_incidence = external.get('incidencia_estatal', {})
-    ratios = {}
-    for year in selected:
-        local, entity = municipal.get(year, []), state.get(year, [])
-        if len(local) != 1 or len(entity) != 1 or year not in municipal_incidence or year not in state_incidence:
-            return {'puntaje': None, 'motivo': 'Faltan incidencia o puestas a disposición comparables.',
-                    'años_observados': years, 'años_evaluados': selected}
-        local_total, state_total = numero(local[0]['celdas'].get('Total de personas', '')), numero(entity[0]['celdas'].get('Total', ''))
-        if local_total is None or state_total is None or municipal_incidence[year] <= 0 or state_incidence[year] <= 0:
-            return {'puntaje': None, 'motivo': 'Incidencia o puestas a disposición no válidas.',
-                    'años_observados': years, 'años_evaluados': selected}
-        ratios[year] = {'municipal': local_total / municipal_incidence[year],
-                        'estatal': state_total / state_incidence[year]}
-    relative = [value['municipal'] / value['estatal'] for value in ratios.values()]
-    if all(value >= 1 for value in relative):
-        score = 4
-    elif all(Decimal('0.75') <= value < 1 for value in relative):
-        score = 3
-    elif any(value < Decimal('0.75') for value in relative):
-        score = 2
-    else:
-        return {'puntaje': None, 'motivo': 'Razón de puestas a disposición no cubierta por un criterio inequívoco.',
-                'años_observados': years, 'años_evaluados': selected}
-    return {'puntaje': score, 'criterio_aplicado': 'Ficha 18: razón de puestas a disposición frente a incidencia',
-            'años_observados': years, 'años_evaluados': selected,
-            'razones': {str(year): {key: str(value) for key, value in values.items()} for year, values in ratios.items()},
-            'nota': 'El puntaje 5 exige además estabilidad y revisión documentada de recomendaciones de derechos humanos.'}
-
-
-def calificar_indicador(section, ficha, period, mappings=None, external=None):
+def calificar_indicador(section, ficha, period, mappings=None, *, años_objetivo=None):
     tables = [table for table in section['tablas'] if table['ambito'] == 'municipal']
     rows = [row for table in tables for row in registros(table)]
     years = sorted({row['año'] for row in rows})
-    selected = years[-2:] if period == 'ultimo_periodo' else years
+    if period not in ('general', 'ultimo_periodo'):
+        raise ValueError('Periodo desconocido.')
+    selected = (list(años_objetivo) if años_objetivo is not None
+                else [years[-1] - 1, years[-1]] if years else []) if period == 'ultimo_periodo' else years
     result = {'puntaje': None, 'años_observados': years, 'años_evaluados': selected,
               'cobertura': 'Observaciones documentadas; la ausencia de ediciones anteriores no acredita inaplicabilidad.'}
     if not selected or (period == 'ultimo_periodo' and len(selected) < 2):
         return {**result, 'motivo': 'Cobertura temporal insuficiente.'}
+    if period == 'ultimo_periodo':
+        if len(selected) != 2 or selected[1] != selected[0] + 1:
+            raise ValueError('El último periodo requiere dos años calendario consecutivos.')
+        coverage = cobertura_periodo(section, selected)
+        result.update(coverage)
+        if coverage['cobertura_temporal_insuficiente']:
+            return {**result, 'motivo': 'Faltan observaciones para evaluar el último periodo completo.'}
     if mappings and ficha['id'] == 3:
-        return calificar_temas_proteccion(section, period, mappings)
+        return {**result, **calificar_temas_proteccion(section, period, mappings, selected)}
     if mappings and ficha['id'] == 10:
-        return calificar_temas_policiales(section, period, mappings)
+        return {**result, **calificar_temas_policiales(section, period, mappings, selected)}
     if ficha['id'] == 15:
-        return calificar_llamadas(section, period)
-    if external and ficha['id'] == 4:
-        return calificar_personal(section, period, external)
-    if external and ficha['id'] == 14:
-        return calificar_camaras(section, period, external)
-    if external and ficha['id'] == 18:
-        return calificar_puestas_a_disposicion(section, period, external)
+        return {**result, **calificar_llamadas(section, period, selected)}
     if ficha['metodo'] == 'revision_contextual':
         return {**result, 'motivo': 'Requiere homologación, denominadores o interpretación de la ficha.',
                 'datos_requeridos': list(ficha['datos_requeridos'])}
@@ -321,7 +252,7 @@ def calificar_indicador(section, ficha, period, mappings=None, external=None):
 
 def dependencias(results):
     # Las reglas particulares se aplican antes de promediar dimensiones.
-    if results[2]['puntaje'] == 1:
+    if results[2]['puntaje'] == 1 and not results[3].get('cobertura_temporal_insuficiente'):
         results[3].update(puntaje=1, criterio_aplicado='Ficha 3: indicador 2 = 1')
         results[3].pop('motivo', None)
     institute = results[6]

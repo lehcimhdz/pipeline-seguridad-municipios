@@ -1,61 +1,78 @@
-# Pipeline de seguridad municipal · v2
+# Pipeline de seguridad municipal · v2.1
 
-Los cuatro Word de `input/word/` siguen siendo las fuentes. El pipeline llena
-exclusivamente SEGURIDAD y publica dos documentos: medición y anexo.
+El pipeline transforma dos fuentes municipales en un diagnóstico de SEGURIDAD,
+con análisis consultivo, tablas de evidencia y gráficas de los puntajes
+calculables. Publica un solo Word, acompañado de su JSON fuente y un recibo de
+renderizado.
 
-    python3 -m pip install -r requirements.txt
-    python3 scripts/validar_plantilla.py
-    python3 scripts/ejecutar_pipeline.py
+Coloca en `input/word/` exactamente un archivo de cada tipo, con el mismo
+prefijo municipal:
 
-Las bases operativas son [seguridad_medicion.docx](templates/seguridad_medicion.docx)
-y [seguridad_anexo.docx](templates/seguridad_anexo.docx), derivadas de los nuevos
-machotes generales. Las variables usan llaves simples y `snake_case` ASCII:
-`{municipio}`, `{estado}`, `{analisis_indicador_01}`, `{graficas_indicador_01}`
-y `{tablas_indicador_01}`. Hay 116 variables y 137 apariciones entre ambas bases.
+```text
+{municipio} PAQUETE SEGURIDAD.docx
+{municipio} Anexo.docx
+```
 
-Si cambia un machote general, ejecuta `python3 scripts/migrar_machotes_v2.py`
-antes de generar otro municipio. La detección de cambios del original en cada
-corrida todavía está pendiente; hoy se validan los hashes de las bases derivadas.
-`PLATAFORMA ELECTORAL MACHOTE.docx` está versionado, pero aún no está integrado
-al contrato ni al renderizador: no se genera una plataforma electoral.
+PAQUETE SEGURIDAD aporta la evidencia principal; Anexo confirma identidad y
+permite contrastar esa evidencia. Ambos archivos son entradas. La ejecución
+utiliza exclusivamente esos dos documentos y no necesita API keys.
 
-El [diagrama editable de draw.io](flujo_pipeline.drawio) tiene dos páginas:
-ejecución actual y relación entre machotes, migración y pendientes de integración.
+```sh
+python3 -m pip install -r requirements.txt
+python3 scripts/validar_plantilla.py
+python3 scripts/ejecutar_pipeline.py
+```
 
-El [contrato documental](config/contrato_documental.json) vincula las plantillas,
+La única base de salida es
+[seguridad_medicion.docx](templates/seguridad_medicion.docx), derivada del capítulo
+SEGURIDAD de `templates/Machote general medicion version final.docx`. El original
+se conserva intacto. Si se actualiza, regenera y valida la base antes de ejecutar:
+
+```sh
+python3 scripts/migrar_machotes_v2.py
+python3 scripts/validar_plantilla.py
+```
+
+El [contrato documental](config/contrato_documental.json) vincula la base,
 el [diccionario](diccionario_datos_diagnostico_seguridad_municipal.json), las
-[reglas](reglas_calificacion.json), el [formato editorial](config/formato_editorial.json)
-y las fuentes Archivo mediante SHA-256. Las reglas conservan los 18 indicadores,
-90 criterios y candados de la metodología anterior: los nuevos Word no contienen
-fichas de puntuación ni cambian esos umbrales.
+[reglas](reglas_calificacion.json), el [formato](config/formato_editorial.json)
+y la [configuración de redacción](config/redaccion_consultoria.json).
+La base tiene 81 variables únicas y 81 apariciones. Se conservan los 18
+indicadores, 90 criterios y candados históricos. Un dato
+faltante permanece como `null`; una calificación incompleta queda PENDIENTE.
+El último periodo comprende una ventana común de dos años consecutivos al
+cierre documental. Los vacíos no se rellenan con observaciones de otros años.
 
-La salida contiene un JSON fuente, dos DOCX de nombre estable y dos recibos.
-Cada ejecución exitosa elimina los artefactos anteriores. Las tablas conservan
-la evidencia municipal y estatal; las gráficas nativas de Word muestran los
-puntajes calculados de ambos periodos, sin convertir un pendiente en cero.
-Todo texto insertado desde JSON queda resaltado en amarillo.
+Las salidas tienen nombres estables; `{municipio}` usa minúsculas, sin acentos
+y con guiones bajos:
 
-El formato aplica Archivo Regular/Light/Medium, tamaños, colores, interlineados,
-sangrías y tablas conforme al manual. Las fuentes oficiales se incrustan en
-los DOCX. Los interlineados de títulos inferiores a su tamaño de letra se
-aplican como mínimos para evitar superposición o recorte.
+```text
+output/json/{municipio}_diagnostico_seguridad_municipal.json
+output/word/{municipio}_seguridad_medicion_{modo}.docx
+output/json/{municipio}_seguridad_medicion_{modo}_renderizado.json
+```
 
-Para repetir el renderizado sin extraer otra vez:
+Una corrida exitosa conserva esos tres archivos y limpia las salidas anteriores.
+El modo predeterminado es `borrador`. Para volver a generar el Word a partir del
+JSON vigente:
 
-    python3 scripts/renderizar_word.py output/json/{archivo}.json --modo borrador
+```sh
+python3 scripts/renderizar_word.py output/json/{municipio}_diagnostico_seguridad_municipal.json --modo borrador
+```
 
-`--documento medicion` o `--documento anexo` genera sólo ese documento;
-por defecto genera ambos. `--modo final` exige revisión humana concluida,
-todos los puntajes, cálculos coherentes y ninguna validación abierta.
-`--word ninguno` en el pipeline genera sólo el JSON y limpia las salidas anteriores.
-Los JSON v1 deben regenerarse.
+`--modo final` exige revisión concluida y cálculos completos y coherentes.
+`--word ninguno` en el pipeline produce sólo el JSON y limpia los Word y recibos
+anteriores. Las carpetas de salida están reservadas para artefactos del pipeline.
 
-La población opcional puede ingresarse como CSV o con `--inegi-population`,
-usando `INEGI_TOKEN` desde el entorno. La ejecución habitual con los cuatro
-Word no necesita API key. Las claves y respuestas de fuentes externas nunca
-se incorporan al repositorio.
+El formato sigue el manual de medición: tipografía Archivo incrustada, jerarquía
+editorial y tablas legibles. El documento se entrega sin resaltado amarillo.
+La prosa sigue [ESTILO_REDACCION.md](ESTILO_REDACCION.md): presenta hallazgos,
+evidencia, implicaciones y prioridades, conservando la trazabilidad en el JSON.
 
-Consulta [PIPELINE.md](PIPELINE.md) para el contrato de variables, el manual
-editorial, la migración de nuevos machotes y las limitaciones pendientes.
+Consulta [PIPELINE.md](PIPELINE.md) para el contrato, los periodos, la revisión
+y la política de publicación. El [diagrama editable](flujo_pipeline.drawio)
+describe la ejecución y el mantenimiento de la base documental.
 
-    python3 -m unittest discover -s tests -v
+```sh
+python3 -m unittest discover -s tests -v
+```

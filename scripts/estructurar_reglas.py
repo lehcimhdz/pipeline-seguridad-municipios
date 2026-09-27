@@ -16,10 +16,21 @@ def construir():
     if any(sorted(c['puntaje'] for c in f['criterios']) != [1, 2, 3, 4, 5] for f in historical['fichas']):
         raise ValueError('Se requieren los cinco criterios en cada ficha.')
     result = deepcopy(historical)
-    result['version'] = '2.0'
+    result['version'] = '2.1'
     result['fuente_historica'] = historical['fuente']
     result['fuente'] = {'archivo': str(SOURCE.relative_to(ROOT)), 'sha256': sha256(SOURCE)}
-    result['alcance'] = 'Metodología de seguridad preservada; los machotes editoriales nuevos no contienen criterios de calificación.'
+    result['alcance'] = 'Sólo SEGURIDAD en el documento de medición general; evidencia exclusiva del paquete de seguridad y su anexo.'
+    result['politica_evidencia'] = {
+        'fuentes_admitidas': ['{municipio} PAQUETE SEGURIDAD.docx', '{municipio} Anexo.docx'],
+        'fuente_primaria': 'PAQUETE SEGURIDAD', 'control_cruzado': 'Anexo',
+        'fuentes_externas': False,
+        'muestra_estilo': 'Referencia editorial; no aporta datos, calificaciones ni estándares.',
+        'faltantes': 'Puntaje null cuando falta evidencia comparable; no convertir vacíos en cero, ausencia municipal o puntaje 1.',
+        'calificaciones_reportadas': 'Se conservan para contraste, sin sustituir los puntajes calculados.',
+        'agregacion': 'Requiere los 18 puntajes del periodo; no completar ni promediar un subconjunto.',
+        'ultimo_periodo': 'Dos años calendario consecutivos de cierre comunes a los 18 indicadores; no sustituir un año faltante por una edición anterior.',
+        'parametros_conservados': '18 indicadores, 90 criterios, escala 1–5, tres dimensiones, dependencias y candados de la transcripción histórica.',
+        'limites': 'Los umbrales históricos no acreditan vigencia normativa ni estándares externos. Las tasas requieren denominadores documentados en las dos fuentes.'}
     return result
 
 

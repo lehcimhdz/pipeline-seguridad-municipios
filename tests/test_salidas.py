@@ -36,7 +36,7 @@ class SalidasTests(unittest.TestCase):
             self.assertFalse(anterior.exists())
             self.assertFalse(word_anterior.exists())
 
-    def test_conserva_dos_documentos_y_sus_recibos(self):
+    def test_retira_el_anexo_de_salida_anterior(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             json_dir, word_dir = root / 'json', root / 'word'
@@ -48,9 +48,11 @@ class SalidasTests(unittest.TestCase):
             for path in [source, *receipts, *words, old]:
                 path.write_text('x', encoding='utf-8')
             result = limpiar_salidas(json_dir, word_dir, json_actual=source,
-                                      words_actuales=words, recibos_actuales=receipts)
-            self.assertEqual(result, {'json': 0, 'word': 1})
-            self.assertTrue(all(path.exists() for path in [source, *receipts, *words]))
+                                      word_actual=words[0], recibo_actual=receipts[0])
+            self.assertEqual(result, {'json': 1, 'word': 2})
+            self.assertTrue(all(path.exists() for path in [source, receipts[0], words[0]]))
+            self.assertFalse(words[1].exists())
+            self.assertFalse(receipts[1].exists())
             self.assertFalse(old.exists())
 
 

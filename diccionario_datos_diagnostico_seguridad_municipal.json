@@ -1,154 +1,960 @@
 {
   "metadatos": {
-    "version": "3.0",
+    "version": "2.1",
     "nombre": "diccionario_variables_diagnostico_seguridad_municipal",
-    "idioma": "es",
+    "idioma": "es-MX",
     "tipo_documento": "diccionario_de_datos_y_especificacion_de_contenido",
     "es_json_schema_formal": false,
-    "descripcion": "Define los marcadores existentes, sus contenidos esperados, los campos auxiliares y las reglas de consistencia para completar el documento.",
-    "fuente": "Bases operativas de SEGURIDAD derivadas de los nuevos machotes de medición y anexos.",
+    "descripcion": "Contenido del estudio de seguridad municipal, su evidencia y reglas de correspondencia con Word.",
+    "fuente": "Capítulo SEGURIDAD de Machote general medicion version final.docx, conservado sin sobrescribir.",
+    "alcance_activo": "Un documento de medición de seguridad y dos documentos de entrada: paquete de seguridad y Anexo.",
     "cobertura_verificada": {
-      "marcadores_de_variables_unicos": 116,
-      "apariciones_de_variables": 137,
+      "marcadores_de_variables_unicos": 81,
+      "apariciones_de_variables": 81,
       "indicadores": 18,
       "dimensiones": 3,
-      "periodos_de_evaluacion": 2
+      "periodos_de_evaluacion": 2,
+      "documentos_generados": 1
     },
-    "documento_modificado": true,
-    "verificacion_externa_de_fuentes_realizada": false,
-    "advertencia_metodologica": "Los criterios descritos proceden del documento. Su inclusión no acredita la vigencia externa de referencias legales, técnicas o bibliográficas.",
-    "alcance_activo": "Sólo SEGURIDAD; los modelos auxiliares históricos no implican nuevos marcadores ni producto electoral."
+    "verificacion_externa_de_fuentes_realizada": false
+  },
+  "fuentes_autorizadas": {
+    "paquete_seguridad": {
+      "patron": "{municipio} PAQUETE SEGURIDAD.docx",
+      "rol": "Evidencia primaria para tablas y evaluación."
+    },
+    "anexo": {
+      "patron": "{municipio} Anexo.docx",
+      "rol": "Identidad territorial y contraste del capítulo de seguridad; no es un producto de salida."
+    },
+    "regla": "No consultar ni incorporar API, CSV, otros paquetes, investigaciones o documentos de ejemplo como evidencia."
   },
   "convenciones": {
     "nombres_de_variables": {
       "formato": "snake_case",
       "mayusculas": false,
       "separador": "_",
-      "conservar_nombres_existentes": false,
-      "conservar_letra_ñ": false,
+      "caracteres": "ASCII",
       "ejemplos": [
         "municipio",
-        "analisis_indicador_01",
-        "tablas_indicador_01"
+        "analisis_indicador_01"
       ]
     },
     "marcadores": {
       "formato_en_word": "{nombre_variable}",
       "formato_de_clave_json": "nombre_variable",
-      "regla": "Llaves simples; claves ASCII snake_case únicas por indicador."
-    },
-    "tipos_de_dato": {
-      "string": "Texto.",
-      "integer": "Número entero.",
-      "number": "Número entero o decimal.",
-      "boolean": "Verdadero o falso.",
-      "array": "Lista ordenada de elementos.",
-      "object": "Objeto con campos internos.",
-      "null": "Valor todavía no disponible o no aplicable, acompañado de un estado que explique el motivo."
-    },
-    "distincion_entre_tipo_y_contenido": {
-      "tipo_dato": "Indica cómo almacenar el valor.",
-      "tipo_contenido": "Indica qué debe expresar: nombre, selección, párrafo, análisis, conclusión, serie, tabla o gráfica."
+      "regla": "Llaves simples; una variable por función e indicador, sin selección de variantes."
     },
     "valores_pendientes": {
       "valor": null,
-      "estado": "pendiente",
-      "regla": "No sustituir automáticamente un dato pendiente por cero, falso, una cadena vacía o una calificación de 1."
+      "regla": "No sustituir información desconocida por cero ni imputar puntajes sin una regla explícita."
     },
-    "listas": {
-      "almacenamiento": "array",
-      "presentacion_en_prosa": "Unir los elementos con comas y una conjunción final.",
-      "lista_vacia": "Usar solo cuando se haya confirmado que no existen elementos; no usar para representar una revisión pendiente."
+    "redaccion_publicable": {
+      "configuracion": "config/redaccion_consultoria.json",
+      "regla": "Prosa diagnóstica consultiva; hallazgos y sus límites, sin archivos, rutas, códigos ni mensajes del sistema."
     },
-    "porcentajes": {
-      "escala": "0_a_100",
-      "minimo": 0,
-      "maximo": 100,
-      "guardar_simbolo_porcentaje": false,
-      "regla_presentacion": "Agregar el símbolo % al presentar el valor, salvo que ya exista fuera del marcador."
+    "trazabilidad": "Conservar localizadores, huellas y validaciones en metadatos; publicar títulos de fuentes y notas sustantivas.",
+    "periodos": "Periodo general con cobertura declarada e intervalo reciente común de dos años; no reemplazar años ausentes por observaciones antiguas.",
+    "años": "Las etiquetas de las tablas no se identifican automáticamente con el año de referencia del censo.",
+    "porcentajes": "Conservar unidades de la fuente; no convertir conteos a porcentajes sin denominador."
+  },
+  "variables_documento": {
+    "municipio": {
+      "marcador": "{municipio}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Nombre del municipio común a las dos entradas documentales.",
+      "obligatorio": true
     },
-    "años": {
-      "tipo_dato": "integer",
-      "formato": "AAAA",
-      "regla": "Distinguir el año de edición del censo del año al que se refieren sus datos."
+    "estado": {
+      "marcador": "{estado}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Entidad federativa identificada en el Anexo y consistente con el municipio.",
+      "obligatorio": true
     },
-    "obligatoriedad": {
-      "marcadores_de_textos_alternativos": "Obligatorios únicamente si se utiliza la variante que los contiene.",
-      "campos_de_calculo": "Obligatorios para cerrar la evaluación, salvo imposibilidad metodológica documentada.",
-      "campos_adicionales": "Obligatorios cuando sean necesarios para justificar una afirmación, cálculo o ajuste."
+    "introduccion_seguridad": {
+      "marcador": "{introduccion_seguridad}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Objeto del estudio, tres dimensiones y alcance temporal de los documentos recibidos.",
+      "obligatorio": true
     },
-    "origen_de_los_campos": {
-      "variables_documento": "Marcadores que sí existen literalmente en el documento.",
-      "campos_auxiliares": "Campos propuestos para organizar datos, desambiguar marcadores y calcular resultados; no se afirma que tengan un marcador propio en Word.",
-      "modelos_reutilizables": "Estructuras comunes que deben instanciarse para cada indicador, periodo, fuente o visualización."
+    "calificacion_general": {
+      "marcador": "{calificacion_general}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Categoría del periodo general calculada con las reglas; PENDIENTE si falta evidencia necesaria.",
+      "obligatorio": true
     },
-    "referencias_internas": {
-      "regla": "Las propiedades modelo, catalogo y fuente_auxiliar son referencias descriptivas a otras secciones de este diccionario, no instrucciones ejecutables."
+    "calificacion_ultimo_periodo": {
+      "marcador": "{calificacion_ultimo_periodo}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Categoría del periodo reciente calculada con las reglas; PENDIENTE si falta evidencia necesaria.",
+      "obligatorio": true
     },
-    "sustitucion_en_word": {
-      "seleccionar_variante_antes_de_completar": true,
-      "prohibir_reemplazo_global_de_variables_contextuales": true,
-      "resolver_por": [
-        "seccion",
-        "variante_del_texto",
-        "indicador",
-        "periodo",
-        "orden_de_aparicion_dentro_del_parrafo"
-      ],
-      "regla": "Solo los datos verdaderamente globales, como municipio y estado, pueden compartir automáticamente un valor entre todas sus apariciones."
+    "resumen_general": {
+      "marcador": "{resumen_general}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Balance del periodo completo, resultados por dimensión y límites sustantivos de la evidencia.",
+      "obligatorio": true
+    },
+    "resumen_ultimo_periodo": {
+      "marcador": "{resumen_ultimo_periodo}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Balance del intervalo reciente común; distinguir ausencia de datos de desempeño desfavorable.",
+      "obligatorio": true
+    },
+    "analisis_indicador_01": {
+      "marcador": "{analisis_indicador_01}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_01": {
+      "marcador": "{graficas_indicador_01}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_01": {
+      "marcador": "{tablas_indicador_01}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_01": {
+      "marcador": "{cierre_indicador_01}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_02": {
+      "marcador": "{analisis_indicador_02}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_02": {
+      "marcador": "{graficas_indicador_02}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_02": {
+      "marcador": "{tablas_indicador_02}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_02": {
+      "marcador": "{cierre_indicador_02}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_03": {
+      "marcador": "{analisis_indicador_03}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_03": {
+      "marcador": "{graficas_indicador_03}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_03": {
+      "marcador": "{tablas_indicador_03}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_03": {
+      "marcador": "{cierre_indicador_03}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_04": {
+      "marcador": "{analisis_indicador_04}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_04": {
+      "marcador": "{graficas_indicador_04}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_04": {
+      "marcador": "{tablas_indicador_04}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_04": {
+      "marcador": "{cierre_indicador_04}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_05": {
+      "marcador": "{analisis_indicador_05}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_05": {
+      "marcador": "{graficas_indicador_05}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_05": {
+      "marcador": "{tablas_indicador_05}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_05": {
+      "marcador": "{cierre_indicador_05}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_06": {
+      "marcador": "{analisis_indicador_06}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_06": {
+      "marcador": "{graficas_indicador_06}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_06": {
+      "marcador": "{tablas_indicador_06}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_06": {
+      "marcador": "{cierre_indicador_06}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_07": {
+      "marcador": "{analisis_indicador_07}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_07": {
+      "marcador": "{graficas_indicador_07}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_07": {
+      "marcador": "{tablas_indicador_07}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_07": {
+      "marcador": "{cierre_indicador_07}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_08": {
+      "marcador": "{analisis_indicador_08}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_08": {
+      "marcador": "{graficas_indicador_08}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_08": {
+      "marcador": "{tablas_indicador_08}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_08": {
+      "marcador": "{cierre_indicador_08}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_09": {
+      "marcador": "{analisis_indicador_09}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_09": {
+      "marcador": "{graficas_indicador_09}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_09": {
+      "marcador": "{tablas_indicador_09}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_09": {
+      "marcador": "{cierre_indicador_09}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_10": {
+      "marcador": "{analisis_indicador_10}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_10": {
+      "marcador": "{graficas_indicador_10}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_10": {
+      "marcador": "{tablas_indicador_10}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_10": {
+      "marcador": "{cierre_indicador_10}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_11": {
+      "marcador": "{analisis_indicador_11}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_11": {
+      "marcador": "{graficas_indicador_11}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_11": {
+      "marcador": "{tablas_indicador_11}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_11": {
+      "marcador": "{cierre_indicador_11}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_12": {
+      "marcador": "{analisis_indicador_12}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_12": {
+      "marcador": "{graficas_indicador_12}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_12": {
+      "marcador": "{tablas_indicador_12}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_12": {
+      "marcador": "{cierre_indicador_12}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_13": {
+      "marcador": "{analisis_indicador_13}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_13": {
+      "marcador": "{graficas_indicador_13}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_13": {
+      "marcador": "{tablas_indicador_13}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_13": {
+      "marcador": "{cierre_indicador_13}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_14": {
+      "marcador": "{analisis_indicador_14}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_14": {
+      "marcador": "{graficas_indicador_14}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_14": {
+      "marcador": "{tablas_indicador_14}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_14": {
+      "marcador": "{cierre_indicador_14}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_15": {
+      "marcador": "{analisis_indicador_15}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_15": {
+      "marcador": "{graficas_indicador_15}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_15": {
+      "marcador": "{tablas_indicador_15}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_15": {
+      "marcador": "{cierre_indicador_15}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_16": {
+      "marcador": "{analisis_indicador_16}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_16": {
+      "marcador": "{graficas_indicador_16}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_16": {
+      "marcador": "{tablas_indicador_16}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_16": {
+      "marcador": "{cierre_indicador_16}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_17": {
+      "marcador": "{analisis_indicador_17}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_17": {
+      "marcador": "{graficas_indicador_17}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_17": {
+      "marcador": "{tablas_indicador_17}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_17": {
+      "marcador": "{cierre_indicador_17}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "analisis_indicador_18": {
+      "marcador": "{analisis_indicador_18}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Lectura de los datos del indicador: evolución, alcance y comparación válida; lenguaje consultivo.",
+      "obligatorio": true
+    },
+    "graficas_indicador_18": {
+      "marcador": "{graficas_indicador_18}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "graficas",
+      "debe_contener": "Comparación de puntajes efectivamente calculados; no dibujar valores faltantes como cero.",
+      "obligatorio": false
+    },
+    "tablas_indicador_18": {
+      "marcador": "{tablas_indicador_18}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "array",
+      "tipo_contenido": "tablas",
+      "debe_contener": "Tablas municipales y estatales del paquete de seguridad; conservar valores y referencias de origen.",
+      "obligatorio": true
+    },
+    "cierre_indicador_18": {
+      "marcador": "{cierre_indicador_18}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Implicación concreta de los hallazgos del indicador, sin causas ni efectos no acreditados.",
+      "obligatorio": true
+    },
+    "conclusiones_seguridad": {
+      "marcador": "{conclusiones_seguridad}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Síntesis de fortalezas, carencias y prioridades sustentadas en los hallazgos de seguridad.",
+      "obligatorio": true
+    },
+    "bibliografia": {
+      "marcador": "{bibliografia}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Títulos legibles de los dos documentos efectivamente utilizados, sin rutas ni huellas digitales.",
+      "obligatorio": true
     }
   },
   "catalogos": {
     "periodos": [
       "general",
       "ultimo_periodo"
-    ],
-    "calificaciones": [
-      {
-        "codigo": "excelente",
-        "texto": "EXCELENTE",
-        "nivel_ordinal": 5,
-        "rango_publicado": {
-          "minimo": 4.5,
-          "maximo": 5
-        }
-      },
-      {
-        "codigo": "muy_bien",
-        "texto": "MUY BIEN",
-        "nivel_ordinal": 4,
-        "rango_publicado": {
-          "minimo": 3.5,
-          "maximo": 4.49
-        }
-      },
-      {
-        "codigo": "regular",
-        "texto": "REGULAR",
-        "nivel_ordinal": 3,
-        "rango_publicado": {
-          "minimo": 2.5,
-          "maximo": 3.49
-        }
-      },
-      {
-        "codigo": "mal",
-        "texto": "MAL",
-        "nivel_ordinal": 2,
-        "rango_publicado": {
-          "minimo": 1.5,
-          "maximo": 2.49
-        }
-      },
-      {
-        "codigo": "catastrofico",
-        "texto": "CATASTRÓFICO",
-        "nivel_ordinal": 1,
-        "rango_publicado": {
-          "minimo": 1,
-          "maximo": 1.49
-        }
-      }
     ],
     "dimensiones": [
       {
@@ -191,2149 +997,36 @@
         ]
       }
     ],
-    "tendencias": [
-      "mejora_sostenida",
-      "avances_irregulares",
-      "estancamiento",
-      "deterioro",
-      "datos_insuficientes"
-    ],
-    "posiciones_frente_al_estado": [
-      "por_encima",
-      "similar",
-      "por_debajo"
-    ],
-    "comparaciones_entre_periodos": [
-      "igual",
-      "superior",
-      "inferior"
+    "calificaciones": [
+      {
+        "minimo": 4.5,
+        "calificacion": "EXCELENTE"
+      },
+      {
+        "minimo": 3.5,
+        "calificacion": "MUY BIEN"
+      },
+      {
+        "minimo": 2.5,
+        "calificacion": "REGULAR"
+      },
+      {
+        "minimo": 1.5,
+        "calificacion": "MAL"
+      },
+      {
+        "minimo": 1,
+        "calificacion": "CATASTRÓFICO"
+      }
     ],
     "estados_del_dato": [
-      "pendiente",
       "reportado",
+      "pendiente",
       "sin_respuesta_municipal",
       "variable_no_existente_en_edicion",
       "dato_dudoso",
       "no_aplicable"
-    ],
-    "tipos_de_visualizacion": [
-      "grafica_lineas",
-      "grafica_barras",
-      "grafica_composicion",
-      "tabla"
-    ],
-    "tipos_de_producto": [
-      "gobierno",
-      "electoral",
-      "ambos"
     ]
-  },
-  "variables_documento": {
-    "municipio": {
-      "marcador": "{municipio}",
-      "apariciones": 2,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "estado": {
-      "marcador": "{estado}",
-      "apariciones": 2,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "calificacion_general": {
-      "marcador": "{calificacion_general}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "calificacion_ultimo_periodo": {
-      "marcador": "{calificacion_ultimo_periodo}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "resumen_general": {
-      "marcador": "{resumen_general}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "resumen_ultimo_periodo": {
-      "marcador": "{resumen_ultimo_periodo}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_01": {
-      "marcador": "{analisis_indicador_01}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_01": {
-      "marcador": "{graficas_indicador_01}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_01": {
-      "marcador": "{tablas_indicador_01}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_01": {
-      "marcador": "{cierre_indicador_01}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_02": {
-      "marcador": "{analisis_indicador_02}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_02": {
-      "marcador": "{graficas_indicador_02}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_02": {
-      "marcador": "{tablas_indicador_02}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_02": {
-      "marcador": "{cierre_indicador_02}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_03": {
-      "marcador": "{analisis_indicador_03}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_03": {
-      "marcador": "{graficas_indicador_03}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_03": {
-      "marcador": "{tablas_indicador_03}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_03": {
-      "marcador": "{cierre_indicador_03}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_04": {
-      "marcador": "{analisis_indicador_04}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_04": {
-      "marcador": "{graficas_indicador_04}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_04": {
-      "marcador": "{tablas_indicador_04}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_04": {
-      "marcador": "{cierre_indicador_04}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_05": {
-      "marcador": "{analisis_indicador_05}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_05": {
-      "marcador": "{graficas_indicador_05}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_05": {
-      "marcador": "{tablas_indicador_05}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_05": {
-      "marcador": "{cierre_indicador_05}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_06": {
-      "marcador": "{analisis_indicador_06}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_06": {
-      "marcador": "{graficas_indicador_06}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_06": {
-      "marcador": "{tablas_indicador_06}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_06": {
-      "marcador": "{cierre_indicador_06}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_07": {
-      "marcador": "{analisis_indicador_07}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_07": {
-      "marcador": "{graficas_indicador_07}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_07": {
-      "marcador": "{tablas_indicador_07}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_07": {
-      "marcador": "{cierre_indicador_07}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_08": {
-      "marcador": "{analisis_indicador_08}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_08": {
-      "marcador": "{graficas_indicador_08}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_08": {
-      "marcador": "{tablas_indicador_08}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_08": {
-      "marcador": "{cierre_indicador_08}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_09": {
-      "marcador": "{analisis_indicador_09}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_09": {
-      "marcador": "{graficas_indicador_09}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_09": {
-      "marcador": "{tablas_indicador_09}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_09": {
-      "marcador": "{cierre_indicador_09}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_10": {
-      "marcador": "{analisis_indicador_10}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_10": {
-      "marcador": "{graficas_indicador_10}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_10": {
-      "marcador": "{tablas_indicador_10}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_10": {
-      "marcador": "{cierre_indicador_10}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_11": {
-      "marcador": "{analisis_indicador_11}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_11": {
-      "marcador": "{graficas_indicador_11}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_11": {
-      "marcador": "{tablas_indicador_11}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_11": {
-      "marcador": "{cierre_indicador_11}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_12": {
-      "marcador": "{analisis_indicador_12}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_12": {
-      "marcador": "{graficas_indicador_12}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_12": {
-      "marcador": "{tablas_indicador_12}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_12": {
-      "marcador": "{cierre_indicador_12}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_13": {
-      "marcador": "{analisis_indicador_13}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_13": {
-      "marcador": "{graficas_indicador_13}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_13": {
-      "marcador": "{tablas_indicador_13}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_13": {
-      "marcador": "{cierre_indicador_13}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_14": {
-      "marcador": "{analisis_indicador_14}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_14": {
-      "marcador": "{graficas_indicador_14}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_14": {
-      "marcador": "{tablas_indicador_14}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_14": {
-      "marcador": "{cierre_indicador_14}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_15": {
-      "marcador": "{analisis_indicador_15}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_15": {
-      "marcador": "{graficas_indicador_15}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_15": {
-      "marcador": "{tablas_indicador_15}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_15": {
-      "marcador": "{cierre_indicador_15}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_16": {
-      "marcador": "{analisis_indicador_16}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_16": {
-      "marcador": "{graficas_indicador_16}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_16": {
-      "marcador": "{tablas_indicador_16}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_16": {
-      "marcador": "{cierre_indicador_16}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_17": {
-      "marcador": "{analisis_indicador_17}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_17": {
-      "marcador": "{graficas_indicador_17}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_17": {
-      "marcador": "{tablas_indicador_17}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_17": {
-      "marcador": "{cierre_indicador_17}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "analisis_indicador_18": {
-      "marcador": "{analisis_indicador_18}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "graficas_indicador_18": {
-      "marcador": "{graficas_indicador_18}",
-      "apariciones": 2,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "graficas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": false
-    },
-    "tablas_indicador_18": {
-      "marcador": "{tablas_indicador_18}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "cierre_indicador_18": {
-      "marcador": "{cierre_indicador_18}",
-      "apariciones": 1,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 0
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "bibliografia": {
-      "marcador": "{bibliografia}",
-      "apariciones": 2,
-      "tipo_dato": "string",
-      "apariciones_por_documento": {
-        "medicion": 1,
-        "anexo": 1
-      },
-      "tipo_contenido": "texto",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tabla_calificaciones": {
-      "marcador": "{tabla_calificaciones}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_01": {
-      "marcador": "{tablas_estatales_indicador_01}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_01": {
-      "marcador": "{tablas_municipales_indicador_01}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_02": {
-      "marcador": "{tablas_estatales_indicador_02}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_02": {
-      "marcador": "{tablas_municipales_indicador_02}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_03": {
-      "marcador": "{tablas_estatales_indicador_03}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_03": {
-      "marcador": "{tablas_municipales_indicador_03}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_04": {
-      "marcador": "{tablas_estatales_indicador_04}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_04": {
-      "marcador": "{tablas_municipales_indicador_04}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_05": {
-      "marcador": "{tablas_estatales_indicador_05}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_05": {
-      "marcador": "{tablas_municipales_indicador_05}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_06": {
-      "marcador": "{tablas_estatales_indicador_06}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_06": {
-      "marcador": "{tablas_municipales_indicador_06}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_07": {
-      "marcador": "{tablas_estatales_indicador_07}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_07": {
-      "marcador": "{tablas_municipales_indicador_07}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_08": {
-      "marcador": "{tablas_estatales_indicador_08}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_08": {
-      "marcador": "{tablas_municipales_indicador_08}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_09": {
-      "marcador": "{tablas_estatales_indicador_09}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_09": {
-      "marcador": "{tablas_municipales_indicador_09}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_10": {
-      "marcador": "{tablas_estatales_indicador_10}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_10": {
-      "marcador": "{tablas_municipales_indicador_10}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_11": {
-      "marcador": "{tablas_estatales_indicador_11}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_11": {
-      "marcador": "{tablas_municipales_indicador_11}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_12": {
-      "marcador": "{tablas_estatales_indicador_12}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_12": {
-      "marcador": "{tablas_municipales_indicador_12}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_13": {
-      "marcador": "{tablas_estatales_indicador_13}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_13": {
-      "marcador": "{tablas_municipales_indicador_13}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_14": {
-      "marcador": "{tablas_estatales_indicador_14}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_14": {
-      "marcador": "{tablas_municipales_indicador_14}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_15": {
-      "marcador": "{tablas_estatales_indicador_15}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_15": {
-      "marcador": "{tablas_municipales_indicador_15}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_16": {
-      "marcador": "{tablas_estatales_indicador_16}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_16": {
-      "marcador": "{tablas_municipales_indicador_16}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_17": {
-      "marcador": "{tablas_estatales_indicador_17}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_17": {
-      "marcador": "{tablas_municipales_indicador_17}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_estatales_indicador_18": {
-      "marcador": "{tablas_estatales_indicador_18}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    },
-    "tablas_municipales_indicador_18": {
-      "marcador": "{tablas_municipales_indicador_18}",
-      "apariciones": 1,
-      "tipo_dato": "array",
-      "apariciones_por_documento": {
-        "medicion": 0,
-        "anexo": 1
-      },
-      "tipo_contenido": "tablas",
-      "debe_contener": "Contenido específico de SEGURIDAD, sustentado en las fuentes de entrada.",
-      "obligatorio": true
-    }
-  },
-  "campos_auxiliares": {
-    "identificacion_del_caso": {
-      "clave_municipio": {
-        "tipo_dato": "string",
-        "tipo_contenido": "identificador",
-        "debe_contener": "Clave municipal de la fuente utilizada, conservando ceros iniciales si existen.",
-        "obligatorio": "Cuando se integren bases de datos."
-      },
-      "clave_estado": {
-        "tipo_dato": "string",
-        "tipo_contenido": "identificador",
-        "debe_contener": "Clave de la entidad utilizada para vincular las fuentes."
-      },
-      "tipo_producto": {
-        "tipo_dato": "string",
-        "tipo_contenido": "seleccion",
-        "catalogo": "tipos_de_producto"
-      },
-      "fecha_corte_datos": {
-        "tipo_dato": "string",
-        "tipo_contenido": "fecha",
-        "formato": "AAAA-MM-DD",
-        "debe_contener": "Fecha hasta la que se revisaron las fuentes."
-      }
-    },
-    "periodos": {
-      "ediciones_censo_general": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer",
-        "debe_contener": "Ediciones efectivamente incluidas en la evaluación general."
-      },
-      "ediciones_censo_ultimo_periodo": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer",
-        "cantidad": 2,
-        "debe_contener": "Las dos ediciones más recientes incluidas en el análisis."
-      },
-      "años_referencia_series_anuales": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer",
-        "debe_contener": "Años de referencia disponibles para las series anuales."
-      },
-      "años_ultimo_periodo_series_anuales": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer",
-        "cantidad": 2,
-        "debe_contener": "Los dos años más recientes para los indicadores 17 y 18."
-      },
-      "año_inicial_ultimo_periodo": {
-        "tipo_dato": "integer",
-        "debe_contener": "Primer año que debe mostrarse en la apertura del diagnóstico reciente."
-      },
-      "año_final_ultimo_periodo": {
-        "tipo_dato": "integer",
-        "debe_contener": "Segundo año que debe mostrarse en la apertura del diagnóstico reciente."
-      },
-      "convencion_temporal_del_resumen": {
-        "tipo_dato": "string",
-        "debe_contener": "Explicación de si los años de apertura corresponden a ediciones o a años de referencia y de cómo se presentan series con coberturas distintas."
-      }
-    },
-    "comparacion_estatal": {
-      "posicion_frente_al_estado": {
-        "tipo_dato": "string",
-        "tipo_contenido": "seleccion",
-        "catalogo": "posiciones_frente_al_estado"
-      },
-      "indicadores_comparables": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer",
-        "debe_contener": "Identificadores de los indicadores incluidos en la comparación."
-      },
-      "indicadores_por_encima": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer",
-        "debe_contener": "Identificadores de los indicadores con mejor desempeño comparable."
-      },
-      "indicadores_similares": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer",
-        "debe_contener": "Identificadores considerados similares conforme al criterio documentado."
-      },
-      "indicadores_por_debajo": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer",
-        "debe_contener": "Identificadores de los indicadores con peor desempeño comparable."
-      },
-      "criterio_de_similitud": {
-        "tipo_dato": "string",
-        "debe_contener": "Tolerancia o regla utilizada para declarar que dos resultados son similares.",
-        "nota": "El documento no fija una tolerancia numérica universal."
-      },
-      "porcentaje_estatal_cumplimiento": {
-        "tipo_dato": "number",
-        "minimo": 0,
-        "maximo": 100,
-        "debe_contener": "Porcentaje estatal utilizado en el complemento sobre brecha del estado."
-      },
-      "base_del_porcentaje_estatal": {
-        "tipo_dato": "object",
-        "campos": {
-          "municipios_que_cumplen": "integer",
-          "municipios_incluidos": "integer",
-          "edicion_o_año_referencia": "integer",
-          "criterio_de_cumplimiento": "string",
-          "fuente_id": "string"
-        }
-      },
-      "analisis_comparativo": {
-        "tipo_dato": "string",
-        "tipo_contenido": "parrafo",
-        "debe_contener": "Interpretación de la posición municipal, sus límites y los indicadores que la explican."
-      }
-    },
-    "tendencia": {
-      "tipo_tendencia": {
-        "tipo_dato": "string",
-        "tipo_contenido": "seleccion",
-        "catalogo": "tendencias"
-      },
-      "años_mejora": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer"
-      },
-      "años_retroceso": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer"
-      },
-      "año_inicial_tendencia": {
-        "tipo_dato": "integer"
-      },
-      "año_final_tendencia": {
-        "tipo_dato": "integer"
-      },
-      "valor_inicial_tendencia": {
-        "tipo_dato": "number"
-      },
-      "valor_final_tendencia": {
-        "tipo_dato": "number"
-      },
-      "metrica_comparada": {
-        "tipo_dato": "string",
-        "debe_contener": "Nombre exacto de la medición representada por x e y."
-      },
-      "unidad_comparada": {
-        "tipo_dato": "string",
-        "debe_contener": "Unidad común de x e y."
-      },
-      "sentido_de_mejora": {
-        "tipo_dato": "string",
-        "opciones": [
-          "aumento",
-          "disminucion",
-          "cumplimiento_de_condicion",
-          "interpretacion_contextual"
-        ]
-      },
-      "analisis_tendencia": {
-        "tipo_dato": "string",
-        "tipo_contenido": "analisis",
-        "debe_contener": "Explicación del patrón temporal, sus rupturas y sus limitaciones."
-      },
-      "explicacion_divergencia_periodos": {
-        "tipo_dato": "string",
-        "tipo_contenido": "analisis",
-        "obligatorio": "Cuando las calificaciones finales difieran en dos niveles o más.",
-        "debe_contener": "Explicación sustentada del cambio entre el periodo general y el reciente."
-      }
-    },
-    "diagnosticos": {
-      "resumen_general": {
-        "tipo_dato": "array",
-        "tipo_elemento": "string",
-        "tipo_contenido": "parrafos",
-        "cantidad_minima": 2,
-        "cantidad_maxima": 3,
-        "destino": "Primera aparición de insertar_dos_a_tres_parrafos."
-      },
-      "resumen_ultimo_periodo": {
-        "tipo_dato": "array",
-        "tipo_elemento": "string",
-        "tipo_contenido": "parrafos",
-        "cantidad_minima": 2,
-        "cantidad_maxima": 3,
-        "destino": "Segunda aparición de insertar_dos_a_tres_parrafos."
-      },
-      "calificacion_general_final": {
-        "tipo_dato": "string",
-        "tipo_contenido": "resultado_calculado",
-        "catalogo": "calificaciones",
-        "destinos": [
-          "Encabezado de calificación general.",
-          "Hoja de cómputo.",
-          "Selección del texto base general."
-        ]
-      },
-      "calificacion_ultimo_periodo_final": {
-        "tipo_dato": "string",
-        "tipo_contenido": "resultado_calculado",
-        "catalogo": "calificaciones",
-        "destinos": [
-          "Encabezado de calificación del último periodo.",
-          "Hoja de cómputo.",
-          "Selección del texto base reciente."
-        ]
-      }
-    },
-    "producto_gobierno": {
-      "tendencia_general": {
-        "tipo_dato": "string",
-        "tipo_contenido": "seleccion",
-        "opciones": [
-          "va_bien",
-          "no_se_ha_movido",
-          "va_mal"
-        ]
-      },
-      "analisis_de_la_informacion": {
-        "tipo_dato": "string",
-        "tipo_contenido": "parrafo",
-        "debe_contener": "Qué muestran los resultados y qué debe conservarse o corregirse."
-      },
-      "orientacion_de_accion": {
-        "tipo_dato": "string",
-        "tipo_contenido": "seleccion_derivada",
-        "reglas": {
-          "excelente_o_muy_bien": "mejorar_procesos",
-          "regular": "cerrar_brechas_puntuales",
-          "mal_o_catastrofico": "atender_carencias"
-        },
-        "periodo_de_referencia": "ultimo_periodo"
-      },
-      "propuestas": {
-        "tipo_dato": "array",
-        "modelo_elemento": "propuesta",
-        "debe_contener": "Acciones concretas vinculadas con los hallazgos.",
-        "regla_documental": "Las propuestas del menú por dimensión se seleccionan para indicadores con puntajes de 1 a 3."
-      }
-    },
-    "producto_electoral": {
-      "periodo_de_referencia": {
-        "tipo_dato": "string",
-        "catalogo": "periodos",
-        "debe_contener": "Periodo utilizado para clasificar fortalezas y debilidades.",
-        "nota": "Debe definirse explícitamente; no mezclar puntajes de ambos periodos."
-      },
-      "que_esta_bien": {
-        "tipo_dato": "string",
-        "tipo_contenido": "parrafo",
-        "debe_contener": "Fortalezas respaldadas por indicadores con puntajes de 4 o 5."
-      },
-      "que_esta_mal": {
-        "tipo_dato": "string",
-        "tipo_contenido": "parrafo",
-        "debe_contener": "Carencias respaldadas por indicadores con puntajes de 1 o 2."
-      },
-      "causas_seleccionadas": {
-        "tipo_dato": "array",
-        "tipo_elemento": "string",
-        "opciones": [
-          "recursos",
-          "tamaño",
-          "continuidad",
-          "prioridades",
-          "informacion"
-        ]
-      },
-      "explicacion_de_causas": {
-        "tipo_dato": "string",
-        "tipo_contenido": "analisis",
-        "debe_contener": "Explicación sustentada de las causas seleccionadas, diferenciando evidencia de hipótesis."
-      },
-      "rubro_priorizado": {
-        "tipo_dato": "string",
-        "debe_contener": "Rubro al que se asignaron recursos o atención.",
-        "destino": "Primera aparición de rubro en la explicación de prioridades."
-      },
-      "rubro_descuidado": {
-        "tipo_dato": "string",
-        "debe_contener": "Rubro cuya atención resultó insuficiente.",
-        "destino": "Segunda aparición de rubro en la explicación de prioridades."
-      }
-    }
-  },
-  "modelos_reutilizables": {
-    "ficha_indicador": {
-      "descripcion": "Modelo que debe aplicarse a cada uno de los 18 indicadores.",
-      "campos": {
-        "indicador_id": {
-          "tipo_dato": "integer",
-          "minimo": 1,
-          "maximo": 18
-        },
-        "nombre": {
-          "tipo_dato": "string",
-          "debe_contener": "Nombre del catálogo de indicadores."
-        },
-        "dimension": {
-          "tipo_dato": "string",
-          "catalogo": "dimensiones"
-        },
-        "criterio_de_referencia": {
-          "tipo_dato": "string",
-          "tipo_contenido": "descripcion_del_estandar",
-          "debe_contener": "Referencia de la ficha y explicación de lo que se está evaluando."
-        },
-        "series": {
-          "tipo_dato": "array",
-          "modelo_elemento": "observacion_serie",
-          "debe_contener": "Datos municipales y estatales que sustentan la evaluación."
-        },
-        "evaluacion_general": {
-          "tipo_dato": "object",
-          "modelo": "evaluacion_indicador"
-        },
-        "evaluacion_ultimo_periodo": {
-          "tipo_dato": "object",
-          "modelo": "evaluacion_indicador"
-        },
-        "nota_datos_ajustes": {
-          "tipo_dato": "string",
-          "tipo_contenido": "nota_metodologica",
-          "debe_contener": "Síntesis de faltantes, datos dudosos y ajustes, identificando el periodo afectado.",
-          "destino": "Columna de notas de la hoja de cómputo."
-        },
-        "analisis_general": {
-          "tipo_dato": "string",
-          "tipo_contenido": "analisis",
-          "debe_contener": "Interpretación del periodo completo, evolución, nivel de cumplimiento y limitaciones."
-        },
-        "analisis_ultimo_periodo": {
-          "tipo_dato": "string",
-          "tipo_contenido": "analisis",
-          "debe_contener": "Interpretación de las dos ediciones o años recientes que correspondan."
-        },
-        "comparacion_estatal": {
-          "tipo_dato": "string",
-          "tipo_contenido": "analisis_comparativo",
-          "debe_contener": "Comparación sustentada o explicación de por qué no es válida."
-        },
-        "limitaciones": {
-          "tipo_dato": "array",
-          "tipo_elemento": "string",
-          "debe_contener": "Restricciones de cobertura, comparabilidad, medición o interpretación."
-        },
-        "visualizaciones": {
-          "tipo_dato": "array",
-          "modelo_elemento": "visualizacion"
-        },
-        "conclusion_indicador": {
-          "tipo_dato": "string",
-          "tipo_contenido": "conclusion",
-          "debe_contener": "Síntesis del hallazgo principal y su implicación para la dimensión."
-        },
-        "bloques_ordenados": {
-          "tipo_dato": "array",
-          "modelo_elemento": "bloque_contenido",
-          "debe_contener": "Secuencia final de análisis, visualizaciones y cierres que sustituirá el marcador del indicador."
-        },
-        "fuentes_ids": {
-          "tipo_dato": "array",
-          "tipo_elemento": "string",
-          "debe_contener": "Referencias a las fuentes utilizadas."
-        }
-      }
-    },
-    "evaluacion_indicador": {
-      "campos": {
-        "periodo": {
-          "tipo_dato": "string",
-          "catalogo": "periodos"
-        },
-        "ediciones_o_años_incluidos": {
-          "tipo_dato": "array",
-          "tipo_elemento": "integer"
-        },
-        "puntaje_base": {
-          "tipo_dato": "integer",
-          "opciones": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "debe_contener": "Puntaje conforme a la rúbrica de la ficha, antes del ajuste por dato dudoso."
-        },
-        "criterio_aplicado": {
-          "tipo_dato": "string",
-          "debe_contener": "Criterio concreto del Anexo 1 utilizado para asignar el puntaje."
-        },
-        "justificacion_puntaje": {
-          "tipo_dato": "string",
-          "tipo_contenido": "explicacion",
-          "debe_contener": "Relación entre la evidencia disponible y el criterio seleccionado."
-        },
-        "ajuste_por_dato_dudoso": {
-          "tipo_dato": "integer",
-          "opciones": [
-            -1,
-            0,
-            1
-          ],
-          "debe_contener": "Modificación autorizada y justificada del puntaje."
-        },
-        "justificacion_ajuste": {
-          "tipo_dato": "string",
-          "tipo_contenido": "nota_metodologica",
-          "obligatorio": "Si ajuste_por_dato_dudoso es distinto de cero."
-        },
-        "reglas_especificas_aplicadas": {
-          "tipo_dato": "array",
-          "tipo_elemento": "string",
-          "debe_contener": "Dependencias, límites o condiciones particulares de la ficha."
-        },
-        "puntaje_final": {
-          "tipo_dato": "integer",
-          "opciones": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "debe_contener": "Puntaje definitivo después de la rúbrica, ajustes y reglas específicas.",
-          "destinos": [
-            "Celda del indicador y periodo en la hoja de cómputo.",
-            "Selector del mismo indicador y periodo en la ficha."
-          ]
-        },
-        "puntaje_uno_por_falta_de_respuesta": {
-          "tipo_dato": "boolean",
-          "debe_contener": "Indica si el puntaje 1 se debe a falta de respuesta municipal.",
-          "uso": "Aplicar el candado general de falta de información."
-        },
-        "observaciones_ids": {
-          "tipo_dato": "array",
-          "tipo_elemento": "string",
-          "debe_contener": "Identificadores de las observaciones que sustentan la evaluación."
-        }
-      },
-      "reglas": [
-        "No obtener el puntaje del periodo mediante un promedio de años salvo que la ficha lo indique.",
-        "Las 36 selecciones de las fichas deben reutilizar los mismos 36 puntajes de la hoja de cómputo.",
-        "No mantener valores independientes para una misma calificación.",
-        "El puntaje final debe permanecer entre 1 y 5."
-      ]
-    },
-    "observacion_serie": {
-      "campos": {
-        "observacion_id": {
-          "tipo_dato": "string",
-          "debe_contener": "Identificador único de la observación."
-        },
-        "metrica": {
-          "tipo_dato": "string",
-          "debe_contener": "Nombre de la variable medida."
-        },
-        "ambito_geografico": {
-          "tipo_dato": "string",
-          "opciones": [
-            "municipal",
-            "estatal"
-          ]
-        },
-        "edicion_censo": {
-          "tipo_dato": "integer",
-          "admite_null": true
-        },
-        "año_referencia": {
-          "tipo_dato": "integer",
-          "admite_null": true
-        },
-        "valor": {
-          "tipo_dato": [
-            "number",
-            "boolean",
-            "string",
-            "null"
-          ],
-          "debe_contener": "Valor observado con el tipo correspondiente a la métrica."
-        },
-        "unidad": {
-          "tipo_dato": "string",
-          "debe_contener": "Conteo, porcentaje, tasa, razón, existencia u otra unidad explícita."
-        },
-        "numerador": {
-          "tipo_dato": "number",
-          "admite_null": true,
-          "debe_contener": "Cantidad utilizada en el numerador si el valor es calculado."
-        },
-        "denominador": {
-          "tipo_dato": "number",
-          "admite_null": true,
-          "debe_contener": "Base del porcentaje, tasa o razón."
-        },
-        "tipo_agregacion_estatal": {
-          "tipo_dato": "string",
-          "admite_null": true,
-          "opciones": [
-            "suma",
-            "promedio",
-            "porcentaje_de_municipios",
-            "porcentaje_de_personal",
-            "tasa",
-            "razon",
-            "otro_documentado"
-          ]
-        },
-        "estado_dato": {
-          "tipo_dato": "string",
-          "catalogo": "estados_del_dato"
-        },
-        "comparable_en_el_tiempo": {
-          "tipo_dato": "boolean",
-          "admite_null": true
-        },
-        "comparable_con_estado": {
-          "tipo_dato": "boolean",
-          "admite_null": true
-        },
-        "nota_comparabilidad": {
-          "tipo_dato": "string"
-        },
-        "fuente_id": {
-          "tipo_dato": "string"
-        },
-        "ubicacion_en_fuente": {
-          "tipo_dato": "string",
-          "debe_contener": "Tabla, pregunta, variable, página o registro que permita localizar el dato."
-        }
-      }
-    },
-    "visualizacion": {
-      "campos": {
-        "visualizacion_id": {
-          "tipo_dato": "string"
-        },
-        "tipo": {
-          "tipo_dato": "string",
-          "catalogo": "tipos_de_visualizacion"
-        },
-        "titulo": {
-          "tipo_dato": "string",
-          "debe_contener": "Título breve que identifique la medición y el periodo."
-        },
-        "objetivo": {
-          "tipo_dato": "string",
-          "debe_contener": "Hallazgo que la gráfica o tabla debe ayudar a explicar."
-        },
-        "observaciones_ids": {
-          "tipo_dato": "array",
-          "tipo_elemento": "string",
-          "debe_contener": "Datos exactos utilizados en la visualización."
-        },
-        "unidad": {
-          "tipo_dato": "string"
-        },
-        "categorias_o_eje_temporal": {
-          "tipo_dato": "array",
-          "tipo_elemento": [
-            "string",
-            "integer"
-          ]
-        },
-        "series_a_mostrar": {
-          "tipo_dato": "array",
-          "tipo_elemento": "string",
-          "debe_contener": "Nombres de las series, como municipio, estado o referencia."
-        },
-        "parrafo_previo": {
-          "tipo_dato": "string",
-          "tipo_contenido": "analisis",
-          "debe_contener": "Explicación que la visualización desarrolla o contrasta."
-        },
-        "parrafo_cierre": {
-          "tipo_dato": "string",
-          "tipo_contenido": "conclusion",
-          "debe_contener": "Lectura del hallazgo mostrado, su implicación y sus límites."
-        },
-        "nota_metodologica": {
-          "tipo_dato": "string"
-        },
-        "fuentes_ids": {
-          "tipo_dato": "array",
-          "tipo_elemento": "string"
-        }
-      },
-      "reglas": [
-        "Representar datos existentes y trazables.",
-        "No dibujar valores faltantes como cero.",
-        "Mantener las mismas unidades entre series comparadas.",
-        "Usar tablas para consulta detallada y gráficas para tendencias o comparaciones cuando sean más claras.",
-        "Crear la tabla o gráfica real al completar Word; el JSON solo define su contenido."
-      ]
-    },
-    "bloque_contenido": {
-      "campos": {
-        "orden": {
-          "tipo_dato": "integer",
-          "minimo": 1
-        },
-        "tipo": {
-          "tipo_dato": "string",
-          "opciones": [
-            "analisis",
-            "visualizacion",
-            "conclusion_visualizacion",
-            "conclusion_indicador",
-            "nota_metodologica"
-          ]
-        },
-        "texto": {
-          "tipo_dato": "string",
-          "admite_null": true,
-          "obligatorio": "Para bloques textuales."
-        },
-        "visualizacion_id": {
-          "tipo_dato": "string",
-          "admite_null": true,
-          "obligatorio": "Para bloques que insertan una visualización."
-        }
-      }
-    },
-    "fuente": {
-      "campos": {
-        "fuente_id": {
-          "tipo_dato": "string"
-        },
-        "institucion": {
-          "tipo_dato": "string"
-        },
-        "titulo": {
-          "tipo_dato": "string"
-        },
-        "tipo": {
-          "tipo_dato": "string",
-          "opciones": [
-            "base_de_datos",
-            "documento_oficial",
-            "norma",
-            "informe",
-            "estudio",
-            "otro"
-          ]
-        },
-        "edicion_o_fecha": {
-          "tipo_dato": "string"
-        },
-        "localizador": {
-          "tipo_dato": "string",
-          "debe_contener": "Identificador, referencia o dirección de consulta cuando esté disponible."
-        },
-        "fecha_consulta": {
-          "tipo_dato": "string",
-          "formato": "AAAA-MM-DD"
-        },
-        "estado_verificacion": {
-          "tipo_dato": "string",
-          "opciones": [
-            "pendiente",
-            "verificada",
-            "requiere_aclaracion"
-          ]
-        },
-        "observaciones": {
-          "tipo_dato": "string"
-        }
-      }
-    },
-    "propuesta": {
-      "campos": {
-        "propuesta_id": {
-          "tipo_dato": "string"
-        },
-        "dimension": {
-          "tipo_dato": "string",
-          "catalogo": "dimensiones"
-        },
-        "indicadores_relacionados": {
-          "tipo_dato": "array",
-          "tipo_elemento": "integer"
-        },
-        "hallazgo_que_la_justifica": {
-          "tipo_dato": "string"
-        },
-        "accion": {
-          "tipo_dato": "string",
-          "tipo_contenido": "propuesta_concreta"
-        },
-        "resultado_esperado": {
-          "tipo_dato": "string"
-        },
-        "medio_de_verificacion": {
-          "tipo_dato": "string"
-        }
-      }
-    },
-    "tabla_word_v2": {
-      "titulo": "string",
-      "ambito": "municipal|estatal",
-      "filas": "array de arrays de strings",
-      "tabla_fuente": "integer"
-    },
-    "grafica_word_v2": {
-      "tipo": "puntajes",
-      "titulo": "string",
-      "categorias": "array de strings",
-      "valores": "array de number|null",
-      "fuente": "string",
-      "regla": "null no se representa como cero; sólo puntajes calculados."
-    }
   },
   "catalogo_indicadores": [
     {
@@ -2852,266 +1545,102 @@
       ]
     }
   ],
+  "campos_auxiliares": {
+    "identidad_evidencia": "Párrafo original que identifica municipio y estado.",
+    "fuentes": "Lista de exactamente dos documentos con nombre, rol y SHA-256; trazabilidad interna.",
+    "evidencia_documental": "Bloques originales de las dos entradas, conservados para auditoría.",
+    "validaciones": "Pendientes de revisión, inconsistencias y límites; los códigos no son texto del informe.",
+    "contrato": "Versiones y huellas de los componentes que produjeron el resultado.",
+    "contenido_word": "Contenido compuesto, variables activas y controles de publicación."
+  },
+  "modelos_reutilizables": {
+    "ficha_indicador": {
+      "numero": "integer 1..18",
+      "nombre": "string",
+      "dimension": "codigo de dimensión",
+      "tablas": "Tablas originales y localizadores de evidencia.",
+      "evaluaciones": {
+        "general": "evaluacion_indicador",
+        "ultimo_periodo": "evaluacion_indicador"
+      },
+      "control_cruzado_anexo": "Correspondencia de tablas y calificación reportada entre los dos documentos."
+    },
+    "evaluacion_indicador": {
+      "puntaje": "integer 1..5|null",
+      "criterio_aplicado": "string cuando existe puntaje",
+      "motivo": "string que explica por qué no puede asignarse puntaje",
+      "años_observados": "array de integer",
+      "años_evaluados": "array de integer",
+      "regla": "No confundir la calificación reportada en la entrada con una evaluación calculada; justificar toda asignación."
+    },
+    "tabla_word_v2": {
+      "titulo": "string",
+      "ambito": "municipal|estatal",
+      "filas": "array de arrays de strings",
+      "tabla_fuente": "integer"
+    },
+    "grafica_word_v2": {
+      "tipo": "puntajes",
+      "titulo": "string",
+      "categorias": "array de strings",
+      "valores": "array de number|null",
+      "fuente": "string",
+      "regla": "Representar únicamente puntajes calculados; null no es cero."
+    }
+  },
   "calculos_derivados": {
-    "estructura": {
-      "evaluaciones_requeridas": [
-        "general",
-        "ultimo_periodo"
-      ],
-      "modelo_comun": "resultado_evaluacion",
-      "regla": "Calcular ambos periodos por separado y conservar trazabilidad hasta los puntajes de cada indicador."
-    },
-    "resultado_evaluacion": {
-      "promedio_proteccion_civil": {
-        "tipo_dato": "number",
-        "minimo": 1,
-        "maximo": 5,
-        "formula": "(puntaje_1 + puntaje_2 + puntaje_3) / 3"
-      },
-      "promedio_condiciones_del_personal": {
-        "tipo_dato": "number",
-        "minimo": 1,
-        "maximo": 5,
-        "formula": "(puntaje_4 + puntaje_5 + puntaje_6 + puntaje_7 + puntaje_8 + puntaje_9 + puntaje_10) / 7"
-      },
-      "promedio_inteligencia_y_eficiencia": {
-        "tipo_dato": "number",
-        "minimo": 1,
-        "maximo": 5,
-        "formula": "(puntaje_11 + puntaje_12 + puntaje_13 + puntaje_14 + puntaje_15 + puntaje_16 + puntaje_17 + puntaje_18) / 8"
-      },
-      "promedio_tres_dimensiones": {
-        "tipo_dato": "number",
-        "minimo": 1,
-        "maximo": 5,
-        "formula": "(promedio_proteccion_civil + promedio_condiciones_del_personal + promedio_inteligencia_y_eficiencia) / 3"
-      },
-      "calificacion_por_dimension": {
-        "tipo_dato": "object",
-        "debe_contener": "Categoría correspondiente al promedio de cada dimensión.",
-        "uso": "Seleccionar los textos base de cada dimensión del último periodo."
-      },
-      "calificacion_preliminar": {
-        "tipo_dato": "string",
-        "catalogo": "calificaciones",
-        "debe_contener": "Categoría obtenida del promedio de las tres dimensiones antes de los candados generales."
-      },
-      "candados_aplicados": {
-        "tipo_dato": "array",
-        "campos_por_elemento": {
-          "regla_id": "integer",
-          "nombre": "string",
-          "condicion_observada": "string",
-          "indicadores_o_dimensiones_afectados": "array",
-          "efecto_sobre_resultado": "string",
-          "modifica_calificacion": "boolean"
-        }
-      },
-      "identificadores_candados_aplicados": {
-        "tipo_dato": "array",
-        "tipo_elemento": "integer",
-        "debe_contener": "Números de las reglas aplicadas."
-      },
-      "numero_candados_aplicados": {
-        "tipo_dato": "integer",
-        "minimo": 0,
-        "debe_contener": "Cantidad de candados aplicados, diferenciada de sus identificadores."
-      },
-      "numero_ajustes_dato_dudoso": {
-        "tipo_dato": "integer",
-        "minimo": 0,
-        "debe_contener": "Número de indicadores modificados mediante el ajuste por dato dudoso."
-      },
-      "numero_indicadores_uno_por_falta_de_respuesta": {
-        "tipo_dato": "integer",
-        "minimo": 0,
-        "maximo": 18
-      },
-      "calificacion_final": {
-        "tipo_dato": "string",
-        "catalogo": "calificaciones",
-        "debe_contener": "Categoría definitiva después de los candados."
-      },
-      "justificacion_calificacion_final": {
-        "tipo_dato": "string",
-        "tipo_contenido": "explicacion",
-        "debe_contener": "Síntesis del promedio, los candados y su efecto en la categoría final."
-      }
-    },
-    "reglas_generales_del_documento": [
-      {
-        "id": 1,
-        "nombre": "dimension_colapsada",
-        "condicion": "Alguna dimensión obtiene menos de 1.50.",
-        "efecto": "La calificación no puede superar REGULAR."
-      },
-      {
-        "id": 2,
-        "nombre": "condicion_para_excelente",
-        "condicion": "Se pretende asignar EXCELENTE.",
-        "requisitos": [
-          "Ninguna dimensión por debajo de 4.00.",
-          "Ningún indicador con puntaje 1."
-        ]
-      },
-      {
-        "id": 3,
-        "nombre": "condicion_para_muy_bien",
-        "condicion": "Se pretende asignar MUY BIEN.",
-        "requisito": "Ninguna dimensión por debajo de 2.50."
-      },
-      {
-        "id": 4,
-        "nombre": "falta_de_informacion",
-        "condicion": "Más de la mitad de los 18 indicadores tiene puntaje 1 por falta de respuesta municipal.",
-        "umbral_con_18_indicadores": 10,
-        "efecto": "Asignar CATASTRÓFICO."
-      },
-      {
-        "id": 5,
-        "nombre": "ajuste_por_dato_dudoso",
-        "variacion_permitida": [
-          -1,
-          1
-        ],
-        "maximo_ajustes_segun_documento": 3,
-        "unidad_del_limite_en_el_documento": "por_evaluacion",
-        "requisito": "Justificación escrita en la hoja de cómputo.",
-        "nota": "Registrar estos ajustes en los indicadores y no tratarlos como un descuento fijo sobre el promedio."
-      },
-      {
-        "id": 6,
-        "nombre": "divergencia_entre_periodos",
-        "condicion": "Diferencia de dos niveles o más entre las categorías finales.",
-        "efecto": "Exigir una explicación narrativa del cambio.",
-        "modifica_puntaje": false
-      }
+    "metodologia": "reglas_calificacion.json",
+    "periodos": [
+      "general",
+      "ultimo_periodo"
     ],
-    "reglas_de_integridad": [
-      "No sustituir el promedio de dimensiones por un promedio simple de los 18 indicadores.",
-      "Los candados generales no pueden mejorar la categoría obtenida del promedio.",
-      "Registrar un candado aunque no modifique el resultado final, indicando que no tuvo efecto adicional.",
-      "Conservar precisión interna suficiente y documentar la regla de redondeo.",
-      "No calcular promedios de dimensión con un subconjunto de indicadores sin una regla metodológica explícita.",
-      "Distinguir exclusión de un año no aplicable de exclusión de un indicador completo."
-    ]
+    "promedio_por_dimension": "Media de todos los puntajes de la dimensión; null si alguno está pendiente.",
+    "promedio_tres_dimensiones": "Media de las tres dimensiones; no sustituir por la media simple de 18 indicadores.",
+    "clasificacion": "Aplicar escala, redondeo y candados de las reglas conservando sus motivos.",
+    "regla_faltantes": "Un pendiente metodológico impide cerrar el agregado; la falta de respuesta sólo se puntúa si la ficha y la evidencia lo justifican."
   },
   "tratamiento_datos_faltantes": {
-    "pendiente_de_captura": {
-      "valor": null,
-      "accion": "Mantener pendiente; no calificar automáticamente."
-    },
-    "sin_respuesta_municipal": {
-      "valor": null,
-      "accion_documental": "Asignar 1 en ese año conforme a la guía y aplicar la ficha del indicador al periodo.",
-      "registro": "Identificar la falta de respuesta y su efecto sobre el puntaje del indicador."
-    },
-    "variable_no_existente_en_edicion": {
-      "valor": null,
-      "accion_documental": "Excluir ese año del cálculo correspondiente.",
-      "registro": "Documentar qué edición carece de la variable y por qué."
-    },
-    "dato_dudoso": {
-      "accion": "Conservar el valor original, registrar la duda y justificar cualquier ajuste.",
-      "prohibicion": "No corregir silenciosamente el dato observado."
-    },
-    "no_aplicable": {
-      "valor": null,
-      "accion": "Explicar por qué no aplica y resolver su tratamiento antes del cálculo.",
-      "nota": "No usar esta categoría para evitar una calificación desfavorable."
-    },
-    "serie_sin_observaciones_evaluables": {
-      "accion": "Registrar una incidencia metodológica.",
-      "prohibicion": "No imputar un resultado ni cambiar denominadores sin una regla documentada."
-    }
+    "fuente_no_disponible": "Explicar el dato ausente y mantener pendiente; este flujo no lo busca fuera de los dos documentos.",
+    "denominador_no_disponible": "No estimar tasas, razones o porcentajes sin su base de cálculo.",
+    "serie_reciente_incompleta": "Declarar los años faltantes y no sustituirlos por años anteriores.",
+    "dato_dudoso": "Conservar el valor original y registrar el motivo de revisión."
   },
-  "marcadores_no_tratados_como_variables": {},
-  "decisiones_metodologicas_por_confirmar": [
-    {
-      "tema": "redondeo_para_clasificacion",
-      "observacion": "La guía menciona redondeo convencional y presenta rangos a dos decimales, pero no desarrolla todos los detalles operativos.",
-      "propuesta_tecnica": "Conservar precisión interna y fijar explícitamente un redondeo convencional a dos decimales para clasificar.",
-      "estado": "propuesta_no_confirmada"
-    },
-    {
-      "tema": "denominacion_del_ultimo_periodo",
-      "observacion": "La guía distingue dos ediciones recientes del censo y dos años recientes para las series anuales, mientras algunos textos hablan de dos años.",
-      "criterio_documental_para_los_datos": "Seguir la definición específica de la guía para cada indicador.",
-      "pendiente": "Definir una presentación narrativa que no confunda edición con año de referencia."
-    },
-    {
-      "tema": "alcance_del_limite_de_tres_ajustes",
-      "observacion": "El documento establece un máximo de tres ajustes por evaluación.",
-      "pendiente": "Dejar explícito si el control operativo se lleva por cada periodo evaluado o por el caso completo."
-    },
-    {
-      "tema": "numero_de_candados_en_la_hoja",
-      "observacion": "La fila dice Candados aplicados (número).",
-      "propuesta_tecnica": "Guardar tanto identificadores de reglas como cantidad de candados para evitar ambigüedad."
-    },
-    {
-      "tema": "periodo_del_producto_electoral",
-      "observacion": "La clasificación de fortalezas y debilidades requiere elegir un periodo consistente.",
-      "pendiente": "Definir general o ultimo_periodo antes de derivar las listas."
-    },
-    {
-      "tema": "prioridad_entre_ajustes_y_reglas_especificas",
-      "observacion": "Existen ajustes generales y límites o dependencias particulares de varias fichas.",
-      "pendiente": "Documentar su orden de aplicación y resolver cualquier conflicto sin ignorar límites explícitos."
-    }
-  ],
   "validaciones_finales": [
     {
-      "id": "cobertura_indicadores",
-      "regla": "Existir exactamente 18 registros de indicadores, con identificadores únicos del 1 al 18."
-    },
-    {
-      "id": "cobertura_periodos",
-      "regla": "Cada indicador debe tener evaluación general y del último periodo, o una incidencia pendiente explícita."
-    },
-    {
-      "id": "puntajes_consistentes",
-      "regla": "La hoja de cómputo y las fichas deben mostrar el mismo puntaje para cada indicador y periodo."
-    },
-    {
-      "id": "notas_completas",
-      "regla": "Todo faltante, dato dudoso o ajuste debe tener explicación y periodo identificado."
-    },
-    {
-      "id": "calificaciones_consistentes",
-      "regla": "Encabezados, cálculos y textos narrativos deben utilizar las mismas categorías finales."
-    },
-    {
-      "id": "comparaciones_validas",
-      "regla": "No comparar conteos municipales con sumas estatales ni mezclar años, unidades o definiciones incompatibles."
-    },
-    {
-      "id": "trazabilidad",
-      "regla": "Toda cifra, afirmación comparativa y ajuste debe poder vincularse con datos o fuentes identificables."
-    },
-    {
-      "id": "visualizaciones_completas",
-      "regla": "Las visualizaciones deben utilizar los datos del indicador y acompañarse de análisis previo y cierre explicativo."
-    },
-    {
-      "id": "afirmaciones_limitadas_por_evidencia",
-      "regla": "No convertir existencia formal en funcionamiento efectivo ni correlación temporal en causalidad."
-    },
-    {
-      "id": "sin_datos_inventados",
-      "regla": "Mantener null y el estado correspondiente cuando falte evidencia; no completar por conjetura."
-    },
-    {
-      "id": "cierre_editorial",
-      "regla": "Antes de emitir una versión final, resolver o declarar los pendientes metodológicos y de verificación, y revisar las instrucciones editoriales."
+      "id": "fuentes_unicas",
+      "regla": "Exactamente un paquete de seguridad y un Anexo del mismo municipio."
     },
     {
       "id": "contrato_editorial_v2",
-      "regla": "116 variables snake_case con llaves simples; apariciones por perfil y huellas de contrato coincidentes."
+      "regla": "81 variables snake_case del único perfil medicion; comprobar original, base y componentes del contrato."
+    },
+    {
+      "id": "cobertura_indicadores",
+      "regla": "18 indicadores en el orden del machote y dos periodos declarados por indicador."
+    },
+    {
+      "id": "puntajes_consistentes",
+      "regla": "Los textos, gráficas y agregados reutilizan las mismas evaluaciones calculadas."
+    },
+    {
+      "id": "trazabilidad",
+      "regla": "Toda cifra y afirmación debe sustentarse en los dos documentos recibidos."
+    },
+    {
+      "id": "comparaciones_validas",
+      "regla": "No comparar conteos municipales con sumas estatales ni mezclar unidades o años."
     },
     {
       "id": "objetos_visuales",
-      "regla": "Tablas y gráficas deben coincidir con evidencia y puntajes; null no es cero."
+      "regla": "Tablas y gráficas coincidentes con evidencia y puntajes; null no es cero."
+    },
+    {
+      "id": "redaccion_consultiva",
+      "regla": "Bloquear referencias técnicas internas y prosa no sustentada en el contenido publicable."
+    },
+    {
+      "id": "cierre_editorial",
+      "regla": "Resolver los bloqueos y completar la revisión humana antes de emitir una versión final."
     }
   ]
 }

@@ -1,32 +1,36 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "alcance": "seguridad",
   "marcador": "{snake_case}",
   "plantillas": {
     "medicion": {
       "archivo": "templates/seguridad_medicion.docx",
-      "sha256": "f4cf70ed6a92b078aa0dba863d2b7abde33e11584ac20b5a6fce8dc3a31c5bb9",
+      "sha256": "013469a286320e4ad7a34d4ab6484004a4aa9c243a7ed19af6a78dd531df493f",
       "origen": "templates/Machote general medicion version final.docx",
-      "origen_sha256": "6404e0eed69c2562259787af065dddce4b004147923e0da32f4f30ecabc6f159"
-    },
-    "anexo": {
-      "archivo": "templates/seguridad_anexo.docx",
-      "sha256": "52d682480dd82046366f7357950b6f2cade8350c40b580638e4af7d671b9c267",
-      "origen": "templates/Machote general anexos version final.docx",
-      "origen_sha256": "5ffb4b9be704e6310cd09e68eb90d3c2d44af9a7394af4aeaf1d5adb71da276b"
+      "origen_sha256": "6404e0eed69c2562259787af065dddce4b004147923e0da32f4f30ecabc6f159",
+      "bloques_capitulo_origen": 95,
+      "derivacion": "Copia del capítulo SEGURIDAD en su orden original; portada, introducción, conclusiones y fuentes."
     }
   },
   "diccionario": {
     "archivo": "diccionario_datos_diagnostico_seguridad_municipal.json",
-    "sha256": "dcc63da0dc6a0395621ca4e537220751e8b08ba9252e07f12c951309d1781cc4"
+    "sha256": "1ab232f1e46dd92ef66719d249666cc920507d50c22b512decd767a1873d858d"
   },
   "reglas": {
     "archivo": "reglas_calificacion.json",
-    "sha256": "1019c713ecf3a953ea03402036a152452c823217d58c7ec193f70ecbc8c91b68"
+    "sha256": "17734d672cba2a6dfdee5abc0ba541e565272bc70c597757f727fe7d2d7e0461"
+  },
+  "metodologia": {
+    "archivo": "config/metodologia_seguridad.json",
+    "sha256": "a85630efb2087def34e0ecf2af2c0b2fd5470ffa17d9a6f94862f456fbc8b32c"
   },
   "formato": {
     "archivo": "config/formato_editorial.json",
-    "sha256": "a3e4cfed6102da2dc3f2779e681a4505be4c804bd71be7eaeea450e25593f081"
+    "sha256": "18e7d71c0d9515b4c14fbe349c85fe30b94c88103fa385fb4e76b483859e1741"
+  },
+  "redaccion": {
+    "archivo": "config/redaccion_consultoria.json",
+    "sha256": "3c6bb986fbfa3ae9331332c4147ae41cf5b9f41a8dbbc57664177b98c2e3ab45"
   },
   "tipografias": [
     {
@@ -66,8 +70,11 @@
     17,
     18
   ],
-  "correcciones": [
-    "Medición: eliminar duplicado de personal e incorporar Certificado Único Policial como indicador 7.",
-    "Mantener EXCELENTE en la metodología; IDEAL del catálogo general no redefine umbrales."
+  "fuentes_entrada": [
+    "{municipio} PAQUETE SEGURIDAD.docx",
+    "{municipio} Anexo.docx"
+  ],
+  "documentos_salida": [
+    "medicion"
   ]
 }
