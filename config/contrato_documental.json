@@ -1,28 +1,45 @@
 {
-  "version": "2.1",
+  "version": "2.2",
   "alcance": "seguridad",
+  "producto": "estudio_seguridad",
   "marcador": "{snake_case}",
   "plantillas": {
     "medicion": {
       "archivo": "templates/seguridad_medicion.docx",
-      "sha256": "013469a286320e4ad7a34d4ab6484004a4aa9c243a7ed19af6a78dd531df493f",
+      "sha256": "243a5ddc9690993ed10ac6be7703a79a4acdbf0f35fadf134d7d85028d98d34d",
       "origen": "templates/Machote general medicion version final.docx",
       "origen_sha256": "6404e0eed69c2562259787af065dddce4b004147923e0da32f4f30ecabc6f159",
       "bloques_capitulo_origen": 95,
-      "derivacion": "Copia del capítulo SEGURIDAD en su orden original; portada, introducción, conclusiones y fuentes."
+      "bloques_capitulo_derivado": 41,
+      "derivacion": "Capítulo SEGURIDAD en el orden del formato de la consultora, encabezados humanos y 25 variables de texto. Portada y fuentes; sin nuevos cuadros o gráficas."
     }
+  },
+  "fuente_formato": {
+    "archivo": "templates/Machote general medicion version final.docx",
+    "sha256": "6404e0eed69c2562259787af065dddce4b004147923e0da32f4f30ecabc6f159",
+    "rol": "Formato de entrega de la consultora; sólo capítulo SEGURIDAD."
+  },
+  "guia": {
+    "archivo": "templates/Machote general medicion version final rzg investigación.docx",
+    "sha256": "ac7402dbf1e06061570934aea41fa7798b296abeed376886b61b70b9a98662b3",
+    "rol": "Guía de lectura e interpretación; no es el documento de entrega ni aporta estadísticas."
+  },
+  "benchmark": {
+    "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
+    "sha256": "6fa649b5d01273e115ae896efdf910bfd5ebe0155cd2032884e9613e5e1e5507",
+    "rol": "Criterios para construir la metodología de calificación e interpretación."
   },
   "diccionario": {
     "archivo": "diccionario_datos_diagnostico_seguridad_municipal.json",
-    "sha256": "1ab232f1e46dd92ef66719d249666cc920507d50c22b512decd767a1873d858d"
+    "sha256": "3ecd44770e8927a9c24eca7cc9d5a214ce6b0865ec73520a6eba7bf6a8387924"
   },
   "reglas": {
     "archivo": "reglas_calificacion.json",
-    "sha256": "17734d672cba2a6dfdee5abc0ba541e565272bc70c597757f727fe7d2d7e0461"
+    "sha256": "8b477504544616fc51cdca614bc35c9778b7f74dda4116ced346b2c9f3e36755"
   },
   "metodologia": {
-    "archivo": "config/metodologia_seguridad.json",
-    "sha256": "a85630efb2087def34e0ecf2af2c0b2fd5470ffa17d9a6f94862f456fbc8b32c"
+    "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
+    "sha256": "6fa649b5d01273e115ae896efdf910bfd5ebe0155cd2032884e9613e5e1e5507"
   },
   "formato": {
     "archivo": "config/formato_editorial.json",
@@ -30,7 +47,11 @@
   },
   "redaccion": {
     "archivo": "config/redaccion_consultoria.json",
-    "sha256": "3c6bb986fbfa3ae9331332c4147ae41cf5b9f41a8dbbc57664177b98c2e3ab45"
+    "sha256": "73ad34e800c8e948cf6e49907512d38e79accf464084f44e375a7e079d42a8d5"
+  },
+  "normalizaciones": {
+    "archivo": "config/normalizaciones.json",
+    "sha256": "9ac87940c020efe389510d8f0041e50fdc16f7438a1c1c73b23ee7ff8ec56e3e"
   },
   "tipografias": [
     {
@@ -70,11 +91,36 @@
     17,
     18
   ],
+  "titulos_indicadores": [
+    "Plan o programa de protección civil",
+    "Capacitación en materia de protección civil",
+    "Temas de la capacitación de protección civil",
+    "Personal destinado a funciones de seguridad pública",
+    "Evaluaciones de control de confianza",
+    "Instituto de formación, capacitación y/o profesionalización",
+    "Certificado Único Policial vigente",
+    "Uniformes",
+    "Equipamiento",
+    "Temas de capacitación policial",
+    "Sistemas de información georreferenciados",
+    "Patrullajes estratégicos",
+    "Atención a problemas comunitarios",
+    "Cámaras de vigilancia",
+    "Llamadas procedentes",
+    "Informe anual de actividades",
+    "Cambio del estado de fuerza, egresos y fallecimientos",
+    "Puestas a disposición"
+  ],
+  "correspondencia_guia": "La guía repite Personal y no identifica el Certificado Único Policial; se mantienen los 18 indicadores del formato y del Paquete Seguridad.",
   "fuentes_entrada": [
-    "{municipio} PAQUETE SEGURIDAD.docx",
+    "{municipio} PAQUETE SEGURIDAD.docx"
+  ],
+  "fuentes_opcionales": [
     "{municipio} Anexo.docx"
   ],
   "documentos_salida": [
     "medicion"
-  ]
+  ],
+  "nombre_salida": "{municipio} Estudio Seguridad.docx",
+  "ilustraciones": "Reproducción de imágenes originales verificadas; sin generar tablas o gráficas nuevas."
 }

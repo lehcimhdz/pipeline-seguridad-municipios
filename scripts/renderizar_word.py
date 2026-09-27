@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Renderiza el único documento de medición de SEGURIDAD, contrato v2.1."""
+"""Publica el Estudio Seguridad en el formato de la consultora."""
 from collections import Counter
 from copy import deepcopy
 from decimal import Decimal
@@ -13,15 +13,14 @@ import tempfile
 import unicodedata
 import zipfile
 from lxml import etree as ET
-from calificar import agregar, cobertura_periodo, definir_periodos
-from componer_documento import PERIODOS, decimal_corto
+from calificar import agregar, calificar_indicador, dependencias, definir_periodos
+from componer_documento import componer
 from contrato import ROOT, CONTRACT, cargar_contrato, huellas
 from documentos import sha256
 from editorial import configurar
-from graficas_word import agregar_grafica
+from ilustraciones_word import importar_grafica, seleccionar_graficas
 from salidas import limpiar_salidas
-from redaccion_consultoria import (comprobar_texto, fuente_grafica, notas_alcance,
-                                  texto_pendiente, titulo_tabla, validar_publicacion)
+from redaccion_consultoria import comprobar_texto, validar_publicacion
 
 TEMPLATE = ROOT / 'templates/seguridad_medicion.docx'
 DICTIONARY = ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json'
@@ -101,186 +100,146 @@ def reemplazar(p, token, replacement, first_only=False):
             break
 
 
-def tabla_evidencia(rows, perfil='medicion'):
-    if not rows or any(not isinstance(row, list) for row in rows) or not max(map(len, rows)):
-        raise ValueError('Tabla vacía o inválida.')
-    columns = max(map(len, rows))
-    table = ET.Element(W + 'tbl')
-    props = ET.SubElement(table, W + 'tblPr')
-    ET.SubElement(props, W + 'tblW', {W + 'w': '5000', W + 'type': 'pct'})
-    borders = ET.SubElement(props, W + 'tblBorders')
-    for edge in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
-        ET.SubElement(borders, W + edge, {W + 'val': 'single', W + 'sz': '4', W + 'color': 'B7B7B7'})
-    grid = ET.SubElement(table, W + 'tblGrid')
-    for _ in range(columns):
-        ET.SubElement(grid, W + 'gridCol', {W + 'w': str(9000 // columns)})
-    for index, values in enumerate(rows):
-        row = ET.SubElement(table, W + 'tr')
-        rowprops = ET.SubElement(row, W + 'trPr')
-        if index == 0:
-            ET.SubElement(rowprops, W + 'tblHeader')
-        ET.SubElement(rowprops, W + 'cantSplit')
-        for value in list(values) + [''] * (columns - len(values)):
-            cell = ET.SubElement(row, W + 'tc')
-            cellprops = ET.SubElement(cell, W + 'tcPr')
-            ET.SubElement(cellprops, W + 'tcW', {W + 'w': str(9000 // columns), W + 'type': 'dxa'})
-            if index % 2 == 0:
-                ET.SubElement(cellprops, W + 'shd', {W + 'val': 'clear', W + 'fill': 'DAE3F3' if index == 0 else 'EAF0F8'})
-            role = 'tabla_' + ('titulo' if index == 0 else 'cuerpo')
-            cell.append(parrafo(value, perfil=perfil, rol=role))
-    return table
+def nombre_documento(municipio):
+    if (not isinstance(municipio, str) or not municipio.strip()
+            or re.search(r'[/\\:\x00-\x1f]', municipio) or municipio in ('.', '..')):
+        raise ValueError('Municipio inválido para nombrar la entrega.')
+    return unicodedata.normalize('NFC', municipio.strip()) + ' Estudio Seguridad.docx'
 
 
-def validar_resultado(result, mode):
+def validar_resultado(result, mode='final'):
+    if mode != 'final':
+        raise ValueError('El estudio se publica en presentación final.')
     content = result.get('contenido_word', {})
-    if content.get('perfil') != 'seguridad_medicion_v2':
-        raise ValueError('El JSON no contiene composición Word compatible; vuelva a ejecutar el pipeline.')
-    sources = [source.get('archivo') for source in result.get('fuentes', [])]
-    if len(sources) != 2 or set(sources) != {result['municipio'] + suffix for suffix in (' Anexo.docx', ' PAQUETE SEGURIDAD.docx')}:
-        raise ValueError('El diagnóstico admite exclusivamente el paquete de seguridad y el anexo del mismo municipio.')
-    sections = result['indicadores']; ids = [s['numero'] for s in sections]
-    if ids != list(range(1, 19)):
-        raise ValueError('Se requieren los 18 indicadores ordenados, sin duplicados.')
+    if content.get('perfil') != 'estudio_seguridad':
+        raise ValueError('La composición no corresponde al Estudio Seguridad vigente.')
+    municipality = result['municipio']
+    nombre_documento(municipality)
+    sources = [item['archivo'] for item in result['fuentes']]
+    admitted = {municipality + suffix for suffix in (' PAQUETE SEGURIDAD.docx', ' Anexo.docx')}
+    if (municipality + ' PAQUETE SEGURIDAD.docx' not in sources
+            or len(sources) != len(set(sources)) or not set(sources) <= admitted):
+        raise ValueError('Las fuentes deben corresponder al Paquete Seguridad y, opcionalmente, su Anexo.')
+    sections = result['indicadores']
+    if [s['numero'] for s in sections] != list(range(1, 19)):
+        raise ValueError('Se requieren los dieciocho indicadores en orden.')
     if result.get('periodos_evaluacion') != definir_periodos(sections):
-        raise ValueError('Los periodos deben corresponder a la cobertura documental y al cierre común de dos años consecutivos.')
+        raise ValueError('Los periodos no corresponden a las ediciones y años de las fuentes.')
     rules = json.loads(RULES.read_text(encoding='utf-8'))
+    mappings = json.loads((ROOT / 'config/normalizaciones.json').read_text(encoding='utf-8'))
     dictionary = json.loads(DICTIONARY.read_text(encoding='utf-8'))
-    active = set(dictionary['variables_documento'])
-    if set(content.get('variables_activas', [])) != active:
-        raise ValueError('Variables activas distintas al contrato editorial.')
-    if sorted(row['indicador'] for row in content['hoja_computo']) != ids or sorted(a['indicador'] for a in content['analisis']) != ids:
-        raise ValueError('Se requieren 18 análisis y filas de cómputo.')
-    for key in active:
-        value = result['valores_plantilla'].get(key)
-        expected = dictionary['variables_documento'][key]['tipo_dato']
-        if value is not None and not ((expected == 'string' and isinstance(value, str)) or (expected == 'array' and isinstance(value, list))):
-            raise ValueError(f'Tipo incorrecto para {key}.')
-        if isinstance(value, str) and (re.search(r'[{}]', value) or '[INSERTAR' in value.upper()):
-            raise ValueError(f'Contenido con marcadores pendientes: {key}')
-        if (value is None or (isinstance(value, str) and not value.strip())) and mode == 'final':
-            raise ValueError(f'Variable pendiente: {key}')
-    for key in ('municipio', 'estado'):
-        if result['valores_plantilla'].get(key) != result.get(key):
-            raise ValueError(f'Identidad inconsistente: {key}.')
-    for section in sections:
-        number = section['numero']
-        expected = [{'titulo': titulo_tabla(t),
-                     'ambito': t['ambito'], 'tabla_fuente': t['tabla'], 'filas': t['filas']}
-                    for t in section['tablas']]
-        if result['valores_plantilla'][f'tablas_indicador_{number:02d}'] != expected:
-            raise ValueError(f'Tablas diferentes a la evidencia del indicador {number}.')
-        recent = result.get('periodos_evaluacion', {}).get('ultimo_periodo', {}).get('años_objetivo')
-        if recent is not None:
-            evaluation = section['evaluaciones']['ultimo_periodo']
-            if evaluation.get('años_evaluados') != recent:
-                raise ValueError('El último periodo debe ser común a todos los indicadores.')
-            if cobertura_periodo(section, recent)['cobertura_temporal_insuficiente'] and evaluation['puntaje'] is not None:
-                raise ValueError('Se asignó un puntaje reciente sin cobertura del periodo.')
-        scores = [section['evaluaciones'][p]['puntaje'] for p in PERIODOS]
-        graphs = result['valores_plantilla'][f'graficas_indicador_{number:02d}']
-        if len(graphs) > 1 or (any(s is not None for s in scores) and not graphs):
-            raise ValueError('Gráfica de puntajes ausente o duplicada.')
-        for graph in graphs:
-            if graph.get('tipo') != 'puntajes' or graph.get('categorias') != list(PERIODOS.values()) or graph.get('valores') != scores:
-                raise ValueError('La gráfica difiere de las evaluaciones.')
-            if graph.get('fuente') != fuente_grafica(section):
-                raise ValueError('La fuente de la gráfica difiere de su evaluación.')
-    for period in PERIODOS:
-        scores = {s['numero']: s['evaluaciones'][period] for s in sections}
-        computed = agregar(scores, rules)
-        if computed != result['calculos'][period]:
-            raise ValueError(f'Cálculos agregados inconsistentes en {period}.')
-        grade = computed['calificacion_final'] or 'PENDIENTE'
-        if content['calificaciones'][period] != grade or result['valores_plantilla'][f'calificacion_{period}'] != grade:
-            raise ValueError('Calificación editorial inconsistente.')
-        for row in content['hoja_computo']:
-            value = scores[row['indicador']]['puntaje']
-            if row[period] != (str(value) if value is not None else 'Pendiente'):
-                raise ValueError('La hoja de cómputo difiere de las evaluaciones.')
-        for dimension, numbers in rules['dimensiones'].items():
-            values = [scores[i]['puntaje'] for i in numbers]
-            mean = None if None in values else decimal_corto(sum(Decimal(v) for v in values) / len(values))
-            if content['promedios_dimension'][period][dimension] != mean:
-                raise ValueError('Promedio de dimensión inconsistente.')
-        if content['promedios_generales'][period] != computed.get('promedio_tres_dimensiones'):
-            raise ValueError('Promedio general inconsistente.')
-    if mode == 'final':
-        if result.get('estado_ejecucion') != 'validado':
-            raise ValueError('La versión final exige estado_ejecucion=validado.')
-        if any(v.get('nivel') in ('bloqueante', 'revision') for v in result['validaciones']):
-            raise ValueError('Existen bloqueos o revisiones pendientes: sólo se permite un borrador.')
-        if any(result['calculos'][p].get('estado') != 'calculado' for p in PERIODOS):
-            raise ValueError('La versión final exige todos los puntajes y ambas calificaciones.')
+    values = result['valores_plantilla']
+    if set(values) != set(dictionary['variables_documento']):
+        raise ValueError('Las variables de texto difieren del contrato documental.')
+    if set(content.get('variables_activas', [])) != set(values):
+        raise ValueError('La composición no declara todas las variables vigentes.')
+    if any(not isinstance(v, str) or not v.strip() for v in values.values()):
+        raise ValueError('Todos los apartados de la entrega deben contener texto editorial.')
+    if values['municipio'] != municipality or values['estado'] != result['estado']:
+        raise ValueError('La identidad editorial no corresponde al municipio.')
+    for period in ('general', 'ultimo_periodo'):
+        computed = {}
+        for section, ficha in zip(sections, rules['fichas']):
+            target = result['periodos_evaluacion']['ultimo_periodo']['por_indicador'][str(section['numero'])] if period == 'ultimo_periodo' else None
+            computed[section['numero']] = calificar_indicador(section, ficha, period, mappings, años_objetivo=target)
+        dependencias(computed)
+        if any(section['evaluaciones'][period] != computed[section['numero']] for section in sections):
+            raise ValueError('Una evaluación difiere de la evidencia y de los criterios vigentes.')
+        grade = agregar(computed, rules, modo=result['metodo_calificacion'])
+        if grade != result['calculos'][period]:
+            raise ValueError('La calificación agregada difiere de su metodología.')
+        if grade['calificacion_final'] is None:
+            raise ValueError('La evidencia aún no alcanza la cobertura exigida para asignar una calificación.')
+        if values[f'calificacion_{period}'] != grade['calificacion_final']:
+            raise ValueError('La calificación publicada no corresponde a la evaluación.')
+    catalogue = result.get('catalogo_ilustraciones', [])
+    selected = content.get('ilustraciones', [])
+    if seleccionar_graficas(catalogue, selected) != selected:
+        raise ValueError('Las ilustraciones no corresponden al catálogo documental.')
+    for image in selected:
+        paragraphs = values[f'analisis_indicador_{image["indicador"]:02d}'].split('\n\n')
+        if image['despues_parrafo'] >= len(paragraphs):
+            raise ValueError('La ilustración no tiene un párrafo de interpretación asociado.')
+    if any(item.get('nivel') == 'bloqueante' for item in result.get('validaciones', [])):
+        raise ValueError('La entrega conserva una inconsistencia documental bloqueante.')
+    editorial = result.get('redaccion_editorial')
+    if not editorial:
+        raise ValueError('Falta el vínculo con la interpretación editorial.')
+    editorial_path = Path(editorial['archivo'])
+    if sha256(editorial_path) != editorial['sha256']:
+        raise ValueError('Cambió la interpretación editorial: vuelva a componer el estudio.')
+    copy = deepcopy(result)
+    componer(copy, dictionary, rules, redaccion=json.loads(editorial_path.read_text(encoding='utf-8')))
+    if copy['valores_plantilla'] != values:
+        raise ValueError('El texto publicado difiere de la interpretación verificada.')
     validar_publicacion(result)
 
 
 def seleccionar_documento(root, result, mode, perfil, files):
     body = root.find(W + 'body')
-    start = next(i + 1 for i, p in enumerate(body) if p.find(W + 'pPr/' + W + 'sectPr') is not None)
-    if mode == 'borrador':
-        body.insert(start, parrafo(result['contenido_word']['aviso_borrador'], perfil=perfil, rol='nota'))
-    body.insert(start + (1 if mode == 'borrador' else 0), parrafo(result['contenido_word']['periodo'], perfil=perfil, rol='nota'))
-    chart_number = 0
+    section = body.find(W + 'sectPr')
+    page = section.find(W + 'pgSz')
+    margins = section.find(W + 'pgMar')
+    max_width = (int(page.get(W + 'w')) - int(margins.get(W + 'left')) - int(margins.get(W + 'right'))) * 635
     format_config = json.loads((ROOT / 'config/formato_editorial.json').read_text(encoding='utf-8'))
+    originals = []
     for p in list(root.iter(W + 'p')):
         matches = list(MARKER.finditer(texto(p)))
         if not matches:
             continue
         if len(matches) == 1 and MARKER.fullmatch(texto(p).strip()):
-            key = matches[0][1]; value = result['valores_plantilla'][key]
+            key = matches[0][1]
+            value = result['valores_plantilla'][key]
+            role = 'bibliografia' if key == 'bibliografia' else 'cuerpo'
             replacements = []
-            if isinstance(value, list):
-                for item in value:
-                    if key.startswith('graficas_'):
-                        chart_number += 1
-                        drawing = configurar(agregar_grafica(files, item, chart_number), perfil, 'cuerpo')
-                        drawing.find(W + 'pPr/' + W + 'spacing').set(W + 'lineRule', 'atLeast')
+            for index, piece in enumerate(value.split('\n\n')):
+                replacement = parrafo(piece, p, perfil=perfil, rol=role, inicial=index == 0)
+                if role == 'bibliografia':
+                    for r in replacement.iter(W + 'r'):
+                        ET.SubElement(r.find(W + 'rPr'), W + 'i')
+                    configurar(replacement, perfil, role, inicial=index == 0)
+                replacements.append(replacement)
+                if key.startswith('analisis_indicador_'):
+                    indicator = int(key.rsplit('_', 1)[1])
+                    illustrations = [i for i in result['contenido_word'].get('ilustraciones', [])
+                                     if i['indicador'] == indicator and i['despues_parrafo'] == index]
+                    for image in illustrations:
+                        source = Path(result['rutas_fuentes'][image['fuente']])
+                        drawing, proof = importar_grafica(files, source, image, len(originals) + 1, max_width)
                         replacements.append(drawing)
-                        replacements.append(parrafo(item['fuente'], perfil=perfil, rol='nota'))
-                    else:
-                        caption = parrafo(item['titulo'], perfil=perfil, rol='nota')
-                        ET.SubElement(caption.find(W + 'pPr'), W + 'keepNext')
-                        configurar(caption, perfil, 'nota')
-                        replacements.append(caption)
-                        replacements.append(tabla_evidencia(item['filas'], perfil))
-            else:
-                value = texto_pendiente(key) if value is None else value
-                rol = 'bibliografia' if key == 'bibliografia' else 'cuerpo'
-                replacements = [parrafo(piece, p, perfil=perfil, rol=rol, inicial=i == 0)
-                                for i, piece in enumerate(str(value).split('\n\n'))]
-                if rol == 'bibliografia':
-                    for replacement in replacements:
-                        value = texto(replacement)
-                        for r in replacement.iter(W + 'r'):
-                            ET.SubElement(r.find(W + 'rPr'), W + 'i')
-                        configurar(replacement, perfil, 'bibliografia')
-            parent = p.getparent(); index = parent.index(p); parent.remove(p)
+                        originals.append(proof)
+            parent = p.getparent()
+            index = parent.index(p)
+            parent.remove(p)
             for offset, replacement in enumerate(replacements):
                 parent.insert(index + offset, replacement)
         else:
             for match in matches:
                 value = result['valores_plantilla'][match[1]]
-                reemplazar(p, match[0], 'Pendiente' if value is None else str(value))
+                reemplazar(p, match[0], value)
                 if match[1].startswith('calificacion_'):
                     for r in p.iter(W + 'r'):
-                        rpr = r.find(W + 'rPr')
-                        if rpr is not None:
-                            for n in rpr.findall(W + 'color'):
-                                rpr.remove(n)
-                            ET.SubElement(rpr, W + 'color', {W + 'val': format_config['colores_calificacion'].get(value, '666666')})
-    if mode == 'borrador':
-        section = body.find(W + 'sectPr')
-        index = body.index(section)
-        body.insert(index, parrafo('Alcance de la información', generated=False, perfil=perfil, rol='subcapitulo'))
-        for offset, note in enumerate(notas_alcance(result), 1):
-            body.insert(index + offset, parrafo(note, perfil=perfil, rol='nota'))
+                        props = r.find(W + 'rPr')
+                        if props is not None:
+                            for color in props.findall(W + 'color'):
+                                props.remove(color)
+                            ET.SubElement(props, W + 'color', {W + 'val': format_config['colores_calificacion'][value]})
+    return originals
 
 
-def auditar(path, expected_generated=None):
+def auditar(path, expected_generated=None, imagenes_esperadas=()):
     count = 0; characters = 0
     with zipfile.ZipFile(path) as archive:
         if archive.testzip():
             raise ValueError('DOCX dañado.')
+        if any(n.startswith('word/charts/') for n in archive.namelist()):
+            raise ValueError('El estudio no debe contener gráficas nuevas.')
+        document = ET.fromstring(archive.read('word/document.xml'), PARSER)
+        if document.find('.//' + W + 'tbl') is not None:
+            raise ValueError('El estudio no debe contener tablas añadidas.')
+        for expected in imagenes_esperadas:
+            if hashlib.sha256(archive.read(expected['parte_salida'])).hexdigest() != expected['sha256']:
+                raise ValueError('La ilustración dejó de ser una reproducción fiel de la fuente.')
         for name in archive.namelist():
             if not name.startswith('word/') or not name.endswith('.xml'):
                 continue
@@ -289,14 +248,6 @@ def auditar(path, expected_generated=None):
                 if ((node.tag == W + 'highlight' and node.get(W + 'val') == 'yellow')
                         or (node.tag == W + 'shd' and node.get(W + 'fill', '').upper() == 'FFFF00')):
                     raise ValueError('El documento conserva resaltado amarillo.')
-            if name.startswith('word/charts/pipeline_'):
-                c = '{http://schemas.openxmlformats.org/drawingml/2006/chart}'
-                a = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
-                fill = root.find(c + 'spPr/' + a + 'solidFill/' + a + 'srgbClr')
-                if fill is None or fill.get('val') == 'FFFF00' or root.find('.//' + a + 'highlight') is not None:
-                    raise ValueError('Gráfica con formato de revisión amarillo.')
-                for item in root.iter(a + 't'):
-                    comprobar_texto(item.text or '', name)
             for p in root.iter(W + 'p'):
                 if re.search(r'[{}]|\[INSERTAR', texto(p), re.I):
                     raise ValueError(f'Marcador editorial pendiente en {name}.')
@@ -314,11 +265,12 @@ def auditar(path, expected_generated=None):
         raise ValueError('Inserciones distintas a la auditoría.')
     return {'segmentos_json': count, 'caracteres_json': characters,
             'sin_resaltado_amarillo_verificado': True,
-            'redaccion_publicable_verificada': True, 'marcadores_pendientes': 0}
+            'redaccion_publicable_verificada': True, 'marcadores_pendientes': 0,
+            'tablas_creadas': 0, 'graficas_creadas': 0, 'graficas_reutilizadas': len(imagenes_esperadas)}
 
 
-def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='medicion'):
-    if mode not in ('borrador', 'final') or perfil != 'medicion':
+def renderizar(json_path, output_dir, mode='final', template=None, perfil='medicion'):
+    if mode != 'final' or perfil != 'medicion':
         raise ValueError('Modo o perfil no reconocido.')
     contract = cargar_contrato()
     template = template or ROOT / contract['plantillas'][perfil]['archivo']
@@ -340,7 +292,7 @@ def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='me
         raise ValueError('Marcadores distintos al contrato del perfil.')
     for cached in list(root.iter(W + 'lastRenderedPageBreak')):
         cached.getparent().remove(cached)
-    seleccionar_documento(root, result, mode, perfil, files)
+    originals = seleccionar_documento(root, result, mode, perfil, files)
     generated = len(root.xpath('.//w:r[w:rPr/w:rStyle[@w:val="ContenidoJSON"]]', namespaces=NS))
     files['word/document.xml'] = xml_bytes(root)
     styles = ET.fromstring(files['word/styles.xml'], PARSER)
@@ -362,20 +314,19 @@ def renderizar(json_path, output_dir, mode='borrador', template=None, perfil='me
             if changed:
                 files[name] = xml_bytes(part)
     output_dir.mkdir(parents=True, exist_ok=True)
-    municipality = slug(result['municipio'])
-    if not municipality:
-        raise ValueError('Municipio inválido para nombrar salida.')
-    dest = output_dir / f'{municipality}_seguridad_{perfil}_{mode}.docx'
+    dest = output_dir / nombre_documento(result['municipio'])
     with tempfile.TemporaryDirectory(prefix='.render-', dir=output_dir) as directory:
         temporary = Path(directory) / 'documento.docx'
         with zipfile.ZipFile(temporary, 'w', zipfile.ZIP_DEFLATED) as archive:
             for name, data in files.items():
                 archive.writestr(name, data)
-        audit = auditar(temporary, generated)
+        audit = auditar(temporary, generated, originals)
         os.replace(temporary, dest)
     return {**audit, 'archivo': str(dest), 'sha256': sha256(dest), 'modo': mode, 'perfil': perfil,
             'json_fuente': str(json_path), 'json_sha256': hashlib.sha256(raw).hexdigest(),
-            'plantilla_sha256': sha256(template), 'contrato_documental_sha256': sha256(CONTRACT)}
+            'plantilla_sha256': sha256(template), 'contrato_documental_sha256': sha256(CONTRACT),
+            'ilustraciones': originals,
+            'formato_ilustraciones': 'Reproducción fiel; tipografía de origen incrustada en los píxeles.' if originals else 'Sin ilustraciones.'}
 
 
 def guardar_recibo(report, receipt):
@@ -394,12 +345,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('json', type=Path)
     parser.add_argument('--output', type=Path, default=ROOT / 'output/word')
-    parser.add_argument('--modo', choices=('borrador', 'final'), default='borrador')
+    parser.add_argument('--modo', choices=('final',), default='final')
     parser.add_argument('--documento', choices=('medicion',), default='medicion')
     args = parser.parse_args()
     try:
         report = renderizar(args.json, args.output, args.modo, perfil=args.documento)
-        word = Path(report['archivo']); receipt = args.output.parent / 'json' / (word.stem + '_renderizado.json')
+        word = Path(report['archivo']); receipt = args.output.parent / 'json' / (slug(word.stem) + '_renderizado.json')
         guardar_recibo(report, receipt)
         print(f"Word (medicion): {word}. Inserciones verificadas: {report['segmentos_json']} segmentos.")
         removidos = limpiar_salidas(args.output.parent / 'json', args.output, json_actual=args.json,

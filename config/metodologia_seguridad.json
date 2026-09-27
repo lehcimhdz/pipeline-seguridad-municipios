@@ -1,18 +1,18 @@
 {
-  "version": "1.0",
+  "version": "2.2",
   "fuente": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "375e8f58120fffec24367d4b57ced17151f78d175ca17cc7736f008c3d9a01e4"
+    "sha256": "6fa649b5d01273e115ae896efdf910bfd5ebe0155cd2032884e9613e5e1e5507"
   },
-  "alcance": "Transcripción de criterios internos; no verifica vigencia legal ni bibliográfica.",
+  "alcance": "Estudio de seguridad en el formato de la consultora; estadísticas del paquete de seguridad y contraste opcional con su anexo.",
   "criterio_operativo": {
     "prioridad": "Primera regla satisfecha. En binarios, ausencia en el último periodo aplica 2 antes de intermitencia (3).",
-    "huecos": "No interpolar huecos entre umbrales ni asignar puntaje si no se satisface un criterio explícito.",
+    "huecos": "Combinaciones no definidas por las fichas conservan puntaje null; no interpolar umbrales.",
     "faltantes": "Una celda vacía no demuestra falta de respuesta municipal; requiere clasificación.",
-    "periodos": "General: todas las observaciones documentadas. Último: dos etiquetas temporales más recientes, sin saltar vacíos.",
+    "periodos": "General: observaciones documentadas; reciente: dos ediciones censales para 1–16 y dos años calendario para 17–18.",
     "cobertura": "No inferir que una variable no existía en las ediciones ausentes; declarar cobertura observada.",
     "redondeo": "Agregación: ROUND_HALF_UP a dos decimales para clasificar; precisión interna conservada.",
-    "ajustes": "No se aplican ajustes discrecionales automáticos."
+    "ajustes": "Sin ajustes discrecionales automáticos. La escala no acredita cumplimiento normativo ni vigencia de las referencias."
   },
   "dimensiones": {
     "proteccion_civil": [
@@ -583,7 +583,7 @@
         },
         {
           "bloque": 443,
-          "texto": "Por eso el benchmark funciona como un piso de capacidad, no como una medida de desempeño: un municipio puede superarlo y aun así no tener cobertura efectiva si el personal disponible no alcanza para sostener turnos."
+          "texto": "Por eso el benchmark funciona como un piso de capacidad, no como una medida de desempeño: un municipio puede superarlo y aun así no tener cobertura efectiva si la plantilla no alcanza para sostener turnos."
         },
         {
           "bloque": 444,
@@ -591,7 +591,7 @@
         },
         {
           "bloque": 446,
-          "texto": "Nota de aplicación: Criterio ajustable: si el estado de fuerza total tiene menos de 15 elementos, el puntaje máximo es 4, porque la cobertura por turno es insuficiente aunque la tasa sea alta."
+          "texto": "Nota de aplicación: Criterio ajustable: si la plantilla total tiene menos de 15 elementos, el puntaje máximo es 4, porque la cobertura por turno es insuficiente aunque la tasa sea alta."
         }
       ],
       "datos_requeridos": {
@@ -1187,7 +1187,7 @@
         }
       },
       "periodicidad": "por_edicion",
-      "metodo": "revision_contextual",
+      "metodo": "uniformes",
       "reglas_ejecutables": [],
       "regla_especifica": null,
       "precauciones": [
@@ -2292,7 +2292,7 @@
         }
       },
       "periodicidad": "anual",
-      "metodo": "revision_contextual",
+      "metodo": "fallecimientos",
       "reglas_ejecutables": [],
       "regla_especifica": null,
       "precauciones": [
@@ -2407,5 +2407,51 @@
         "Distinguir delitos, faltas administrativas y limitaciones de la fuente."
       ]
     }
-  ]
+  ],
+  "agregacion": {
+    "modo_predeterminado": "completo",
+    "modos": {
+      "completo": {
+        "requiere": "18 indicadores calificados",
+        "origen": "Benchmark suministrado"
+      },
+      "evaluables": {
+        "origen": "Adaptación operativa; no equivale a la evaluación completa del benchmark",
+        "cobertura_minima_por_dimension": "2/3 de sus indicadores, redondeado al entero superior",
+        "minimos": {
+          "proteccion_civil": 2,
+          "condiciones_del_personal": 5,
+          "inteligencia_y_eficiencia_policial": 6
+        },
+        "formula": "Promedio de los indicadores evaluables dentro de cada dimensión; promedio simple de las tres dimensiones.",
+        "peso_dimensiones": "1/3 cada una",
+        "imputacion": false,
+        "tope_con_pendientes": "MUY BIEN",
+        "declaracion": "Publicar cobertura y alcance parcial; conservar intervalo de sensibilidad de la evaluación completa."
+      }
+    }
+  },
+  "convenciones_ejecutables": {
+    "uniformes": "Homologar seis prendas básicas; camisola/camisa y tipos de calzado cuentan una vez por grupo. Frecuencias semestral y anual cumplen al menos anual. Dotación en una sola edición precede a incompleta.",
+    "fallecimientos": "Usar la serie municipal de conteos, no porcentajes de egresos ni sumar los desgloses. Mayoría significa más de la mitad de los años del periodo, incluidos los vacíos en el denominador; un conteo desconocido no se transforma en cero.",
+    "ultimo_periodo": "El criterio de todas las ediciones se evalúa sobre ambas recientes; un cumplimiento completo puede obtener 5.",
+    "faltantes": "Sólo una falta de respuesta municipal acreditada permite penalizarla como tal; denominadores ausentes no son evidencia de abandono.",
+    "fuentes_normativas": "Referencias aportadas por el benchmark; no constituyen verificación externa ni acreditan vigencia jurídica."
+  },
+  "politica_evidencia": {
+    "fuentes_admitidas": [
+      "{municipio} PAQUETE SEGURIDAD.docx",
+      "{municipio} Anexo.docx (opcional)"
+    ],
+    "fuente_primaria": "PAQUETE SEGURIDAD",
+    "control_cruzado": "Anexo, si se aporta",
+    "fuentes_externas": false,
+    "muestra_estilo": "Referencia editorial; no aporta datos, calificaciones ni estándares.",
+    "faltantes": "Puntaje null cuando falta evidencia comparable; no convertir vacíos en cero, ausencia municipal o puntaje 1.",
+    "calificaciones_reportadas": "Se conservan para contraste, sin sustituir los puntajes calculados.",
+    "agregacion": "Modo completo requiere 18 puntajes; modo evaluables es una adaptación explícita con cobertura mínima por dimensión y alcance parcial.",
+    "ultimo_periodo": "Dos ediciones censales recientes para indicadores 1–16; dos años calendario recientes para 17–18. No omitir celdas vacías al seleccionar.",
+    "parametros_conservados": "18 indicadores, 90 criterios, escala 1–5, tres dimensiones, dependencias y candados de la transcripción histórica.",
+    "limites": "Los umbrales del benchmark no acreditan vigencia normativa ni estándares externos. Las tasas requieren denominadores documentados; no se completan con cifras de la muestra editorial."
+  }
 }

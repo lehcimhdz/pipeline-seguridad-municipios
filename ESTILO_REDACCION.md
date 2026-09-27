@@ -1,122 +1,123 @@
-# Redacción del diagnóstico de seguridad · v2.1
+# Escritura del estudio de seguridad · v2.2
 
-## Propósito y referencia
+El producto es una interpretación del funcionamiento municipal, organizada en
+el formato de la consultora. Debe poder leerse como un estudio terminado:
+explica qué ocurre, qué significan los cambios y qué decisiones permiten tomar.
+La evidencia y las verificaciones técnicas se conservan por separado.
 
-El documento debe ayudar a comprender el funcionamiento de la seguridad
-municipal y a reconocer prioridades de gestión a partir de evidencia concreta.
-La voz es consultiva: explica qué muestran los datos, por qué importa y qué
-conviene revisar o fortalecer.
+## Referencias y responsabilidades
 
-La referencia editorial es `Muestra Estudio Seguridad.docx`, consultada fuera
-del repositorio. Se retoma su organización mediante síntesis, comparación
-territorial y temporal, e implicaciones para la gestión. Sus cifras, localidades,
-calificaciones, estándares y juicios no son insumos del diagnóstico. El archivo
-no se incorpora al repositorio ni se consulta durante la ejecución.
+`Muestra Estudio Seguridad.docx` orienta la escritura: síntesis con una posición
+clara, comparaciones pertinentes y recomendaciones ligadas al hallazgo. Sus
+datos, localidades, calificaciones y estándares no se trasladan a otro municipio.
+La muestra se consultó fuera del repositorio; no es una fuente estadística.
 
-Las únicas fuentes factuales son `{municipio} PAQUETE SEGURIDAD.docx` y
-`{municipio} Anexo.docx`. Las calificaciones proceden de las reglas históricas
-versionadas. Las pautas operativas están en
-[config/redaccion_consultoria.json](config/redaccion_consultoria.json), perfil
-`diagnostico_consultivo`.
+Cada documento tiene una función distinta:
 
-## Organización del documento
+- `Machote general medicion version final.docx`: estructura del producto.
+- `Machote general medicion version final rzg investigación.docx`: guía de
+  interpretación y organización del razonamiento.
+- `Machote_seguridad_general_con_calificacion.docx`: benchmark de evaluación.
+- `{municipio} PAQUETE SEGURIDAD.docx`: evidencia municipal y referencia estatal.
+- `{municipio} Anexo.docx`, cuando está disponible: contraste documental.
 
-La introducción explica el propósito del diagnóstico, su alcance en SEGURIDAD,
-las dos fuentes y el periodo documental. Presenta una lectura accesible de las
-calificaciones y de las limitaciones de información. Debe permitir comprender
-el documento sin conocer el pipeline.
+Las calificaciones las calcula el módulo metodológico. La redacción no cambia
+puntajes ni resuelve faltantes mediante opiniones. El criterio de agregación y
+su cobertura se explican brevemente junto a los resúmenes del estudio.
 
-La síntesis general selecciona los hallazgos más relevantes para la gestión.
-La síntesis del último periodo identifica el cierre documental y sus límites.
-Ambas deben corresponder a las evaluaciones calculadas y a la cobertura real
-de las fuentes.
+## Un argumento por párrafo
 
-Cada indicador desarrolla una secuencia reconocible:
+Los dos resúmenes contienen tres párrafos cada uno. El general organiza una
+lectura conjunta de protección civil, personal y capacidades policiales; el
+reciente identifica avances y asuntos de gestión en las últimas observaciones.
+La síntesis elige hallazgos; no repite todas las cifras de los apartados.
 
-1. **Hallazgo.** Expone la situación municipal observada con una frase concreta.
-2. **Evidencia.** Identifica magnitud, unidad, territorio y año; compara sólo
-   cuando las observaciones son equivalentes.
-3. **Implicación.** Explica la relación con la capacidad o función municipal,
-   manteniendo la incertidumbre que la evidencia requiera.
-4. **Prioridad.** Propone una acción proporcionada al hallazgo o una verificación
-   precisa cuando falte información.
+Los dieciocho apartados conservan el orden del formato de la consultora. Cada
+uno desarrolla un argumento propio: una situación municipal, las cifras
+indispensables para comprenderla y su consecuencia para la gestión. La acción
+propuesta debe responder al hallazgo, no ser un consejo genérico sobre el tema.
+No existe una lista de frases que el programa combine para simular un análisis.
 
-Las tablas conservan la evidencia y las gráficas muestran puntajes calculables.
-Los párrafos conectan los resultados con su significado, evitando enumerar
-todas las celdas. El cierre de cada indicador concentra la prioridad de gestión.
-Las conclusiones reúnen las prioridades sustentadas y los asuntos que siguen
-abiertos, sin introducir hechos nuevos.
+Seleccionar cifras también significa dejar fuera las que no ayudan a comprender
+el problema. Una variación decisiva puede merecer un párrafo; el resto de una
+serie puede describirse en una oración. Alternar el comienzo y la extensión
+según el argumento evita que todos los apartados suenen a una misma ficha.
 
-## Voz y precisión
+Las gráficas que se incluyan se reutilizan de la documentación original. No se
+construyen gráficas de puntajes ni nuevas tablas. La selección editorial indica
+qué figura corresponde a cada análisis y después de qué párrafo debe aparecer.
+Las figuras con rótulos incompatibles o datos cuya interpretación no es fiable
+se omiten y se registra el motivo en la trazabilidad.
 
-Usa oraciones directas y párrafos breves, cada uno con una idea principal.
-Nombra al municipio o al ámbito estatal cuando pueda haber ambigüedad. Alterna
-la estructura de los párrafos conforme al tipo de evidencia; evita repetir
-un preámbulo idéntico en los 18 indicadores.
+## Interpretación verificable
 
-Prefiere verbos descriptivos y verificables: «reporta», «registra», «aumentó»,
-«disminuyó», «se mantuvo» o «no permite determinar». Usa «sugiere» cuando la
-relación sea una interpretación prudente. Las recomendaciones pueden comenzar
-con «Conviene revisar», «La prioridad es» o «Se requiere verificar», seguidas
-de un objeto específico.
+Conservar territorio, año, unidad y universo de cada cifra. Comparar sólo
+magnitudes equivalentes: un porcentaje de municipios no es un porcentaje de
+policías; un total estatal no mide la cobertura de un municipio. Distinguir
+variaciones en puntos porcentuales de variaciones relativas.
 
-Cada cifra debe conservar su unidad y año. Un porcentaje de municipios no
-describe el porcentaje de policías del municipio. El promedio estatal y el
-total municipal requieren una explicación de sus respectivas unidades antes
-de compararse. Cuando se citan dos extremos de una serie, se identifican los
-años de ambos valores.
+La ausencia de información no significa cero ni prueba mal desempeño. Un plan
+existente no acredita su implementación; un equipo inventariado no demuestra
+su funcionamiento; una remisión policial no equivale a un delito resuelto.
+No sumar participantes de distintos cursos como personas únicas ni inferir
+déficits por habitante sin denominadores compatibles.
 
-Los siguientes patrones ilustran la forma de redacción; los campos entre
-corchetes deben reemplazarse exclusivamente con evidencia validada:
+Una diferencia entre observaciones no demuestra una tendencia continua. Las
+rupturas abruptas de una serie exigen verificar su comparabilidad antes de
+atribuirlas a decisiones de gestión. Un porcentaje superior al total posible o
+un desglose que contradice su agregado requiere una explicación cercana al
+hallazgo. Evitar apéndices de advertencias genéricas al final del documento.
 
-> En [municipio], [indicador] pasó de [valor y unidad] en [año inicial] a
-> [valor y unidad] en [año final]. Este cambio hace pertinente revisar
-> [proceso directamente relacionado con el indicador].
+Las recomendaciones pueden proponer revisión de turnos, vigencias, atención o
+funcionamiento cuando el dato sustenta esa prioridad. No atribuir intenciones,
+causas políticas, incumplimientos legales o mejoras en la seguridad que la
+documentación no demuestra. No incorporar estándares normativos nuevos como
+si formaran parte del benchmark proporcionado.
 
-> La fuente reporta [hallazgo verificable]. Para determinar [aspecto no
-> resuelto] se requiere [dato preciso faltante]. La prioridad es completar
-> esa verificación antes de establecer una meta de cobertura.
+## Preparación editorial sin una API key
 
-## Límites de interpretación
+Un agente o una persona redacta y revisa la interpretación en
+`input/redaccion/{municipio_normalizado}.json`. La ejecución no llama a un
+servicio de IA. Conserva ese texto y comprueba su correspondencia con las
+fuentes y los criterios vigentes. Si falta el archivo o quedó desactualizado,
+se detiene antes de publicar el Word: no lo sustituye por prosa automática.
 
-Un faltante permanece como `null` en el JSON y se explica en la prosa.
-«No se reporta información» describe una limitación documental; no demuestra
-ausencia de personal, equipo, servicio o actividad. Un cero se usa únicamente
-cuando está reportado y validado como tal. La calificación PENDIENTE conserva
-esa condición hasta resolver la evidencia necesaria.
+El archivo editorial contiene:
 
-El periodo general y la ventana común de dos años consecutivos del último
-periodo se aplican según [PIPELINE.md](PIPELINE.md). Se deben distinguir los
-años efectivamente observados de los años sin información. Una variación entre
-dos observaciones no demuestra una tendencia continua en los años intermedios.
+- `version`, `municipio` y `estado`.
+- `vinculos`: nombres exactos y SHA-256 de las fuentes, del benchmark y de las
+  reglas. Al cambiar la evidencia o la metodología se requiere revisar el texto
+  antes de actualizar sus vínculos; no se deben renovar las huellas a ciegas.
+- `revision`: estado `revisada`, tipo de autor `agente_editorial` o `persona` y
+  alcance de la revisión. El primero no significa aprobación humana.
+- `hechos`: referencias a indicador, tabla, fila, columna y valor literal. La
+  fila se cuenta desde cero, incluida la cabecera; las observaciones empiezan
+  en uno. Se admiten restas y variaciones porcentuales con operandos, precisión
+  decimal y resultado declarados.
+- `bloques`: tres párrafos por resumen, los dieciocho análisis y la bibliografía.
+  Cada párrafo contiene `texto` y una lista `evidencia` con los hechos que usa.
+- `ilustraciones`: fuente, parte del documento, indicador y posición del
+  párrafo, contada desde cero. `ilustraciones_excluidas` conserva los motivos de
+  omisión, que no se imprimen como instrucciones al lector.
 
-La cantidad de cursos o registros de participantes no permite inferir personas
-únicas capacitadas. Las categorías que puedan superponerse no se suman como
-si fueran excluyentes. Una razón de cobertura requiere numerador, denominador,
-unidad y periodo compatibles; sin población suficiente, no se declara déficit
-o suficiencia por habitante.
+Los archivos editoriales municipales se mantienen fuera de Git, igual que los
+insumos y las salidas. Su contenido y su huella se incorporan al resultado para
+permitir reconstruir exactamente la interpretación usada.
 
-Las relaciones observadas no prueban causalidad. Los datos sobre recursos,
-procesos y resultados deben describirse conforme a lo que miden. La existencia
-de un plan no acredita su implementación; la adquisición de equipo no prueba
-su funcionamiento ni su cobertura. No se atribuyen causas políticas, delitos,
-intenciones o responsabilidades que las fuentes no establezcan.
+## Qué comprueba el programa y qué debe revisar el autor
 
-Las recomendaciones deben responder al hallazgo documentado. Se pueden
-proponer verificación de cobertura, seguimiento de vigencias o revisión de
-procesos cuando corresponda. No se agregan metas numéricas, estándares nuevos
-ni afirmaciones de cumplimiento legal que no formen parte de la evidencia y
-de las reglas aplicables.
+La validación comprueba identidad, nombres y huellas de las fuentes, versión del
+criterio, integridad de los bloques, coincidencia de las celdas y operaciones
+declaradas. Cada número escrito debe existir en los hechos citados o en sus
+años, o ser resultado de una operación declarada. Los conteos de cobertura y
+las etiquetas de calificación se agregan directamente desde el cálculo vigente.
 
-## Presentación y revisión
+El control numérico no demuestra por sí solo la verdad de una interpretación.
+El autor debe comprobar que cada cifra se atribuye al concepto, territorio y
+año correctos, que las comparaciones son válidas y que la consecuencia propuesta
+no excede la evidencia. El programa tampoco certifica calidad literaria.
 
-El Word conserva lenguaje para quien toma decisiones municipales. Las
-coordenadas de celdas, hashes, nombres de variables, códigos de validación y
-trazas de cálculo se consultan en el JSON y el recibo. Una limitación que afecta
-la interpretación sí debe explicarse en el texto con palabras comprensibles.
-
-La entrega usa el manual de medición y tipografía Archivo, sin resaltado
-amarillo. Antes de cerrar la revisión se comprueba que cada afirmación tenga
-respaldo en las dos fuentes, que las cifras conserven unidad y periodo, que los
-faltantes sigan visibles y que las conclusiones coincidan con el cuerpo del
-diagnóstico. La revisión editorial no modifica puntajes ni criterios.
+Antes de generar el Word se rechazan rutas, identificadores técnicos, nombres
+de archivos locales y expresiones como «borrador», «machote» o «plantilla» en el
+texto público. El documento utiliza Archivo, conserva el formato editorial de
+medición y no resalta en amarillo el contenido incorporado.

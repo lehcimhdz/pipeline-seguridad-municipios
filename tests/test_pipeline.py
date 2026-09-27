@@ -9,7 +9,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from ejecutar_pipeline import discover, publicar, SUFFIXES
-from test_word import ejemplo
+from ejemplo_estudio import ejemplo
 
 
 class PipelineTests(unittest.TestCase):
@@ -24,15 +24,23 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(name, 'Municipio')
             self.assertEqual(len(sources), 2)
             (path / 'Otro Anexo.docx').touch()
-            with self.assertRaisesRegex(ValueError, 'exactamente un archivo'):
+            with self.assertRaisesRegex(ValueError, 'Anexo'):
                 discover(path)
+
+    def test_package_is_required_but_annex_is_optional(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)
+            (path / 'Municipio PAQUETE SEGURIDAD.docx').touch()
+            municipality, documents = discover(path)
+            self.assertEqual(municipality, 'Municipio')
+            self.assertEqual(list(documents), [' PAQUETE SEGURIDAD.docx'])
 
     def test_mismatched_municipalities_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)
             (path / ('Uno' + SUFFIXES[0])).touch()
             (path / ('Dos' + SUFFIXES[1])).touch()
-            with self.assertRaisesRegex(ValueError, 'compartir un municipio'):
+            with self.assertRaisesRegex(ValueError, 'Anexo'):
                 discover(path)
 
     def test_failed_render_preserves_previous_delivery(self):
@@ -41,12 +49,12 @@ class PipelineTests(unittest.TestCase):
             (output / 'json').mkdir()
             (output / 'word').mkdir()
             old_json = output / 'json/municipio_de_prueba_diagnostico_seguridad_municipal.json'
-            old_word = output / 'word/municipio_de_prueba_seguridad_medicion_borrador.docx'
+            old_word = output / 'word/Municipio de prueba Estudio Seguridad.docx'
             old_json.write_text('Entrega anterior', encoding='utf-8')
             old_word.write_bytes(b'Entrega anterior')
             with patch('renderizar_word.renderizar', side_effect=ValueError('Revisión pendiente')):
                 with self.assertRaisesRegex(ValueError, 'Revisión pendiente'):
-                    publicar(ejemplo(), output, 'borrador')
+                    publicar(ejemplo(output), output)
             self.assertEqual(old_json.read_text(), 'Entrega anterior')
             self.assertEqual(old_word.read_bytes(), b'Entrega anterior')
             self.assertFalse(list(output.glob('.publicacion-*')))
@@ -54,7 +62,7 @@ class PipelineTests(unittest.TestCase):
     def test_publishes_one_word_one_json_and_receipt_with_stable_names(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
-            dest, report, removed = publicar(ejemplo(), output, 'borrador')
+            dest, report, removed = publicar(ejemplo(output), output)
             self.assertEqual(dest.name, 'municipio_de_prueba_diagnostico_seguridad_municipal.json')
             self.assertEqual(len(list((output / 'json').glob('*.json'))), 2)
             self.assertEqual(len(list((output / 'word').glob('*.docx'))), 1)
@@ -63,15 +71,15 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(saved['json_fuente'], str(dest))
             self.assertTrue(Path(saved['archivo']).exists())
             self.assertNotIn('.publicacion-', receipt.read_text())
-            publicar(ejemplo(), output, 'borrador')
+            publicar(ejemplo(output), output)
             self.assertEqual(len(list((output / 'word').glob('*.docx'))), 1)
 
     def test_failed_replace_restores_all_previous_artifacts(self):
-        for fail_name in ('municipio_de_prueba_seguridad_medicion_borrador_renderizado.json',
+        for fail_name in ('municipio_de_prueba_estudio_seguridad_renderizado.json',
                           'municipio_de_prueba_diagnostico_seguridad_municipal.json'):
             with self.subTest(fail_name=fail_name), tempfile.TemporaryDirectory() as directory:
                 output = Path(directory)
-                publicar(ejemplo(), output, 'borrador')
+                publicar(ejemplo(output), output)
                 before = {path: path.read_bytes() for folder in ('json', 'word')
                           for path in (output / folder).iterdir()}
                 replace = Path.replace
@@ -83,7 +91,7 @@ class PipelineTests(unittest.TestCase):
 
                 with patch.object(Path, 'replace', fail_second_or_third):
                     with self.assertRaisesRegex(OSError, 'se restauró'):
-                        publicar(ejemplo(), output, 'borrador')
+                        publicar(ejemplo(output), output)
                 for path, content in before.items():
                     self.assertEqual(path.read_bytes(), content)
                 self.assertFalse(list(output.glob('.publicacion-*')))

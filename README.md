@@ -1,78 +1,69 @@
-# Pipeline de seguridad municipal · v2.1
+# Estudio de seguridad municipal · v2.2
 
-El pipeline transforma dos fuentes municipales en un diagnóstico de SEGURIDAD,
-con análisis consultivo, tablas de evidencia y gráficas de los puntajes
-calculables. Publica un solo Word, acompañado de su JSON fuente y un recibo de
-renderizado.
+El pipeline llena el capítulo SEGURIDAD del formato de la consultora con una interpretación escrita de las estadísticas municipales. Produce un único documento: **`{municipio} Estudio Seguridad.docx`**. La redacción relaciona los hallazgos con sus implicaciones y recomendaciones; las calificaciones se sustentan en el benchmark del proyecto.
 
-Coloca en `input/word/` exactamente un archivo de cada tipo, con el mismo
-prefijo municipal:
+Los tres documentos de referencia tienen funciones distintas:
 
-```text
-{municipio} PAQUETE SEGURIDAD.docx
-{municipio} Anexo.docx
-```
+| Documento en `templates/` | Función |
+| --- | --- |
+| `Machote general medicion version final.docx` | Formato de la consultora y orden del estudio final. |
+| `Machote general medicion version final rzg investigación.docx` | Guía para interpretar los apartados y definir las variables. |
+| `Machote_seguridad_general_con_calificacion.docx` | Benchmark de evaluación: 18 fichas, 90 criterios, escala y candados. |
 
-PAQUETE SEGURIDAD aporta la evidencia principal; Anexo confirma identidad y
-permite contrastar esa evidencia. Ambos archivos son entradas. La ejecución
-utiliza exclusivamente esos dos documentos y no necesita API keys.
+La base operativa [seguridad_medicion.docx](templates/seguridad_medicion.docx) se deriva de esos documentos y tiene **25 variables de texto**. Los tres originales permanecen intactos. No se entrega al cliente el documento interno con fichas, instrucciones y alternativas de redacción.
+
+## Preparar un municipio
+
+En `input/word/` se requiere `{municipio} PAQUETE SEGURIDAD.docx`. Puede acompañarse de `{municipio} Anexo.docx`, que permite contrastar información e incorporar sus gráficas originales cuando esté disponible. El municipio debe coincidir en ambos nombres.
 
 ```sh
 python3 -m pip install -r requirements.txt
 python3 scripts/validar_plantilla.py
-python3 scripts/ejecutar_pipeline.py
+python3 scripts/ejecutar_pipeline.py --preparar --estado "Nombre del estado"
 ```
 
-La única base de salida es
-[seguridad_medicion.docx](templates/seguridad_medicion.docx), derivada del capítulo
-SEGURIDAD de `templates/Machote general medicion version final.docx`. El original
-se conserva intacto. Si se actualiza, regenera y valida la base antes de ejecutar:
+`--preparar` genera `output/json/{slug}_evidencia_seguridad.json` con estadísticas, calificaciones y un catálogo de gráficas existentes. El estado debe quedar identificado por la documentación o declararse expresamente cuando falte el Anexo.
+
+Un agente editorial o una persona redacta y revisa `input/redaccion/{slug}.json`. Este archivo contiene los dos resúmenes, los 18 análisis, la bibliografía y la selección de ilustraciones. Cada párrafo remite a hechos verificables; las fuentes y el benchmark quedan vinculados por sus huellas. No se necesita una API key. Un nuevo municipio o una fuente modificada requiere una nueva interpretación revisada.
 
 ```sh
-python3 scripts/migrar_machotes_v2.py
-python3 scripts/validar_plantilla.py
+python3 scripts/ejecutar_pipeline.py --estado "Nombre del estado"
 ```
 
-El [contrato documental](config/contrato_documental.json) vincula la base,
-el [diccionario](diccionario_datos_diagnostico_seguridad_municipal.json), las
-[reglas](reglas_calificacion.json), el [formato](config/formato_editorial.json)
-y la [configuración de redacción](config/redaccion_consultoria.json).
-La base tiene 81 variables únicas y 81 apariciones. Se conservan los 18
-indicadores, 90 criterios y candados históricos. Un dato
-faltante permanece como `null`; una calificación incompleta queda PENDIENTE.
-El último periodo comprende una ventana común de dos años consecutivos al
-cierre documental. Los vacíos no se rellenan con observaciones de otros años.
+Opciones principales:
 
-Las salidas tienen nombres estables; `{municipio}` usa minúsculas, sin acentos
-y con guiones bajos:
+- `--input` y `--output`: carpetas de entradas y salidas.
+- `--redaccion`: ubicación alternativa de la interpretación editorial.
+- `--calificacion evaluables|completo`: valoración con cobertura declarada o evaluación estricta de los 18 indicadores.
+- `--graficas originales|ninguna`: reutilizar las ilustraciones seleccionadas de los documentos fuente o entregar sólo texto.
+
+Los valores predeterminados son `evaluables` y `originales`. Las gráficas se importan sin redibujarlas; no se agregan tablas ni se construyen nuevas gráficas. Una selección editorial omite imágenes incoherentes con las tablas o innecesarias para la explicación.
+
+## Evaluación y presentación
+
+La [metodología](METODOLOGIA.md) distingue las dos ediciones censales recientes para los indicadores 1–16 de los dos años recientes para 17–18. Los datos desconocidos conservan `null`.
+
+El modo `evaluables` es una adaptación explícita del benchmark: requiere al menos 2/3 de los indicadores de cada dimensión, conserva el mismo peso para las tres dimensiones y declara la cobertura en el estudio. No equivale a una evaluación completa. El modo `completo` exige los 18 puntajes y bloquea la publicación del Word final si falta alguno. Para conservar y revisar la evidencia con calificaciones pendientes, utiliza `--preparar --calificacion completo`.
+
+La entrega usa Archivo, el logo de la consultora, el formato editorial solicitado y ningún resaltado amarillo. Los títulos de 24 pt tienen interlineado mínimo de 14 pt para evitar recortes. Las gráficas originales conservan los textos y tipografías incrustados en sus imágenes; cambiarlos exigiría redibujarlas. El documento visible no contiene instrucciones, nombres de archivos internos ni referencias a una versión de trabajo.
+
+## Salidas y mantenimiento
 
 ```text
-output/json/{municipio}_diagnostico_seguridad_municipal.json
-output/word/{municipio}_seguridad_medicion_{modo}.docx
-output/json/{municipio}_seguridad_medicion_{modo}_renderizado.json
+output/word/{municipio} Estudio Seguridad.docx
+output/json/{slug}_diagnostico_seguridad_municipal.json
+output/json/{slug}_estudio_seguridad_renderizado.json
 ```
 
-Una corrida exitosa conserva esos tres archivos y limpia las salidas anteriores.
-El modo predeterminado es `borrador`. Para volver a generar el Word a partir del
-JSON vigente:
+`{municipio}` conserva su nombre legible; `{slug}` usa minúsculas, sin acentos y con guiones bajos. Una generación exitosa publica esos tres artefactos y limpia las salidas anteriores. Si falla la preparación o la sustitución, se conserva o restaura la entrega previa. Entradas, redacción municipal y salidas se excluyen de Git.
+
+Si cambian los documentos de referencia, revisar sus modificaciones y regenerar en este orden:
 
 ```sh
-python3 scripts/renderizar_word.py output/json/{municipio}_diagnostico_seguridad_municipal.json --modo borrador
-```
-
-`--modo final` exige revisión concluida y cálculos completos y coherentes.
-`--word ninguno` en el pipeline produce sólo el JSON y limpia los Word y recibos
-anteriores. Las carpetas de salida están reservadas para artefactos del pipeline.
-
-El formato sigue el manual de medición: tipografía Archivo incrustada, jerarquía
-editorial y tablas legibles. El documento se entrega sin resaltado amarillo.
-La prosa sigue [ESTILO_REDACCION.md](ESTILO_REDACCION.md): presenta hallazgos,
-evidencia, implicaciones y prioridades, conservando la trazabilidad en el JSON.
-
-Consulta [PIPELINE.md](PIPELINE.md) para el contrato, los periodos, la revisión
-y la política de publicación. El [diagrama editable](flujo_pipeline.drawio)
-describe la ejecución y el mantenimiento de la base documental.
-
-```sh
+python3 scripts/estructurar_reglas.py
+python3 scripts/migrar_machotes_v2.py
+python3 scripts/validar_plantilla.py
 python3 -m unittest discover -s tests -v
 ```
+
+La documentación detallada está en [PIPELINE.md](PIPELINE.md), [METODOLOGIA.md](METODOLOGIA.md) y [ESTILO_REDACCION.md](ESTILO_REDACCION.md). El [diagrama editable](flujo_pipeline.drawio) describe el flujo y sus controles.

@@ -1,6 +1,6 @@
 {
-  "version": "2.1",
-  "perfil": "diagnostico_consultivo",
+  "version": "2.2",
+  "perfil": "estudio_seguridad",
   "idioma": "es-MX",
   "tono": "Directo, sustantivo y orientado a decisiones de gestión municipal.",
   "referencia_estilistica": "Muestra Estudio Seguridad: exclusivamente tono y organización argumental; nunca evidencia del municipio analizado.",
@@ -12,7 +12,11 @@
     "No equiparar existencia municipal con porcentaje estatal ni comparar conteos territoriales como tasas de cobertura.",
     "Explicar los límites pertinentes junto al hallazgo, sin repetir una advertencia genérica al cerrar los dieciocho indicadores.",
     "Reservar códigos, archivos, rutas, huellas y coordenadas para la trazabilidad técnica.",
-    "Usar únicamente el Paquete Seguridad y el Anexo del municipio como evidencia; la muestra sólo orienta la escritura."
+    "Interpretar el Paquete Seguridad y contrastar el Anexo cuando esté disponible; la muestra sólo orienta la escritura.",
+    "Escribir cada apartado como un argumento propio: elegir las cifras pertinentes, explicar su relación y proponer decisiones ligadas a ese hallazgo.",
+    "Redactar los dos resúmenes en tres párrafos cada uno. Sintetizar prioridades; no concatenar las frases de los dieciocho apartados.",
+    "Conservar la prosa editorial revisada y sus referencias de evidencia. Ante fuentes o criterios nuevos, exigir una nueva interpretación; nunca sustituirla por frases automáticas.",
+    "Presentar el estudio como documento final, sin avisos de trabajo ni instrucciones para llenar documentos."
   ],
   "patrones_no_publicables": {
     "referencia_informatica": "\\b(?:json|pipeline|sha[ -]?256|checksum|docx|snake_case|None|null)\\b",
@@ -23,7 +27,8 @@
     "jerga_de_implementacion": "(?:criterios? internos?|criterio aplicado|celda vac[ií]a|campos? (?:del|de la) (?:documento|tabla)|puntajes calculados|hoja de c[oó]mputo)",
     "autorreferencia_ia": "(?:como (?:modelo|asistente) de (?:ia|inteligencia artificial)|asistid[ao] por ia)",
     "huella_digital": "\\b[0-9a-f]{64}\\b",
-    "marcador_editorial": "(?:\\{[a-zA-Z_][^}]*\\}|\\[INSERTAR)"
+    "marcador_editorial": "(?:\\{[a-zA-Z_][^}]*\\}|\\[INSERTAR)",
+    "documento_de_trabajo": "\\b(?:borrador(?:es)?|machote(?:s)?|plantilla(?:s)?)\\b|versi[oó]n (?:de trabajo|sujeta a revisi[oó]n)|para revisi[oó]n editorial"
   },
   "control": "Validar los textos públicos antes de guardar el resultado y antes de generar Word, preservando evidencia y bitácora técnicas.",
   "sin_reescritura_automatica_de_fuentes": true

@@ -61,7 +61,7 @@ def validar_publicacion(result):
         else:
             check(value, key)
     content = result.get('contenido_word', {})
-    for key in ('titulo', 'aviso_borrador', 'periodo'):
+    for key in ('titulo', 'periodo'):
         check(content.get(key), f'contenido_word.{key}')
     for note in content.get('notas_alcance', []):
         check(note, 'notas_alcance')
@@ -69,54 +69,3 @@ def validar_publicacion(result):
         check(value, key)
     return {'perfil_redaccion': config['perfil'], 'version_redaccion': config['version'],
             'textos_publicables_verificados': count, 'referencias_tecnicas_en_textos': 0}
-
-
-def titulo_tabla(table):
-    scope = 'municipal' if table.get('ambito') == 'municipal' else 'estatal'
-    return f"Información {scope}. Cuadro {table.get('tabla', table.get('tabla_fuente', ''))} del Paquete Seguridad."
-
-
-def fuente_grafica(section):
-    missing = [PERIODOS[p].lower() for p in PERIODOS
-               if section['evaluaciones'][p]['puntaje'] is None]
-    text = 'Fuente: elaboración propia con el Paquete Seguridad y su Anexo. Escala de 1 a 5.'
-    if missing:
-        text += ' La valoración de ' + enumerar(missing) + ' permanece pendiente y no se representa como cero.'
-    return text
-
-
-def texto_pendiente(key):
-    if key.startswith('calificacion_'):
-        return 'Pendiente'
-    return 'La información disponible aún no permite completar la valoración de este apartado.'
-
-
-def bibliografia_documental(result):
-    """Sólo las dos fuentes autorizadas; sus huellas permanecen en result.fuentes."""
-    municipality = result['municipio']
-    titles = {' paquete seguridad.docx': 'Paquete Seguridad', ' anexo.docx': 'Anexo de medición municipal'}
-    refs = []
-    for source in result.get('fuentes', []):
-        filename = Path(source.get('archivo', '')).name.casefold()
-        title = next((label for suffix, label in titles.items() if filename.endswith(suffix)), None)
-        if title:
-            refs.append(f'{title} de {municipality}. Documentación proporcionada para esta medición.')
-    return list(dict.fromkeys(refs)) or [
-        f'Paquete Seguridad y Anexo de medición municipal de {municipality}. Documentación de referencia de esta medición.'
-    ]
-
-
-def notas_alcance(result):
-    codes = {item['codigo'] for item in result.get('validaciones', [])}
-    notes = []
-    if 'COBERTURA_EDICIONES' in codes:
-        notes.append('Los años identifican las observaciones de los documentos proporcionados; la cobertura temporal varía entre indicadores.')
-    if 'DIFERENCIA_ANEXO' in codes:
-        notes.append('Las diferencias entre el Paquete Seguridad y el Anexo requieren conciliación antes de cerrar la medición.')
-    if 'IDENTIDAD_NO_CONFIRMADA' in codes:
-        notes.append('La identificación del municipio y del estado requiere confirmación documental.')
-    if 'INDICADOR_PENDIENTE' in codes:
-        notes.append('Las valoraciones pendientes se conservarán sin calificación hasta disponer de información suficiente; no se interpretan como desempeño desfavorable.')
-    if codes:
-        notes.append('Versión sujeta a revisión de los hallazgos, las comparaciones y las prioridades propuestas.')
-    return notes

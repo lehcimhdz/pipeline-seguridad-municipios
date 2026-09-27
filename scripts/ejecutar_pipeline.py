@@ -10,7 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
-from documentos import leer_docx, registros, seccion_seguridad, sha256
+from documentos import leer_docx, seccion_seguridad, sha256
+from ilustraciones_word import catalogar_graficas, seleccionar_graficas
 from calificar import agregar, calificar_indicador, dependencias, definir_periodos
 from componer_documento import componer
 from salidas import limpiar_salidas
@@ -27,28 +28,31 @@ def slug(value):
 
 
 def discover(input_dir):
-    documents = {}
-    prefixes = set()
-    for suffix in SUFFIXES:
-        matches = sorted(p for p in input_dir.glob('*' + suffix) if not p.name.startswith('~$'))
-        if len(matches) != 1:
-            raise ValueError(f'Se requiere exactamente un archivo con sufijo {suffix!r}; encontrados: {len(matches)}')
-        documents[suffix] = matches[0]
-        prefixes.add(matches[0].name[:-len(suffix)])
-    if len(prefixes) != 1 or not next(iter(prefixes)).strip():
-        raise ValueError('Las dos entradas deben compartir un municipio.')
-    return prefixes.pop(), documents
+    packages = sorted(p for p in input_dir.glob('* PAQUETE SEGURIDAD.docx') if not p.name.startswith('~$'))
+    if len(packages) != 1:
+        raise ValueError('Se requiere exactamente un PAQUETE SEGURIDAD del municipio.')
+    package = packages[0]
+    municipality = package.name.removesuffix(SUFFIXES[1]).strip()
+    if not municipality:
+        raise ValueError('El archivo debe identificar el municipio.')
+    documents = {SUFFIXES[1]: package}
+    annexes = sorted(p for p in input_dir.glob('* Anexo.docx') if not p.name.startswith('~$'))
+    if annexes:
+        if len(annexes) != 1 or annexes[0].name != municipality + SUFFIXES[0]:
+            raise ValueError('El Anexo debe corresponder al municipio del Paquete Seguridad.')
+        documents[SUFFIXES[0]] = annexes[0]
+    return municipality, documents
 
 
-def publicar(result, output, mode):
+def publicar(result, output, mode='final'):
     """Validar toda la entrega antes de sustituir los archivos publicados."""
     from renderizar_word import renderizar, guardar_recibo
     directory = output / 'json'
     word_directory = output / 'word'
     name = slug(result['municipio'])
     dest = directory / f'{name}_diagnostico_seguridad_municipal.json'
-    word = word_directory / f'{name}_seguridad_medicion_{mode}.docx'
-    receipt = directory / f'{word.stem}_renderizado.json'
+    word = word_directory / f'{result["municipio"]} Estudio Seguridad.docx'
+    receipt = directory / f'{name}_estudio_seguridad_renderizado.json'
     result['salida_word'] = {
         'modo_solicitado': mode,
         'recibos_renderizado': {'medicion': str(receipt)} if mode != 'ninguno' else {},
@@ -102,104 +106,114 @@ def publicar(result, output, mode):
     return dest, report, removed
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Diagnóstico de SEGURIDAD con el paquete y su anexo; un documento de medición.')
-    parser.add_argument('--input', type=Path, default=ROOT / 'input/word')
-    parser.add_argument('--output', type=Path, default=ROOT / 'output')
-    parser.add_argument('--word', choices=('borrador', 'final', 'ninguno'), default='borrador',
-                        help='Genera Word de revisión por defecto; final exige un JSON validado.')
-    args = parser.parse_args()
-    try:
-        municipality, documents = discover(args.input)
-        contract_hashes = huellas()
-    except (OSError, ValueError) as error:
-        parser.error(str(error))
-    run = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8]
+def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='evaluables'):
+    municipality, documents = discover(input_dir)
+    contract_hashes = huellas()
     evidence = {suffix: leer_docx(path) for suffix, path in documents.items()}
     sections = seccion_seguridad(evidence[SUFFIXES[1]])
-    annex_sections = seccion_seguridad(evidence[SUFFIXES[0]])
-    rules_path = ROOT / 'reglas_calificacion.json'
-    rules = json.loads(rules_path.read_text(encoding='utf-8'))
+    annex_sections = seccion_seguridad(evidence[SUFFIXES[0]]) if SUFFIXES[0] in evidence else None
+    rules = json.loads((ROOT / 'reglas_calificacion.json').read_text(encoding='utf-8'))
     mappings_path = ROOT / 'config/normalizaciones.json'
     mappings = json.loads(mappings_path.read_text(encoding='utf-8'))
-    template = ROOT / rules['fuente']['archivo']
-    if sha256(template) != rules['fuente']['sha256']:
-        raise ValueError('La metodología cambió: revisar y regenerar reglas_calificacion.json.')
-    dictionary_path = ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json'
-    dictionary = json.loads(dictionary_path.read_text(encoding='utf-8'))
-    title = next((block for block in evidence[SUFFIXES[0]]
+    dictionary = json.loads((ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json').read_text(encoding='utf-8'))
+    title = next((block for block in evidence.get(SUFFIXES[0], [])
                   if block['tipo'] == 'parrafo' and 'Medición del municipio' in block['texto']), None)
     identity = re.search(r'municipio de\s+(.+?),\s+([^,\n]+)', title['texto']) if title else None
-    validations = []
-    state = None
-    if identity and identity[1].strip().casefold() == municipality.casefold():
-        state = identity[2].strip()
-    else:
-        validations.append({'codigo': 'IDENTIDAD_NO_CONFIRMADA', 'nivel': 'bloqueante'})
-    evaluations = {}
+    if identity and identity[1].strip().casefold() != municipality.casefold():
+        raise ValueError('La identidad del Anexo no corresponde al municipio.')
+    documented_state = identity[2].strip() if identity else None
+    declared_state = estado or (redaccion or {}).get('estado')
+    if documented_state and declared_state and documented_state.casefold() != declared_state.casefold():
+        raise ValueError('La entidad declarada difiere del Anexo.')
+    state = documented_state or declared_state
     periods = definir_periodos(sections)
+    evaluations = {}
     for period in ('general', 'ultimo_periodo'):
-        target_years = periods[period]['años_objetivo'] if period == 'ultimo_periodo' else None
-        calculations = {section['numero']: calificar_indicador(section, ficha, period, mappings, años_objetivo=target_years)
-                        for section, ficha in zip(sections, rules['fichas'])}
+        calculations = {}
+        for section, ficha in zip(sections, rules['fichas']):
+            target = periods['ultimo_periodo']['por_indicador'][str(section['numero'])] if period == 'ultimo_periodo' else None
+            calculations[section['numero']] = calificar_indicador(
+                section, ficha, period, mappings, años_objetivo=target)
         dependencias(calculations)
         evaluations[period] = calculations
-    for section, annex in zip(sections, annex_sections):
+    validations = []
+    for section in sections:
         number = section['numero']
         section['evaluaciones'] = {period: values[number] for period, values in evaluations.items()}
-        raw = lambda item: [(t['ambito'], t['filas']) for t in item['tablas']]
-        section['control_cruzado_anexo'] = {
-            'tablas_identicas': raw(section) == raw(annex),
-            'calificacion_reportada_coincide': section['calificacion_general_reportada'] == annex['calificacion_general_reportada'],
-            'tablas_anexo': [t['tabla'] for t in annex['tablas']],
-        }
-        if not all(section['control_cruzado_anexo'][key] for key in ('tablas_identicas', 'calificacion_reportada_coincide')):
-            validations.append({'nivel': 'revision', 'codigo': 'DIFERENCIA_ANEXO', 'indicador': number,
-                                'detalle': 'Diferencia documental detectada; revisar si es sustantiva o de formato.'})
+        if annex_sections:
+            annex = annex_sections[number - 1]
+            raw = lambda item: [(t['ambito'], t['filas']) for t in item['tablas']]
+            section['control_cruzado_anexo'] = {
+                'tablas_identicas': raw(section) == raw(annex),
+                'calificacion_reportada_coincide': section['calificacion_general_reportada'] == annex['calificacion_general_reportada']}
+            if not all(section['control_cruzado_anexo'].values()):
+                validations.append({'nivel': 'revision', 'codigo': 'DIFERENCIA_ANEXO', 'indicador': number})
         for period, calculation in section['evaluaciones'].items():
             if calculation['puntaje'] is None:
-                validations.append({'nivel': 'bloqueante', 'codigo': 'INDICADOR_PENDIENTE',
+                validations.append({'nivel': 'alcance', 'codigo': 'INDICADOR_NO_EVALUABLE',
                                     'indicador': number, 'periodo': period, 'detalle': calculation['motivo']})
-    years = sorted({row['año'] for section in sections for table in section['tablas']
-                    if table['ambito'] == 'municipal' for row in registros(table)})
-    values = {key: None for key in dictionary['variables_documento']}
-    values.update(municipio=municipality, estado=state)
-    if years:
-        values.update({'año_inicial': years[0], 'año_final': years[-1]})
-    if periods['ultimo_periodo']['años_objetivo']:
-        values.update({'año_ultimo_periodo_inicial': periods['ultimo_periodo']['año_inicial'],
-                       'año_ultimo_periodo_final': periods['ultimo_periodo']['año_final']})
-    validations.append({'nivel': 'revision', 'codigo': 'COBERTURA_EDICIONES',
-                        'detalle': 'Confirmar el año de referencia de las tablas. El último periodo exige los mismos dos años calendario consecutivos en los 18 indicadores.'})
-    aggregates = {period: agregar(results, rules) for period, results in evaluations.items()}
+    aggregates = {period: agregar(values, rules, modo=modo_calificacion)
+                  for period, values in evaluations.items()}
+    catalogue = [image for path in documents.values() for image in catalogar_graficas(path)]
     result = {
-        'version': '2.1', 'ejecucion_id': run, 'municipio': municipality, 'estado': state,
-        'estado_ejecucion': 'requiere_revision',
+        'version': '2.2', 'ejecucion_id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8],
+        'municipio': municipality, 'estado': state, 'estado_ejecucion': 'requiere_redaccion',
         'contrato': {**contract_hashes, 'normalizaciones_sha256': sha256(mappings_path)},
         'fuentes': [{'archivo': path.name, 'sha256': sha256(path),
-                     'rol': 'primaria' if suffix == SUFFIXES[1] else 'control_cruzado'}
+                     'rol': 'primaria' if suffix == SUFFIXES[1] else 'contraste_opcional'}
                     for suffix, path in documents.items()],
-        'identidad_evidencia': title, 'valores_plantilla': values,
+        'rutas_fuentes': {path.name: str(path.resolve()) for path in documents.values()},
+        'identidad_evidencia': title or {'tipo': 'declaracion_editorial', 'estado': state},
+        'valores_plantilla': {key: None for key in dictionary['variables_documento']},
         'indicadores': sections, 'calculos': aggregates, 'periodos_evaluacion': periods,
+        'metodo_calificacion': modo_calificacion, 'catalogo_ilustraciones': catalogue,
         'evidencia_documental': {documents[suffix].name: blocks for suffix, blocks in evidence.items()},
-        'validaciones': validations,
-    }
+        'validaciones': validations}
+    return result, dictionary, rules
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Estudio de seguridad: evidencia, benchmark e interpretación editorial.')
+    parser.add_argument('--input', type=Path, default=ROOT / 'input/word')
+    parser.add_argument('--output', type=Path, default=ROOT / 'output')
+    parser.add_argument('--redaccion', type=Path, help='Interpretación editorial del municipio vinculada a las fuentes.')
+    parser.add_argument('--estado', help='Entidad federativa cuando el Anexo no esté disponible.')
+    parser.add_argument('--preparar', action='store_true', help='Prepara evidencia y calificaciones para que el agente redacte el estudio.')
+    parser.add_argument('--calificacion', choices=('evaluables', 'completo'), default='evaluables')
+    parser.add_argument('--graficas', choices=('originales', 'ninguna'), default='originales')
+    args = parser.parse_args()
     try:
-        componer(result, dictionary, rules)
-    except ValueError as error:
-        parser.error(f'No se publicaron resultados: {error}')
-    try:
-        dest, report, removidos = publicar(result, args.output, args.word)
-    except (ValueError, OSError) as error:
-        parser.error(f'No se completó la publicación: {error}')
+        municipality, _ = discover(args.input)
+        writing_path = args.redaccion or ROOT / 'input/redaccion' / f'{slug(municipality)}.json'
+        writing = json.loads(writing_path.read_text(encoding='utf-8')) if writing_path.is_file() else None
+        result, dictionary, rules = preparar(args.input, writing, args.estado, args.calificacion)
+        if args.preparar:
+            directory = args.output / 'json'
+            directory.mkdir(parents=True, exist_ok=True)
+            dest = directory / f'{slug(municipality)}_evidencia_seguridad.json'
+            from renderizar_word import guardar_recibo
+            guardar_recibo(result, dest)
+            print(f'Evidencia para interpretación editorial: {dest}')
+            return
+        if writing is None:
+            raise ValueError(f'Falta la interpretación editorial: {writing_path}. Use --preparar para revisar la evidencia y redactar sus apartados.')
+        if not result['estado']:
+            raise ValueError('Falta confirmar la entidad federativa en la interpretación editorial.')
+        componer(result, dictionary, rules, redaccion=writing)
+        choices = writing.get('ilustraciones', []) if args.graficas == 'originales' else []
+        result['contenido_word']['ilustraciones'] = seleccionar_graficas(result['catalogo_ilustraciones'], choices)
+        result['contenido_word']['politica_ilustraciones'] = args.graficas
+        result['contenido_word']['ilustraciones_excluidas'] = writing.get('ilustraciones_excluidas', [])
+        result['redaccion_editorial'] = {'archivo': str(writing_path), 'sha256': sha256(writing_path)}
+        result['estado_ejecucion'] = 'compuesto'
+        dest, report, removed = publicar(result, args.output)
+    except (ValueError, KeyError, OSError) as error:
+        parser.error(str(error))
     print(f'JSON: {dest}')
-    for period, results in evaluations.items():
-        print(f'{period}: {sum(value["puntaje"] is not None for value in results.values())}/18 indicadores calculados.')
-    print('Estado: requiere_revision. Los motivos específicos constan en validaciones.')
-    if report:
-        print(f"Word (medicion, {args.word}): {report['archivo']}")
-        print(f"Formato y redacción verificados: {report['segmentos_json']} segmentos.")
-    print(f"Limpieza de salidas: {removidos['json']} JSON y {removidos['word']} Word anteriores eliminados.")
+    print(f'Word: {report["archivo"]}')
+    for period, calculation in result['calculos'].items():
+        print(f'{period}: {calculation["calificacion_final"]}; alcance {calculation.get("alcance", "completo")}.')
+    print(f'Limpieza de salidas anteriores: {removed}.')
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-"""Control del contenido público, sus fuentes y la separación de trazabilidad."""
+"""Impide publicar textos desactualizados, cifras inventadas o detalles internos."""
 from copy import deepcopy
 from pathlib import Path
 import sys
@@ -7,118 +7,135 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from componer_documento import componer
+from redaccion_editorial import BLOQUES, cargar_redaccion, validar_redaccion
 from redaccion_consultoria import comprobar_texto, validar_publicacion
 
 
-def ejemplo_consultivo():
-    keys = ['municipio', 'estado', 'calificacion_general', 'calificacion_ultimo_periodo',
-            'resumen_general', 'resumen_ultimo_periodo', 'introduccion_seguridad', 'conclusiones_seguridad', 'bibliografia']
-    keys += [f'{kind}_indicador_{number:02d}' for number in range(1, 19)
-             for kind in ('analisis', 'tablas', 'graficas', 'cierre')]
-    dictionary = {'variables_documento': {key: {'apariciones_por_documento': {'medicion': 1}} for key in keys}}
-    sections = []
+def ejemplo_editorial():
+    sources = [{'archivo': 'Municipio Prueba PAQUETE SEGURIDAD.docx', 'sha256': 'a' * 64}]
+    contract = {'benchmark_sha256': 'b' * 64, 'reglas_sha256': 'c' * 64}
+    sections, facts, blocks = [], {}, {}
     for number in range(1, 19):
-        evaluation = {'puntaje': None, 'años_evaluados': [2023, 2024], 'años_faltantes': [2023],
-                      'motivo': 'MOTIVO_INTERNO'}
-        section = {'numero': number, 'nombre': f'Indicador {number}',
-                   'evaluaciones': {period: deepcopy(evaluation) for period in ('general', 'ultimo_periodo')},
-                   'tablas': [{'tabla': number, 'ambito': 'municipal',
-                               'filas': [['Año', 'Total'], ['2022', '100'], ['2024', '120']]}]}
-        sections.append(section)
-    rules = {'dimensiones': {'proteccion_civil': [1, 2, 3], 'condiciones_del_personal': list(range(4, 11)),
-                             'inteligencia_y_eficiencia_policial': list(range(11, 19))}}
-    result = {'municipio': 'Apodaca', 'estado': 'Nuevo León',
-              'valores_plantilla': {'municipio': 'Apodaca', 'estado': 'Nuevo León',
-                                   'año_inicial': 2022, 'año_final': 2024,
-                                   'tabla_calificaciones': [], 'tablas_municipales_indicador_01': []},
-              'fuentes': [{'archivo': 'Apodaca PAQUETE SEGURIDAD.docx', 'sha256': 'a' * 64},
-                          {'archivo': 'Apodaca Anexo.docx', 'sha256': 'b' * 64}],
-              'indicadores': sections,
-              'calculos': {p: {'calificacion_final': None, 'promedio_tres_dimensiones': None}
-                           for p in ('general', 'ultimo_periodo')},
-              'validaciones': [{'codigo': 'INDICADOR_PENDIENTE', 'nivel': 'bloqueante', 'detalle': 'MOTIVO_INTERNO'}]}
-    return result, dictionary, rules
+        sections.append({'numero': number, 'nombre': 'Indicador', 'tablas': [
+            {'tabla': number, 'ambito': 'municipal', 'filas': [['Año', 'Total'], ['2022', '100'], ['2024', '120']]}],
+            'evaluaciones': {period: {'puntaje': 3 if number <= 14 else None}
+                            for period in ('general', 'ultimo_periodo')}})
+        facts[f'h{number}'] = {'indicador': number, 'tabla': number, 'fila': 2, 'columna': 'Total', 'valor': '120'}
+        blocks[f'analisis_indicador_{number:02d}'] = [
+            {'texto': 'En 2024 se registraron 120 unidades. La distribución requiere revisión por turno.',
+             'evidencia': [f'h{number}']}]
+    for key in ('resumen_general', 'resumen_ultimo_periodo'):
+        blocks[key] = [
+            {'texto': 'La operación municipal dispone de 120 unidades en 2024.', 'evidencia': ['h1']},
+            {'texto': 'El inventario permite examinar la distribución de recursos.', 'evidencia': ['h2']},
+            {'texto': 'La prioridad es verificar su funcionamiento y asignación.', 'evidencia': ['h3']}]
+    blocks['bibliografia'] = [{'texto': 'Información estadística municipal proporcionada para este estudio.', 'evidencia': []}]
+    artifact = {'version': '2.2', 'municipio': 'Municipio Prueba', 'estado': 'Entidad Prueba',
+                'vinculos': {**contract, 'fuentes': deepcopy(sources)},
+                'revision': {'estado': 'revisada', 'tipo_autor': 'agente_editorial'},
+                'hechos': facts, 'bloques': blocks, 'ilustraciones': []}
+    result = {'municipio': artifact['municipio'], 'estado': artifact['estado'], 'fuentes': sources,
+              'contrato': contract, 'indicadores': sections, 'validaciones': [],
+              'periodos_evaluacion': {'general': {'años_objetivo': [2022, 2024]}},
+              'calculos': {period: {'calificacion_final': 'REGULAR', 'promedio_tres_dimensiones': '3.00'}
+                           for period in ('general', 'ultimo_periodo')}}
+    dictionary = {'variables_documento': {key: {} for key in BLOQUES | {
+        'municipio', 'estado', 'calificacion_general', 'calificacion_ultimo_periodo'}}}
+    rules = {'dimensiones': {'proteccion_civil': [1, 2, 3], 'personal': list(range(4, 11)),
+                            'inteligencia': list(range(11, 19))}}
+    return result, artifact, dictionary, rules
 
 
 class RedaccionTests(unittest.TestCase):
-    def test_compone_solo_medicion_y_preserva_pendientes_y_evidencia(self):
-        result, dictionary, rules = ejemplo_consultivo()
+    def test_compone_solo_texto_revisado_y_conserva_evidencia(self):
+        result, artifact, dictionary, rules = ejemplo_editorial()
         original = deepcopy(result['indicadores'])
-        componer(result, dictionary, rules)
-        self.assertEqual(result['version'], '2.1')
-        self.assertEqual(result['contenido_word']['perfil'], 'seguridad_medicion_v2')
-        self.assertIn('2022–2024', result['contenido_word']['periodo'])
-        self.assertIn('(2022–2024)', result['contenido_word']['titulo'])
-        self.assertNotIn('ultimo_periodo', result['contenido_word']['periodo'])
+        componer(result, dictionary, rules, artifact)
+        self.assertEqual(result['version'], '2.2')
+        self.assertEqual(result['contenido_word']['perfil'], 'estudio_seguridad')
         self.assertEqual(set(result['valores_plantilla']), set(dictionary['variables_documento']))
-        self.assertEqual(len(result['valores_plantilla']), 81)
+        self.assertEqual(len(result['valores_plantilla']), 25)
+        self.assertTrue(all(isinstance(value, str) for value in result['valores_plantilla'].values()))
         self.assertEqual(result['indicadores'], original)
-        self.assertEqual(result['valores_plantilla']['graficas_indicador_04'], [])
-        self.assertEqual(result['valores_plantilla']['calificacion_general'], 'PENDIENTE')
-        self.assertEqual(len({result['valores_plantilla'][f'cierre_indicador_{i:02d}'] for i in range(1, 19)}), 18)
-        self.assertIn('Apodaca', result['valores_plantilla']['introduccion_seguridad'])
-        self.assertIn('2023', result['valores_plantilla']['resumen_ultimo_periodo'])
-        self.assertIn('prioridad', result['valores_plantilla']['conclusiones_seguridad'])
-        self.assertNotIn('Juárez', str(result['valores_plantilla']))
-        self.assertNotIn('MOTIVO_INTERNO', str(result['valores_plantilla']))
-        self.assertEqual(result['fuentes'][0]['sha256'], 'a' * 64)
-        self.assertEqual(result['contenido_word']['control_redaccion']['perfil_redaccion'], 'diagnostico_consultivo')
+        self.assertIn('14 de los 18', result['valores_plantilla']['resumen_general'])
+        self.assertNotIn('aviso_borrador', result['contenido_word'])
+        self.assertEqual(result['valores_plantilla']['analisis_indicador_01'], artifact['bloques']['analisis_indicador_01'][0]['texto'])
 
-    def test_recomponer_es_estable_y_no_pierde_periodo(self):
-        result, dictionary, rules = ejemplo_consultivo()
-        componer(result, dictionary, rules)
+    def test_no_hay_prosa_alternativa_si_falta_la_revision(self):
+        with self.assertRaisesRegex(ValueError, 'Falta la interpretación'):
+            cargar_redaccion(ROOT / 'input/redaccion/no_existe_para_prueba.json', municipio='Prueba')
+
+    def test_recomponer_no_duplica_la_nota_metodologica(self):
+        result, artifact, dictionary, rules = ejemplo_editorial()
+        componer(result, dictionary, rules, artifact)
         before = deepcopy(result['valores_plantilla'])
-        componer(result, dictionary, rules)
+        componer(result, dictionary, rules, artifact)
         self.assertEqual(result['valores_plantilla'], before)
 
-    def test_bibliografia_legible_y_fuentes_limitadas(self):
-        result, dictionary, rules = ejemplo_consultivo()
-        result['fuentes'].append({'archivo': 'Apodaca PAQUETE GOBIERNO ABIERTO Y BUEN GOBIERNO.docx'})
-        componer(result, dictionary, rules)
-        bibliography = result['valores_plantilla']['bibliografia']
-        self.assertEqual(len(bibliography.split('\n\n')), 2)
-        self.assertNotIn('GOBIERNO', bibliography)
-        self.assertNotIn('sha', bibliography.lower())
-        self.assertNotIn('docx', bibliography)
-
-    def test_guard_rechaza_tecnicismos_en_prosa_tablas_graficas_y_notas(self):
-        base, dictionary, rules = ejemplo_consultivo()
-        componer(base, dictionary, rules)
-        cases = [
-            ('prosa', lambda r: r['valores_plantilla'].update(resumen_general='Leer output/json/archivo.json')),
-            ('tabla', lambda r: r['valores_plantilla']['tablas_indicador_01'][0]['filas'][1].__setitem__(1, 'SHA-256: ' + 'a' * 64)),
-            ('grafica', lambda r: r['valores_plantilla'].update(graficas_indicador_01=[{'titulo': 'Gráfica', 'fuente': 'Criterio aplicado: Ficha 1'}])),
-            ('nota', lambda r: r['contenido_word']['notas_alcance'].append('VARIABLES_ACTIVAS_PENDIENTES')),
-        ]
-        for label, mutate in cases:
-            with self.subTest(label=label):
-                result = deepcopy(base)
-                mutate(result)
+    def test_rechaza_fuente_obsoleta_duplicada_o_con_alias_de_ruta(self):
+        for mutation in ('hash', 'duplicada', 'ruta', 'otra_fuente'):
+            with self.subTest(mutation=mutation):
+                result, artifact, _, _ = ejemplo_editorial()
+                sources = artifact['vinculos']['fuentes']
+                if mutation == 'hash':
+                    sources[0]['sha256'] = 'd' * 64
+                elif mutation == 'duplicada':
+                    sources.append(deepcopy(sources[0]))
+                elif mutation == 'ruta':
+                    sources[0]['archivo'] = '../' + sources[0]['archivo']
+                else:
+                    sources.append({'archivo': 'Municipio Prueba Anexo.docx', 'sha256': 'd' * 64})
                 with self.assertRaises(ValueError):
-                    validar_publicacion(result)
+                    validar_redaccion(result, artifact)
 
-    def test_guard_no_inspecciona_la_bitacora_tecnica(self):
-        result, dictionary, rules = ejemplo_consultivo()
-        componer(result, dictionary, rules)
+    def test_rechaza_otro_municipio_benchmark_reglas_y_falsa_revision(self):
+        for mutation in ('municipio', 'benchmark_sha256', 'reglas_sha256', 'revision'):
+            with self.subTest(mutation=mutation):
+                result, artifact, _, _ = ejemplo_editorial()
+                if mutation == 'municipio':
+                    artifact['municipio'] = 'Otro municipio'
+                elif mutation == 'revision':
+                    artifact['revision']['estado'] = 'por_revisar'
+                else:
+                    artifact['vinculos'][mutation] = 'd' * 64
+                with self.assertRaises(ValueError):
+                    validar_redaccion(result, artifact)
+
+    def test_rechaza_cifra_sin_evidencia_y_celda_manipulada(self):
+        for mutation in ('texto', 'hecho', 'fila', 'referencia'):
+            with self.subTest(mutation=mutation):
+                result, artifact, _, _ = ejemplo_editorial()
+                paragraph = artifact['bloques']['analisis_indicador_01'][0]
+                if mutation == 'texto':
+                    paragraph['texto'] = 'En 2024 se registraron 999 unidades.'
+                elif mutation == 'hecho':
+                    artifact['hechos']['h1']['valor'] = '999'
+                elif mutation == 'fila':
+                    artifact['hechos']['h1']['fila'] = 0
+                else:
+                    paragraph['evidencia'] = ['hecho_ausente']
+                with self.assertRaises(ValueError):
+                    validar_redaccion(result, artifact)
+
+    def test_guard_rechaza_textos_de_trabajo_y_referencias_tecnicas(self):
+        for text in ('Versión borrador.', 'Usar el machote.', 'Llenar la plantilla.',
+                     'Leer output/json/archivo.json', 'Periodo ultimo_periodo.',
+                     'Calificación desde VARIABLE_INTERNA.', 'Como modelo de inteligencia artificial, recomiendo revisar.'):
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                comprobar_texto(text)
+
+    def test_guard_no_inspecciona_los_metadatos_tecnicos(self):
+        result, artifact, dictionary, rules = ejemplo_editorial()
+        componer(result, dictionary, rules, artifact)
         result['validaciones'].append({'codigo': 'PRUEBA_INTERNA', 'detalle': '/Users/local/output/result.json'})
         self.assertGreater(validar_publicacion(result)['textos_publicables_verificados'], 0)
 
-    def test_guard_acepta_prosa_sustantiva(self):
-        comprobar_texto('En Apodaca, el porcentaje pasó de 72.8% en 2022 a 94% en 2024. Conviene anticipar las renovaciones.')
-
-    def test_guard_rechaza_nombre_interno_de_periodo(self):
-        for text in ('Periodo de observaciones: ultimo_periodo.', 'Análisis de periodo_general.'):
-            with self.assertRaisesRegex(ValueError, 'periodo_interno'):
-                comprobar_texto(text)
-
-    def test_periodo_publico_2014_2024_no_se_sobrescribe_al_agregar_dimensiones(self):
-        result, dictionary, rules = ejemplo_consultivo()
-        result['valores_plantilla']['año_inicial'] = 2014
-        result['indicadores'][0]['tablas'][0]['filas'].insert(1, ['2014', '80'])
-        componer(result, dictionary, rules)
-        self.assertEqual(result['contenido_word']['periodo'],
-                         'Periodo de observaciones: 2014–2024. La cobertura varía entre indicadores.')
-        self.assertIn('(2014–2024)', result['contenido_word']['titulo'])
+    def test_calificacion_ausente_no_se_inventa_para_presentar_documento_final(self):
+        result, artifact, dictionary, rules = ejemplo_editorial()
+        result['calculos']['general']['calificacion_final'] = None
+        componer(result, dictionary, rules, artifact)
+        self.assertEqual(result['valores_plantilla']['calificacion_general'], 'SIN VALORACIÓN CONJUNTA')
+        self.assertIn('completar la evidencia', result['valores_plantilla']['resumen_general'])
 
 
 if __name__ == '__main__':
