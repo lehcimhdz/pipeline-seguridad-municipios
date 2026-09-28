@@ -1,6 +1,6 @@
 {
   "metadatos": {
-    "version": "2.2",
+    "version": "2.3",
     "nombre": "diccionario_variables_diagnostico_seguridad_municipal",
     "idioma": "es-MX",
     "tipo_documento": "diccionario_de_datos_y_especificacion_de_contenido",
@@ -31,7 +31,12 @@
       "obligatorio": false,
       "rol": "Contraste de seguridad y gráficas originales cuando está disponible."
     },
-    "regla": "No incorporar otros municipios, paquetes, API o CSV como datos del estudio. La muestra sólo orienta el estilo."
+    "complementos": {
+      "patron": "input/complementos/{slug}.json",
+      "obligatorio": false,
+      "rol": "Definiciones y denominadores documentados; fuente, año, localizador, SHA-256 y revisión por observación."
+    },
+    "regla": "No incorporar otros municipios ni búsquedas automáticas. Complementos explícitos y revisados mediante --complemento. La muestra sólo orienta el estilo."
   },
   "documentos_de_referencia": {
     "formato_consultora": {
@@ -368,7 +373,8 @@
           1,
           2,
           3
-        ]
+        ],
+        "peso": 0.25
       },
       {
         "codigo": "condiciones_del_personal",
@@ -382,7 +388,8 @@
           8,
           9,
           10
-        ]
+        ],
+        "peso": 0.35
       },
       {
         "codigo": "inteligencia_y_eficiencia_policial",
@@ -397,7 +404,8 @@
           16,
           17,
           18
-        ]
+        ],
+        "peso": 0.4
       }
     ],
     "calificaciones": [
@@ -454,7 +462,9 @@
       "precauciones": [
         "La existencia declarada no acredita por sí sola actualización ni funcionamiento.",
         "Si la evidencia documental contradice el censo, registrar la discrepancia y justificar cualquier ajuste."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false
     },
     {
       "id": 2,
@@ -478,7 +488,10 @@
       "precauciones": [
         "No comparar directamente el conteo municipal con una suma estatal como si fueran unidades equivalentes.",
         "Distinguir personas únicas de participaciones si la fuente lo permite."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
     },
     {
       "id": 3,
@@ -515,7 +528,21 @@
         "primeros_auxilios",
         "prevencion_y_combate_de_incendios"
       ],
-      "regla_especifica": "Si el indicador 2 obtiene 1, este indicador también obtiene 1 en la misma evaluación."
+      "regla_especifica": "Si el indicador 2 obtiene 1, este indicador también obtiene 1 en la misma evaluación.",
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje.",
+      "escala_vigente": {
+        "descripcion": "Cobertura anual sobre grupos captados acreditados por edición; general usa la media de coberturas. Sin catálogo no puntúa.",
+        "niveles": {
+          "1": "0 con ausencia explícita y catálogo completo",
+          "2": ">0",
+          "3": ">=1/3",
+          "4": ">=2/3; máximo si falta análisis de riesgos",
+          "5": ">=80% y análisis de riesgos en cada observación evaluada"
+        },
+        "origen": "Convención de integración: completa escalones que la propuesta dejó sin definir."
+      }
     },
     {
       "id": 4,
@@ -523,10 +550,6 @@
       "dimension": "condiciones_del_personal",
       "modelo": "ficha_indicador",
       "datos_especificos": {
-        "total_personal": {
-          "tipo_dato": "integer",
-          "minimo": 0
-        },
         "poblacion": {
           "tipo_dato": "integer",
           "minimo_para_calcular_tasa": 1
@@ -536,14 +559,22 @@
         },
         "policias_por_mil_habitantes": {
           "tipo_dato": "number",
-          "formula": "total_personal / poblacion * 1000"
+          "formula": "personal_policial / poblacion * 1000"
+        },
+        "personal_policial": {
+          "tipo_dato": "integer",
+          "minimo": 0,
+          "universo": "Corporaciones policiales; excluye administrativos."
         }
       },
       "regla_especifica": "La ficha establece un máximo de 4 si la plantilla total tiene menos de 15 elementos.",
       "precauciones": [
         "Documentar el año y la fuente de población.",
         "Aclarar cómo se aplica el límite de plantilla cuando su tamaño cambia durante el periodo."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
     },
     {
       "id": 5,
@@ -568,7 +599,10 @@
           "obligatorio": "Si se afirma que el personal está aprobado y vigente."
         }
       },
-      "precaucion": "No presentar personal evaluado como equivalente a personal aprobado y vigente."
+      "precaucion": "No presentar personal evaluado como equivalente a personal aprobado y vigente.",
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
     },
     {
       "id": 6,
@@ -592,7 +626,9 @@
         }
       },
       "regla_especifica": "Si no existe instituto propio pero el indicador 10 obtiene 3 o más, la ficha establece asignar al menos 3.",
-      "precaucion": "Ausencia de instituto propio no significa necesariamente ausencia de acceso a formación."
+      "precaucion": "Ausencia de instituto propio no significa necesariamente ausencia de acceso a formación.",
+      "peso": 1,
+      "prioritario": false
     },
     {
       "id": 7,
@@ -612,7 +648,10 @@
           "tipo_dato": "string"
         }
       },
-      "precaucion": "Marcar como dudoso un cero aislado entre valores altos o una inconsistencia relevante con el indicador 5."
+      "precaucion": "Marcar como dudoso un cero aislado entre valores altos o una inconsistencia relevante con el indicador 5.",
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
     },
     {
       "id": 8,
@@ -640,7 +679,9 @@
           "admite_null": true
         }
       },
-      "precaucion": "La entrega de prendas no demuestra que la dotación haya alcanzado a todo el personal."
+      "precaucion": "La entrega de prendas no demuestra que la dotación haya alcanzado a todo el personal.",
+      "peso": 1,
+      "prioritario": false
     },
     {
       "id": 9,
@@ -668,17 +709,19 @@
         "naturaleza_del_dato": {
           "tipo_dato": "string",
           "opciones": [
-            "inventario",
-            "dotacion_del_año",
-            "pendiente_aclarar"
-          ]
+            "asignado_al_cierre"
+          ],
+          "precaucion": "Unidades asignadas, no personas que recibieron equipo ni compras anuales."
         }
       },
       "precauciones": [
         "No dividir entre cero.",
         "Una dotación anual de cero no prueba que el inventario sea cero.",
         "Mantener consistencia temporal con el personal usado como denominador."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
     },
     {
       "id": 10,
@@ -704,7 +747,10 @@
       "precauciones": [
         "Documentar cambios de categorías entre ediciones.",
         "No sumar personas capacitadas por tema como si fueran personas únicas sin verificar duplicidades."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
     },
     {
       "id": 11,
@@ -727,7 +773,9 @@
           "debe_contener": "Justificación documental si se considera equivalente un registro de incidentes con coordenadas."
         }
       },
-      "precaucion": "Existencia declarada no acredita uso efectivo para orientar el patrullaje."
+      "precaucion": "Existencia declarada no acredita uso efectivo para orientar el patrullaje.",
+      "peso": 2,
+      "prioritario": true
     },
     {
       "id": 12,
@@ -746,7 +794,9 @@
           "tipo_dato": "string"
         }
       },
-      "regla_especifica": "Si el indicador 11 obtiene 1, este indicador no puede recibir más de 3 en la misma evaluación."
+      "regla_especifica": "Si el indicador 11 obtiene 1, este indicador no puede recibir más de 3 en la misma evaluación.",
+      "peso": 2,
+      "prioritario": true
     },
     {
       "id": 13,
@@ -769,7 +819,9 @@
           "debe_contener": "Evidencia del indicador 10 sobre proximidad o solución de problemas."
         }
       },
-      "precaucion": "No deducir la existencia de un método completo de solución de problemas a partir de una respuesta binaria."
+      "precaucion": "No deducir la existencia de un método completo de solución de problemas a partir de una respuesta binaria.",
+      "peso": 2,
+      "prioritario": true
     },
     {
       "id": 14,
@@ -799,7 +851,10 @@
       "precauciones": [
         "El conteo no demuestra funcionamiento ni monitoreo activo.",
         "Verificar saltos abruptos antes de asignar el puntaje máximo."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
     },
     {
       "id": 15,
@@ -807,29 +862,40 @@
       "dimension": "inteligencia_y_eficiencia_policial",
       "modelo": "ficha_indicador",
       "datos_especificos": {
-        "numero_llamadas_procedentes": {
+        "llamadas_procedentes": {
           "tipo_dato": "integer",
           "minimo": 0
         },
-        "porcentaje_llamadas_procedentes": {
-          "tipo_dato": "number",
-          "unidad": "porcentaje_0_a_100"
+        "registro_municipal": {
+          "tipo_dato": "boolean",
+          "debe_contener": "Competencia del registro verificada por año."
         },
-        "base_total_llamadas": {
+        "poblacion": {
           "tipo_dato": "integer",
-          "admite_null": true
+          "minimo": 1
         },
-        "porcentaje_estatal": {
-          "tipo_dato": "number",
-          "unidad": "porcentaje_0_a_100"
-        },
-        "tiempos_respuesta": {
-          "tipo_dato": "array",
-          "obligatorio": "Solo si están disponibles y se utilizan en el análisis."
+        "meta_respuesta": {
+          "tipo_dato": "string",
+          "obligatorio_para": "Puntaje 5, cumplimiento documentado en cada año."
         }
       },
       "regla_especifica": "Un 100% poco plausible se marca como dato dudoso y no puede recibir más de 3 conforme a la ficha.",
-      "precaucion": "Un porcentaje alto no es por sí mismo evidencia de mejor resultado."
+      "precaucion": "Un porcentaje alto no es por sí mismo evidencia de mejor resultado.",
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje.",
+      "escala_vigente": {
+        "descripcion": "Registro de competencia municipal y población documentados. No se interpreta volumen como eficacia.",
+        "niveles": {
+          "1": "Ausencia de registro acreditada en todos los cortes aplicables",
+          "2": "Registro previo que falta en ambos cortes recientes por ausencia acreditada",
+          "3": "Registro parcial con ambos cortes recientes; o inconsistencia pendiente (incluye 100%)",
+          "4": "Registro completo y tasas calculables, sin meta de respuesta acreditada",
+          "5": "Registro completo, tasas calculables y cumplimiento documentado de meta de respuesta/despacho en todo el periodo"
+        },
+        "limite": "Vacíos no acreditados permanecen null. El crecimiento de llamadas se describe, no suma puntos por sí mismo.",
+        "origen": "Convención de integración documentada; sustituye comparación del porcentaje como desempeño."
+      }
     },
     {
       "id": 16,
@@ -861,7 +927,9 @@
           ]
         }
       },
-      "precaucion": "Distinguir existencia declarada, publicación y contenido efectivo del informe."
+      "precaucion": "Distinguir existencia declarada, publicación y contenido efectivo del informe.",
+      "peso": 1,
+      "prioritario": false
     },
     {
       "id": 17,
@@ -906,7 +974,9 @@
         "En corporaciones pequeñas, describir los casos y evitar conclusiones basadas solo en tasas inestables.",
         "No afirmar que se calculó un índice de letalidad con datos que no lo permiten.",
         "No confundir fallecimientos de policías con civiles fallecidos por intervención policial."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false
     },
     {
       "id": 18,
@@ -945,12 +1015,18 @@
         "No interpretar esta razón como porcentaje de delitos resueltos.",
         "No asumir ausencia de recomendaciones de derechos humanos si no se realizó la revisión.",
         "Distinguir delitos, faltas administrativas y limitaciones de la fuente."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
     }
   ],
   "campos_auxiliares": {
     "identidad_evidencia": "Párrafo original que identifica municipio y estado.",
     "fuentes": "Paquete y Anexo si está disponible, con nombre, rol y SHA-256; trazabilidad interna.",
+    "evidencia_complementaria": "Versión 1.0, identidad, fuentes conservadas, poblacion por ámbito/año y observaciones por indicador/año; RECOLECCION_DATOS.md.",
+    "evidencia_complementaria_sha256": "Huella del objeto canónico completo; invalida redacción si cambia.",
+    "evaluacion_sha256": "Huella de puntajes, cálculos y periodos; cambiar modo o esquema exige revisar la redacción.",
     "evidencia_documental": "Bloques originales de las entradas recibidas, conservados para auditoría.",
     "validaciones": "Pendientes de revisión, inconsistencias y límites; los códigos no son texto del informe.",
     "contrato": "Versiones y huellas de los componentes que produjeron el resultado.",
@@ -975,6 +1051,8 @@
       "motivo": "string que explica por qué no puede asignarse puntaje",
       "años_observados": "array de integer",
       "años_evaluados": "array de integer",
+      "estado_dato": "reportado|pendiente|no_aplicable",
+      "valoracion_provisional": "Nivel indicativo o null, base, confianza y falta; nunca computa en la agregación.",
       "regla": "No confundir la calificación reportada en la entrada con una evaluación calculada; justificar toda asignación."
     },
     "ilustracion_original": {
@@ -992,12 +1070,12 @@
       "ultimo_periodo"
     ],
     "promedio_por_dimension": "Aplicar las reglas de agregación, cobertura y límites documentadas en la metodología vigente.",
-    "promedio_tres_dimensiones": "Media de las tres dimensiones; no sustituir por la media simple de 18 indicadores.",
+    "promedio_tres_dimensiones": "Media ponderada 25/35/40 por defecto; registrar esquema y coeficientes efectivos. Esquemas alternativos explícitos para comparación.",
     "clasificacion": "Aplicar escala, redondeo y candados de las reglas conservando sus motivos.",
     "regla_faltantes": "Distinguir desempeño y suficiencia documental; toda calificación requiere criterio y límites explícitos según la metodología."
   },
   "tratamiento_datos_faltantes": {
-    "fuente_no_disponible": "Explicar el dato ausente y aplicar la política metodológica; el flujo no incorpora estadísticas externas.",
+    "fuente_no_disponible": "Conservar null y explicar el faltante. Admitir complementos revisados, sin búsqueda ni imputación automática.",
     "denominador_no_disponible": "No estimar tasas, razones o porcentajes sin su base de cálculo.",
     "serie_reciente_incompleta": "Declarar cobertura y años evaluados según la periodicidad observada; no interpolar años.",
     "dato_dudoso": "Conservar el valor original y registrar el motivo de revisión."
@@ -1039,5 +1117,33 @@
       "id": "cierre_editorial",
       "regla": "Documento de consultoría sin instrucciones, nombres de archivos internos, variables pendientes ni rótulos de borrador o machote."
     }
-  ]
+  ],
+  "metodologia_v23": {
+    "ponderacion": "config/ponderacion.json",
+    "definiciones": "config/definiciones_cngmd.json",
+    "referencia_editorial": "config/textos_narrativos.json",
+    "complemento": "Objeto evidencia_complementaria, versión 1.0: fuentes, poblacion y observaciones por indicador/año; véase RECOLECCION_DATOS.md.",
+    "estados": [
+      "reportado",
+      "pendiente",
+      "no_aplicable"
+    ],
+    "puntaje": "Entero 1–5 o null; la valoración provisional nunca se incorpora al puntaje.",
+    "prioritarios": [
+      2,
+      4,
+      5,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "pesos_dimension": {
+      "proteccion_civil": 0.25,
+      "condiciones_del_personal": 0.35,
+      "inteligencia_y_eficiencia_policial": 0.4
+    },
+    "publicacion": "Exige cobertura por dimensión y al menos seis prioritarios; no sustituir evidencia faltante por prosa."
+  }
 }

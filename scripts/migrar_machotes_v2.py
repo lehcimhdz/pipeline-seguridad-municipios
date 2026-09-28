@@ -213,9 +213,17 @@ def depurar_diccionario(previous, found, rules):
     dimensions = deepcopy(previous['catalogos']['dimensiones'])
     for dimension in dimensions:
         dimension['indicadores'] = rules['dimensiones'][dimension['codigo']]
+        dimension['peso'] = rules['ponderacion_config']['ponderacion']['esquemas']['dimensiones_ponderadas']['peso_dimension'][dimension['codigo']]
+    catalogue = deepcopy(previous['catalogo_indicadores'])
+    for item, ficha in zip(catalogue, rules['fichas']):
+        item.update(peso=ficha['peso'], prioritario=ficha['prioritario'], datos_especificos=deepcopy(ficha['datos_requeridos']))
+        if ficha.get('revision_definiciones'):
+            item['revision_definiciones'] = ficha['revision_definiciones']
+        if ficha.get('escala_vigente'):
+            item['escala_vigente'] = deepcopy(ficha['escala_vigente'])
     return {
         'metadatos': {
-            'version': '2.2', 'nombre': 'diccionario_variables_diagnostico_seguridad_municipal',
+            'version': '2.3', 'nombre': 'diccionario_variables_diagnostico_seguridad_municipal',
             'idioma': 'es-MX', 'tipo_documento': 'diccionario_de_datos_y_especificacion_de_contenido',
             'es_json_schema_formal': False,
             'descripcion': 'Contenido del estudio de seguridad municipal, su evidencia y reglas de correspondencia con Word.',
@@ -233,7 +241,9 @@ def depurar_diccionario(previous, found, rules):
                 'rol': 'Datos estadísticos e imágenes originales que sustentan la interpretación.'},
             'anexo': {'patron': '{municipio} Anexo.docx',
                 'obligatorio': False, 'rol': 'Contraste de seguridad y gráficas originales cuando está disponible.'},
-            'regla': 'No incorporar otros municipios, paquetes, API o CSV como datos del estudio. La muestra sólo orienta el estilo.',
+            'complementos': {'patron': 'input/complementos/{slug}.json', 'obligatorio': False,
+                'rol': 'Definiciones y denominadores documentados; fuente, año, localizador, SHA-256 y revisión por observación.'},
+            'regla': 'No incorporar otros municipios ni búsquedas automáticas. Complementos explícitos y revisados mediante --complemento. La muestra sólo orienta el estilo.',
         },
         'documentos_de_referencia': {
             'formato_consultora': {'archivo': str(SOURCE.relative_to(ROOT)),
@@ -263,10 +273,13 @@ def depurar_diccionario(previous, found, rules):
             'dimensiones': dimensions, 'calificaciones': deepcopy(rules['escala']),
             'estados_del_dato': ['reportado', 'pendiente', 'sin_respuesta_municipal',
                 'variable_no_existente_en_edicion', 'dato_dudoso', 'no_aplicable']},
-        'catalogo_indicadores': deepcopy(previous['catalogo_indicadores']),
+        'catalogo_indicadores': catalogue,
         'campos_auxiliares': {
             'identidad_evidencia': 'Párrafo original que identifica municipio y estado.',
             'fuentes': 'Paquete y Anexo si está disponible, con nombre, rol y SHA-256; trazabilidad interna.',
+            'evidencia_complementaria': 'Versión 1.0, identidad, fuentes conservadas, poblacion por ámbito/año y observaciones por indicador/año; RECOLECCION_DATOS.md.',
+            'evidencia_complementaria_sha256': 'Huella del objeto canónico completo; invalida redacción si cambia.',
+            'evaluacion_sha256': 'Huella de puntajes, cálculos y periodos; cambiar modo o esquema exige revisar la redacción.',
             'evidencia_documental': 'Bloques originales de las entradas recibidas, conservados para auditoría.',
             'validaciones': 'Pendientes de revisión, inconsistencias y límites; los códigos no son texto del informe.',
             'contrato': 'Versiones y huellas de los componentes que produjeron el resultado.',
@@ -283,6 +296,8 @@ def depurar_diccionario(previous, found, rules):
                 'puntaje': 'integer 1..5|null', 'criterio_aplicado': 'string cuando existe puntaje',
                 'motivo': 'string que explica por qué no puede asignarse puntaje',
                 'años_observados': 'array de integer', 'años_evaluados': 'array de integer',
+                'estado_dato': 'reportado|pendiente|no_aplicable',
+                'valoracion_provisional': 'Nivel indicativo o null, base, confianza y falta; nunca computa en la agregación.',
                 'regla': 'No confundir la calificación reportada en la entrada con una evaluación calculada; justificar toda asignación.'},
             'ilustracion_original': {'indicador': 'integer 1..18', 'archivo_fuente': 'string',
                 'parte': 'Ruta de la imagen dentro del DOCX de entrada', 'sha256': 'string',
@@ -291,12 +306,12 @@ def depurar_diccionario(previous, found, rules):
         'calculos_derivados': {
             'metodologia': 'reglas_calificacion.json', 'periodos': ['general', 'ultimo_periodo'],
             'promedio_por_dimension': 'Aplicar las reglas de agregación, cobertura y límites documentadas en la metodología vigente.',
-            'promedio_tres_dimensiones': 'Media de las tres dimensiones; no sustituir por la media simple de 18 indicadores.',
+            'promedio_tres_dimensiones': 'Media ponderada 25/35/40 por defecto; registrar esquema y coeficientes efectivos. Esquemas alternativos explícitos para comparación.',
             'clasificacion': 'Aplicar escala, redondeo y candados de las reglas conservando sus motivos.',
             'regla_faltantes': 'Distinguir desempeño y suficiencia documental; toda calificación requiere criterio y límites explícitos según la metodología.',
         },
         'tratamiento_datos_faltantes': {
-            'fuente_no_disponible': 'Explicar el dato ausente y aplicar la política metodológica; el flujo no incorpora estadísticas externas.',
+            'fuente_no_disponible': 'Conservar null y explicar el faltante. Admitir complementos revisados, sin búsqueda ni imputación automática.',
             'denominador_no_disponible': 'No estimar tasas, razones o porcentajes sin su base de cálculo.',
             'serie_reciente_incompleta': 'Declarar cobertura y años evaluados según la periodicidad observada; no interpolar años.',
             'dato_dudoso': 'Conservar el valor original y registrar el motivo de revisión.',
@@ -320,8 +335,8 @@ def main():
     previous = json.loads(dictionary_path.read_text(encoding='utf-8'))
     rules_path = ROOT / 'reglas_calificacion.json'
     rules = json.loads(rules_path.read_text(encoding='utf-8'))
-    if rules['version'] != '2.2':
-        raise ValueError('Regenerar primero reglas_calificacion.json con estructurar_reglas.py para la versión 2.2.')
+    if rules['version'] != '2.3':
+        raise ValueError('Regenerar primero reglas_calificacion.json con estructurar_reglas.py para la versión 2.3.')
     if not REDACCION.is_file():
         raise ValueError('Falta la configuración del estilo de redacción consultiva.')
     guide = guia_path()
@@ -358,11 +373,20 @@ def main():
         raise ValueError('La base debe contener exactamente las 25 variables de texto del estudio.')
     save(BASE, files)
     dictionary = depurar_diccionario(previous, found, rules)
+    dictionary['metodologia_v23'] = {
+        'ponderacion': 'config/ponderacion.json', 'definiciones': 'config/definiciones_cngmd.json',
+        'referencia_editorial': 'config/textos_narrativos.json',
+        'complemento': 'Objeto evidencia_complementaria, versión 1.0: fuentes, poblacion y observaciones por indicador/año; véase RECOLECCION_DATOS.md.',
+        'estados': ['reportado', 'pendiente', 'no_aplicable'],
+        'puntaje': 'Entero 1–5 o null; la valoración provisional nunca se incorpora al puntaje.',
+        'prioritarios': rules['ponderacion_config']['ponderacion']['prioritarios'],
+        'pesos_dimension': rules['ponderacion_config']['ponderacion']['esquemas']['dimensiones_ponderadas']['peso_dimension'],
+        'publicacion': 'Exige cobertura por dimensión y al menos seis prioritarios; no sustituir evidencia faltante por prosa.'}
     dump(dictionary_path, dictionary)
     if any(sha256(path) != digest for path, digest in source_digests.items()):
         raise ValueError('Un documento de referencia original cambió durante la migración.')
     contract = {
-        'version': '2.2', 'alcance': 'seguridad', 'producto': 'estudio_seguridad', 'marcador': '{snake_case}',
+        'version': '2.3', 'alcance': 'seguridad', 'producto': 'estudio_seguridad', 'marcador': '{snake_case}',
         'plantillas': {'medicion': {'archivo': str(BASE.relative_to(ROOT)), 'sha256': sha256(BASE),
             'origen': str(SOURCE.relative_to(ROOT)), 'origen_sha256': source_digests[SOURCE],
             'bloques_capitulo_origen': len(original_section), 'bloques_capitulo_derivado': len(section),
@@ -379,6 +403,9 @@ def main():
         'formato': {'archivo': str(FORMATO.relative_to(ROOT)), 'sha256': sha256(FORMATO)},
         'redaccion': {'archivo': str(REDACCION.relative_to(ROOT)), 'sha256': sha256(REDACCION)},
         'normalizaciones': {'archivo': str(NORMALIZACIONES.relative_to(ROOT)), 'sha256': sha256(NORMALIZACIONES)},
+        **{key: {'archivo': 'config/' + filename, 'sha256': sha256(ROOT / 'config' / filename)}
+           for key, filename in (('ponderacion', 'ponderacion.json'), ('definiciones', 'definiciones_cngmd.json'),
+                                 ('textos_narrativos', 'textos_narrativos.json'))},
         'tipografias': [{'archivo': f'assets/fonts/{filename}', 'sha256': sha256(ROOT / 'assets/fonts' / filename)}
                        for _, filename, _ in FONTS],
         'orden_indicadores': list(range(1, 19)),
@@ -386,6 +413,8 @@ def main():
         'correspondencia_guia': 'La guía repite Personal y no identifica el Certificado Único Policial; se mantienen los 18 indicadores del formato y del Paquete Seguridad.',
         'fuentes_entrada': ['{municipio} PAQUETE SEGURIDAD.docx'],
         'fuentes_opcionales': ['{municipio} Anexo.docx'],
+        'fuentes_complementarias': {'opcion': '--complemento', 'version': '1.0',
+            'contrato': 'RECOLECCION_DATOS.md', 'validacion': 'Fuentes con huella y observaciones verificadas; no se autocompletan.'},
         'documentos_salida': ['medicion'],
         'nombre_salida': '{municipio} Estudio Seguridad.docx',
         'ilustraciones': 'Reproducción de imágenes originales verificadas; sin generar tablas o gráficas nuevas.',

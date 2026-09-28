@@ -1,4 +1,4 @@
-# Escritura del estudio de seguridad · v2.2
+# Escritura del estudio de seguridad · 2.3
 
 El producto es una interpretación del funcionamiento municipal, organizada en
 el formato de la consultora. Debe poder leerse como un estudio terminado:
@@ -85,17 +85,28 @@ se detiene antes de publicar el Word: no lo sustituye por prosa automática.
 El archivo editorial contiene:
 
 - `version`, `municipio` y `estado`.
-- `vinculos`: nombres exactos y SHA-256 de las fuentes, del benchmark y de las
-  reglas. Al cambiar la evidencia o la metodología se requiere revisar el texto
+- `vinculos`: nombres exactos y SHA-256 de fuentes, benchmark, reglas,
+  ponderación, definiciones, textos narrativos y evidencia complementaria.
+  Al cambiar la evidencia o la metodología se requiere revisar el texto
   antes de actualizar sus vínculos; no se deben renovar las huellas a ciegas.
+  `evaluacion_sha256` vincula también los resultados, cobertura y periodos: si
+  cambia el esquema o la evaluación, hay que revisar nuevamente la prosa.
 - `revision`: estado `revisada`, tipo de autor `agente_editorial` o `persona` y
   alcance de la revisión. El primero no significa aprobación humana.
 - `hechos`: referencias a indicador, tabla, fila, columna y valor literal. La
   fila se cuenta desde cero, incluida la cabecera; las observaciones empiezan
   en uno. Se admiten restas y variaciones porcentuales con operandos, precisión
   decimal y resultado declarados.
+  Un hecho del complemento usa `origen: "complemento"`, `indicador`, `anio`,
+  `campo` y `valor` exacto. Para población, `campo: "poblacion"` y `ambito`.
+  No se admiten valores declarados que difieran de la evidencia conservada.
 - `bloques`: tres párrafos por resumen, los dieciocho análisis y la bibliografía.
   Cada párrafo contiene `texto` y una lista `evidencia` con los hechos que usa.
+- `seleccion_editorial`: claves `1` a `18`, cada una con `encuadre_id` igual a
+  su clave, `revision_semantica: true` y `consecuencia_revisada` específica.
+  Esa declaración deja rastro de la lectura; no prueba automáticamente que la
+  interpretación sea correcta. Los resúmenes deben citar hechos de al menos dos
+  indicadores y no omitir prioritarios con puntaje 1 o 2.
 - `ilustraciones`: fuente, parte del documento, indicador y posición del
   párrafo, contada desde cero. `ilustraciones_excluidas` conserva los motivos de
   omisión, que no se imprimen como instrucciones al lector.
@@ -113,6 +124,27 @@ años, o ser resultado de una operación declarada. Los conteos de cobertura y
 las etiquetas de calificación se agregan directamente desde el cálculo vigente.
 
 El control numérico no demuestra por sí solo la verdad de una interpretación.
+
+## Uso del material narrativo del asesor
+
+`config/textos_narrativos.json` conserva encuadres, impactos, variantes y ejemplos
+como material de consulta. El texto municipal sigue siendo escrito y revisado;
+el programa no concatena frases según el semáforo. No se recibieron los 144
+cierres anunciados ni un bloque `apartados`: no se presentan como disponibles.
+Las propuestas electorales del catálogo no generan un segundo producto.
+
+El razonamiento enlaza contexto, dato y consecuencia sin repetir una fórmula
+literal. Hay que verificar que cada encuadre corresponda al universo observado,
+que una comparación tenga años y denominadores compatibles y que la recomendación
+responda al hallazgo. Un mayor volumen de llamadas no demuestra mejor atención;
+el número de remisiones no equivale a delitos esclarecidos. No copiar inferencias
+causales del catálogo sin respaldo. Los marcadores pendientes, incluso `{AÑOS}`,
+bloquean la publicación.
+
+Si el rubro conserva puntaje pendiente, se explica qué se sabe y qué información
+falta, sin llamarlo fracaso ni presentar una valoración provisional como nota
+oficial. La metodología y el alcance se expresan al lector en términos del estudio,
+no mediante nombres de archivos, rutas, JSON o instrucciones de operación.
 El autor debe comprobar que cada cifra se atribuye al concepto, territorio y
 año correctos, que las comparaciones son válidas y que la consecuencia propuesta
 no excede la evidencia. El programa tampoco certifica calidad literaria.

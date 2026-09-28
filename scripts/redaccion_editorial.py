@@ -12,12 +12,20 @@ import re
 import unicodedata
 
 from redaccion_consultoria import comprobar_texto
+from evidencia_complementaria import huella_objeto
 
 ROOT = Path(__file__).resolve().parents[1]
 BLOQUES = {'resumen_general', 'resumen_ultimo_periodo', 'bibliografia'} | {
     f'analisis_indicador_{number:02d}' for number in range(1, 19)}
 NUMERO = re.compile(r'(?<![\w])\d+(?:,\d{3})*(?:\.\d+)?(?![\w])')
 HASH = re.compile(r'[0-9a-f]{64}')
+VINCULOS_METODOLOGICOS = ('benchmark_sha256', 'reglas_sha256', 'ponderacion_sha256',
+                         'definiciones_sha256', 'textos_narrativos_sha256')
+
+
+def huella_evaluacion(result):
+    return huella_objeto({'calculos': result['calculos'], 'periodos': result['periodos_evaluacion'],
+                         'indicadores': {str(s['numero']): s['evaluaciones'] for s in result['indicadores']}})
 
 
 def nombre_editorial(municipio):
@@ -62,6 +70,24 @@ def _resolver_hechos(result, facts):
         if not isinstance(fact, dict):
             raise ValueError(f'Hecho editorial inválido: {key}.')
         if fact.get('operacion'):
+            continue
+        if fact.get('origen') == 'complemento':
+            try:
+                number, year = fact['indicador'], fact['anio']
+                if number not in sections or type(year) is not int:
+                    raise ValueError('Identidad de hecho inválida.')
+                data = result['evidencia_complementaria']
+                if fact.get('ambito') in ('municipal', 'estatal') and fact['campo'] == 'poblacion':
+                    records = [r for r in data['poblacion'] if r['ambito'] == fact['ambito'] and r['anio'] == year]
+                    if len(records) != 1: raise ValueError('Población ausente o ambigua.')
+                    value = records[0]['valor']
+                else:
+                    value = data['observaciones'][str(number)][str(year)][fact['campo']]
+                if isinstance(value, (dict, list, bool)) or value is None or fact.get('valor') != value:
+                    raise ValueError('El dato no coincide con el complemento.')
+            except (KeyError, ValueError, TypeError) as exc:
+                raise ValueError(f'El hecho complementario {key} no coincide con la evidencia.') from exc
+            resolved[key] = {'valor': value, 'numeros': _numeros(value) | {Decimal(year)}, 'indicador': number}
             continue
         try:
             section = sections[fact['indicador']]
@@ -117,18 +143,24 @@ def _resolver_hechos(result, facts):
 
 
 def validar_redaccion(result, artifact):
-    if artifact.get('version') != '2.2':
-        raise ValueError('Se requiere una interpretación editorial versión 2.2.')
+    if artifact.get('version') != '2.3':
+        raise ValueError('Se requiere una interpretación editorial versión 2.3, revisada con la nueva metodología.')
     if any(artifact.get(field) != result.get(field) for field in ('municipio', 'estado')):
         raise ValueError('La interpretación editorial corresponde a otro municipio o estado.')
     links = artifact.get('vinculos', {})
     if _fuentes(links.get('fuentes', [])) != _fuentes(result.get('fuentes', [])):
         raise ValueError('La interpretación editorial está desactualizada: cambiaron las fuentes documentales.')
     contract = result.get('contrato', {})
-    for key in ('benchmark_sha256', 'reglas_sha256'):
+    for key in VINCULOS_METODOLOGICOS:
         expected = contract.get(key)
         if not isinstance(expected, str) or not HASH.fullmatch(expected) or links.get(key) != expected:
             raise ValueError(f'La interpretación editorial no corresponde al criterio vigente: {key}.')
+    supplemental_hash = result.get('evidencia_complementaria_sha256')
+    if (not isinstance(supplemental_hash, str) or not HASH.fullmatch(supplemental_hash)
+            or links.get('evidencia_complementaria_sha256') != supplemental_hash):
+        raise ValueError('La redacción no corresponde a la evidencia complementaria vigente.')
+    if links.get('evaluacion_sha256') != huella_evaluacion(result):
+        raise ValueError('Cambió la evaluación o el esquema: revisar de nuevo la interpretación editorial.')
     revision = artifact.get('revision', {})
     if revision.get('estado') != 'revisada' or revision.get('tipo_autor') not in ('agente_editorial', 'persona'):
         raise ValueError('La interpretación debe estar revisada e identificar el tipo de autor editorial.')
@@ -136,6 +168,13 @@ def validar_redaccion(result, artifact):
     if not isinstance(facts, dict) or not facts:
         raise ValueError('La interpretación no declara hechos verificables.')
     resolved = _resolver_hechos(result, facts)
+    selection = artifact.get('seleccion_editorial', {})
+    if set(selection) != {str(i) for i in range(1, 19)}:
+        raise ValueError('Falta la selección editorial de los dieciocho encuadres.')
+    for number, entry in selection.items():
+        if (entry.get('encuadre_id') != number or entry.get('revision_semantica') is not True
+                or not isinstance(entry.get('consecuencia_revisada'), str) or not entry['consecuencia_revisada'].strip()):
+            raise ValueError('Cada encuadre requiere revisión del significado y una consecuencia específica documentada.')
     blocks = artifact.get('bloques', {})
     if set(blocks) != BLOQUES:
         raise ValueError('La interpretación debe contener los dos resúmenes, los dieciocho análisis y la bibliografía.')
@@ -150,6 +189,8 @@ def validar_redaccion(result, artifact):
             if not isinstance(text, str) or not text.strip():
                 raise ValueError(f'Párrafo vacío en {variable}.')
             comprobar_texto(text, variable)
+            if re.search(r'\{[^{}]+\}|\[(?:INSERTAR|AÑOS|MUNICIPIO)[^\]]*\]', text, re.I):
+                raise ValueError(f'Marcador editorial pendiente en {variable}.')
             refs = paragraph.get('evidencia', [])
             if variable != 'bibliografia' and not refs:
                 raise ValueError(f'El párrafo de {variable} no declara evidencia.')
@@ -163,8 +204,17 @@ def validar_redaccion(result, artifact):
             if _numeros(text) - allowed:
                 raise ValueError(f'El texto de {variable} contiene cifras sin respaldo en los hechos citados.')
             count += 1
+        cited = {resolved[ref]['indicador'] for p in paragraphs for ref in p.get('evidencia', [])}
+        if variable.startswith('resumen_'):
+            if len(cited) < 2:
+                raise ValueError('La síntesis requiere hechos de al menos dos indicadores.')
+            period = 'general' if variable == 'resumen_general' else 'ultimo_periodo'
+            low = {s['numero'] for s in result['indicadores'] if s['numero'] in (2, 4, 5, 10, 11, 12, 13, 14)
+                   and s['evaluaciones'][period].get('puntaje') in (1, 2)}
+            if not low <= cited:
+                raise ValueError('La síntesis omite evidencia de un indicador prioritario con desempeño bajo.')
     canonical = json.dumps(artifact, sort_keys=True, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
-    return {'estado': 'verificada', 'version': '2.2', 'parrafos': count,
+    return {'estado': 'verificada', 'version': '2.3', 'parrafos': count,
             'hechos': len(resolved), 'sha256': hashlib.sha256(canonical).hexdigest(),
             'autor': revision['tipo_autor'],
             'limite': 'La comprobación de fuentes y cifras no sustituye la revisión del significado, las unidades y las inferencias.'}

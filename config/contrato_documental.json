@@ -1,5 +1,5 @@
 {
-  "version": "2.2",
+  "version": "2.3",
   "alcance": "seguridad",
   "producto": "estudio_seguridad",
   "marcador": "{snake_case}",
@@ -26,20 +26,20 @@
   },
   "benchmark": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "6fa649b5d01273e115ae896efdf910bfd5ebe0155cd2032884e9613e5e1e5507",
+    "sha256": "9b6d872b616e9186a0dc691377061c0c7a18e6b5fc6f6140869a414a81fef426",
     "rol": "Criterios para construir la metodología de calificación e interpretación."
   },
   "diccionario": {
     "archivo": "diccionario_datos_diagnostico_seguridad_municipal.json",
-    "sha256": "3ecd44770e8927a9c24eca7cc9d5a214ce6b0865ec73520a6eba7bf6a8387924"
+    "sha256": "21d9e1a35eaf47eb2385c73057d95c25538e75e96e605218474a87e1dfc8ac06"
   },
   "reglas": {
     "archivo": "reglas_calificacion.json",
-    "sha256": "8b477504544616fc51cdca614bc35c9778b7f74dda4116ced346b2c9f3e36755"
+    "sha256": "816b039b61a352e0c7528c56d1a0dd026efb5e2df5e01f8794bd924d86e83e11"
   },
   "metodologia": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "6fa649b5d01273e115ae896efdf910bfd5ebe0155cd2032884e9613e5e1e5507"
+    "sha256": "9b6d872b616e9186a0dc691377061c0c7a18e6b5fc6f6140869a414a81fef426"
   },
   "formato": {
     "archivo": "config/formato_editorial.json",
@@ -52,6 +52,18 @@
   "normalizaciones": {
     "archivo": "config/normalizaciones.json",
     "sha256": "9ac87940c020efe389510d8f0041e50fdc16f7438a1c1c73b23ee7ff8ec56e3e"
+  },
+  "ponderacion": {
+    "archivo": "config/ponderacion.json",
+    "sha256": "824a0c657744e468e2725ce1a9c30abe2b4a36e552124784ec7b31ac5ef73c8c"
+  },
+  "definiciones": {
+    "archivo": "config/definiciones_cngmd.json",
+    "sha256": "2dad4b628c1f9f48282aa6dc1beb4f6be07745e4f1c6f271fe5cd069473e45a9"
+  },
+  "textos_narrativos": {
+    "archivo": "config/textos_narrativos.json",
+    "sha256": "eef08f07299a4e2cfa5098fa448fed8d2acabb11f6df18c168a78c5f8ea9ee5b"
   },
   "tipografias": [
     {
@@ -118,6 +130,12 @@
   "fuentes_opcionales": [
     "{municipio} Anexo.docx"
   ],
+  "fuentes_complementarias": {
+    "opcion": "--complemento",
+    "version": "1.0",
+    "contrato": "RECOLECCION_DATOS.md",
+    "validacion": "Fuentes con huella y observaciones verificadas; no se autocompletan."
+  },
   "documentos_salida": [
     "medicion"
   ],

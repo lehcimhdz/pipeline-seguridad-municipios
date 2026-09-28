@@ -7,13 +7,14 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from componer_documento import componer
-from redaccion_editorial import BLOQUES, cargar_redaccion, validar_redaccion
+from redaccion_editorial import BLOQUES, cargar_redaccion, validar_redaccion, huella_evaluacion
 from redaccion_consultoria import comprobar_texto, validar_publicacion
 
 
 def ejemplo_editorial():
     sources = [{'archivo': 'Municipio Prueba PAQUETE SEGURIDAD.docx', 'sha256': 'a' * 64}]
     contract = {'benchmark_sha256': 'b' * 64, 'reglas_sha256': 'c' * 64}
+    contract.update({key + '_sha256': 'd' * 64 for key in ('ponderacion', 'definiciones', 'textos_narrativos')})
     sections, facts, blocks = [], {}, {}
     for number in range(1, 19):
         sections.append({'numero': number, 'nombre': 'Indicador', 'tablas': [
@@ -30,17 +31,20 @@ def ejemplo_editorial():
             {'texto': 'El inventario permite examinar la distribución de recursos.', 'evidencia': ['h2']},
             {'texto': 'La prioridad es verificar su funcionamiento y asignación.', 'evidencia': ['h3']}]
     blocks['bibliografia'] = [{'texto': 'Información estadística municipal proporcionada para este estudio.', 'evidencia': []}]
-    artifact = {'version': '2.2', 'municipio': 'Municipio Prueba', 'estado': 'Entidad Prueba',
-                'vinculos': {**contract, 'fuentes': deepcopy(sources)},
+    artifact = {'version': '2.3', 'municipio': 'Municipio Prueba', 'estado': 'Entidad Prueba',
+                'vinculos': {**contract, 'fuentes': deepcopy(sources), 'evidencia_complementaria_sha256': 'e' * 64},
+                'seleccion_editorial': {str(i): {'encuadre_id': str(i), 'revision_semantica': True,
+                     'consecuencia_revisada': 'Verificar distribución por turno.'} for i in range(1, 19)},
                 'revision': {'estado': 'revisada', 'tipo_autor': 'agente_editorial'},
                 'hechos': facts, 'bloques': blocks, 'ilustraciones': []}
     result = {'municipio': artifact['municipio'], 'estado': artifact['estado'], 'fuentes': sources,
-              'contrato': contract, 'indicadores': sections, 'validaciones': [],
+              'contrato': contract, 'indicadores': sections, 'validaciones': [], 'evidencia_complementaria_sha256': 'e' * 64,
               'periodos_evaluacion': {'general': {'años_objetivo': [2022, 2024]}},
               'calculos': {period: {'calificacion_final': 'REGULAR', 'promedio_tres_dimensiones': '3.00'}
                            for period in ('general', 'ultimo_periodo')}}
     dictionary = {'variables_documento': {key: {} for key in BLOQUES | {
         'municipio', 'estado', 'calificacion_general', 'calificacion_ultimo_periodo'}}}
+    artifact['vinculos']['evaluacion_sha256'] = huella_evaluacion(result)
     rules = {'dimensiones': {'proteccion_civil': [1, 2, 3], 'personal': list(range(4, 11)),
                             'inteligencia': list(range(11, 19))}}
     return result, artifact, dictionary, rules
@@ -51,7 +55,7 @@ class RedaccionTests(unittest.TestCase):
         result, artifact, dictionary, rules = ejemplo_editorial()
         original = deepcopy(result['indicadores'])
         componer(result, dictionary, rules, artifact)
-        self.assertEqual(result['version'], '2.2')
+        self.assertEqual(result['version'], '2.3')
         self.assertEqual(result['contenido_word']['perfil'], 'estudio_seguridad')
         self.assertEqual(set(result['valores_plantilla']), set(dictionary['variables_documento']))
         self.assertEqual(len(result['valores_plantilla']), 25)
@@ -133,6 +137,7 @@ class RedaccionTests(unittest.TestCase):
     def test_calificacion_ausente_no_se_inventa_para_presentar_documento_final(self):
         result, artifact, dictionary, rules = ejemplo_editorial()
         result['calculos']['general']['calificacion_final'] = None
+        artifact['vinculos']['evaluacion_sha256'] = huella_evaluacion(result)
         componer(result, dictionary, rules, artifact)
         self.assertEqual(result['valores_plantilla']['calificacion_general'], 'SIN VALORACIÓN CONJUNTA')
         self.assertIn('completar la evidencia', result['valores_plantilla']['resumen_general'])

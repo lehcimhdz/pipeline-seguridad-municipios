@@ -1,0 +1,151 @@
+{
+  "version": "2.3",
+  "descripcion": "Ponderación de indicadores y candados de prioridad. Se integra a reglas_calificacion.json.",
+  "compatibilidad": "dimensiones_iguales reproduce sólo el promedio aritmético histórico; conserva los controles nuevos y no equivale íntegramente a v2.2.",
+  "ponderacion": {
+    "esquema_predeterminado": "dimensiones_ponderadas",
+    "prioritarios": [
+      2,
+      4,
+      5,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "pesos": {
+      "1": 1,
+      "2": 2,
+      "3": 1,
+      "4": 2,
+      "5": 2,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "10": 2,
+      "11": 2,
+      "12": 2,
+      "13": 2,
+      "14": 2,
+      "15": 1,
+      "16": 1,
+      "17": 1,
+      "18": 1
+    },
+    "esquemas": {
+      "dimensiones_ponderadas": {
+        "formula_dimension": "sum(peso_i * puntaje_i) / sum(peso_i) sobre los indicadores calificados de la dimensión",
+        "formula_final": "sum(peso_dimension * puntaje_dimension)",
+        "peso_dimension": {
+          "proteccion_civil": 0.25,
+          "condiciones_del_personal": 0.35,
+          "inteligencia_y_eficiencia_policial": 0.4
+        },
+        "suma_pesos_por_dimension": {
+          "proteccion_civil": 4,
+          "condiciones_del_personal": 10,
+          "inteligencia_y_eficiencia_policial": 12
+        },
+        "motivo": "Convención del equipo: priorizar capacidad operativa con pesos de dimensión 25%, 35% y 40%.",
+        "efecto_marginal_por_punto": {
+          "1": 0.063,
+          "2": 0.125,
+          "3": 0.063,
+          "4": 0.07,
+          "5": 0.07,
+          "6": 0.035,
+          "7": 0.035,
+          "8": 0.035,
+          "9": 0.035,
+          "10": 0.07,
+          "11": 0.067,
+          "12": 0.067,
+          "13": 0.067,
+          "14": 0.067,
+          "15": 0.033,
+          "16": 0.033,
+          "17": 0.033,
+          "18": 0.033
+        }
+      },
+      "dimensiones_iguales": {
+        "formula_dimension": "sum(peso_i * puntaje_i) / sum(peso_i) sobre los indicadores calificados de la dimensión",
+        "formula_final": "promedio simple de las tres dimensiones",
+        "uso": "Comparación aritmética. La equivalencia integral v2.2 requiere además desactivar candados 7–9 y conservar los criterios de ficha históricos.",
+        "efecto_marginal_por_punto": {
+          "proteccion_civil_por_indicador": "1/9",
+          "personal_por_indicador": "1/21",
+          "inteligencia_por_indicador": "1/24"
+        },
+        "pesos_indicador": "todos_1"
+      },
+      "global": {
+        "formula_final": "sum(peso_i * puntaje_i) / sum(peso_i) sobre los 18 indicadores, sin igualar dimensiones",
+        "suma_pesos": 26,
+        "efecto_marginal_por_punto": {
+          "prioritario": 0.077,
+          "secundario": 0.038
+        },
+        "nota": "Protección civil baja a 4/26 del resultado."
+      }
+    }
+  },
+  "candados_adicionales": [
+    {
+      "id": 7,
+      "nombre": "prioritarios_para_excelente",
+      "condicion": "Se pretende asignar EXCELENTE.",
+      "requisito": "Los ocho indicadores prioritarios tienen puntaje igual o mayor que 4.",
+      "modifica_puntaje": false
+    },
+    {
+      "id": 8,
+      "nombre": "prioritarios_para_muy_bien",
+      "condicion": "Se pretende asignar MUY BIEN.",
+      "requisitos": [
+        "Promedio ponderado de los prioritarios igual o mayor que 3.00.",
+        "Ningún prioritario con puntaje 1."
+      ],
+      "modifica_puntaje": false
+    },
+    {
+      "id": 9,
+      "nombre": "prioritarios_colapsados",
+      "condicion": "Cuatro o más prioritarios con puntaje 1 por falta de respuesta acreditada.",
+      "efecto": "La calificación no puede superar MAL.",
+      "modifica_puntaje": false
+    }
+  ],
+  "agregacion": {
+    "completo": {
+      "requiere": "18 indicadores calificados",
+      "formula": "promedio ponderado dentro de cada dimensión; dimensiones con pesos 0.25, 0.35 y 0.40"
+    },
+    "evaluables": {
+      "formula": "promedio ponderado de los indicadores calificados dentro de cada dimensión; suma de las tres dimensiones por sus pesos 0.25, 0.35 y 0.40",
+      "cobertura_minima_por_dimension": {
+        "proteccion_civil": 2,
+        "condiciones_del_personal": 5,
+        "inteligencia_y_eficiencia_policial": 6
+      },
+      "cobertura_prioritaria_minima": 6,
+      "efecto_si_no_se_cumple": "resultado indeterminado; no se publica calificación conjunta",
+      "tope_con_pendientes": "MUY BIEN",
+      "imputacion": false,
+      "sensibilidad": "asignar 1 y 5 a los pendientes con los mismos pesos para obtener límites"
+    }
+  },
+  "pruebas_requeridas": [
+    "Monotonicidad: subir un punto cualquier indicador nunca baja la calificación agregada, y subir un punto un prioritario la mueve al menos tanto como subirlo en un secundario de la misma dimensión.",
+    "Comparación: dimensiones_iguales reproduce el promedio aritmético 2.2, no su categoría cuando intervienen los nuevos candados.",
+    "Sensibilidad: el intervalo que asigna 1 y 5 a los indicadores sin puntaje se calcula con los mismos pesos.",
+    "Cobertura prioritaria: en modo evaluables, con menos de seis prioritarios calificados el resultado se marca como indeterminado y no se publica una calificación conjunta.",
+    "Candados: casos de prueba para los candados 7, 8 y 9, incluido el caso límite de un prioritario con puntaje 1 no acreditado como falta de respuesta.",
+    "Reponderación: con cobertura completa, la razón entre efectos marginales de prioritarios es <= 2; con faltantes se informan los pesos efectivos."
+  ],
+  "requisito_previo": {
+    "descripcion": "Verificar el universo de cada dato; la lista de bloqueos se calcula en cada ejecución."
+  }
+}

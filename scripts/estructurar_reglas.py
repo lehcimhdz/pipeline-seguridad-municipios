@@ -18,7 +18,9 @@ def construir():
     if any(sorted(c['puntaje'] for c in f['criterios']) != [1, 2, 3, 4, 5] for f in historical['fichas']):
         raise ValueError('Se requieren los cinco criterios en cada ficha.')
     result = deepcopy(historical)
-    result['version'] = '2.2'
+    result['version'] = '2.3'
+    for key, filename in (('ponderacion_config', 'ponderacion.json'), ('definiciones_config', 'definiciones_cngmd.json')):
+        result[key] = json.loads((ROOT / 'config' / filename).read_text(encoding='utf-8'))
     result.pop('fuente_historica', None)
     result['fuente'] = {'archivo': str(BENCHMARK.relative_to(ROOT)), 'sha256': sha256(BENCHMARK)}
     current = None
@@ -87,6 +89,36 @@ def construir():
         'ultimo_periodo': 'Dos ediciones censales recientes para indicadores 1–16; dos años calendario recientes para 17–18. No omitir celdas vacías al seleccionar.',
         'parametros_conservados': '18 indicadores, 90 criterios, escala 1–5, tres dimensiones, dependencias y candados de la transcripción histórica.',
         'limites': 'Los umbrales del benchmark no acreditan vigencia normativa ni estándares externos. Las tasas requieren denominadores documentados; no se completan con cifras de la muestra editorial.'}
+    result['agregacion']['modos']['evaluables'].update(
+        formula=result['ponderacion_config']['agregacion']['evaluables']['formula'],
+        peso_dimensiones='25% protección civil, 35% condiciones del personal, 40% inteligencia y eficiencia policial',
+        minimo_prioritarios=6)
+    result['agregacion']['esquema_predeterminado'] = 'dimensiones_ponderadas'
+    result['politica_evidencia']['fuentes_externas'] = True
+    result['politica_evidencia']['condiciones_fuentes_externas'] = 'Complementos explícitos: archivo íntegro con SHA-256, identidad municipal, año, localizador y revisión. No búsqueda ni imputación automática.'
+    result['politica_evidencia']['precedencia'] = 'El anexo de integración 2.3 y config/definiciones_cngmd.json prevalecen sobre criterios históricos incompatibles; los 90 criterios originales se conservan como transcripción, no como única especificación ejecutable.'
+    result['politica_evidencia']['parametros_conservados'] = '18 indicadores y escala 1–5. Agregación, definiciones y fichas 3 y 15 revisadas explícitamente en 2.3.'
+    result['convenciones_ejecutables']['implementacion_vigente'] = 'evaluacion_v23.evaluar y ponderacion.agregar_ponderado; calificar conserva las reglas base y la comparación histórica.'
+    for ficha in result['fichas']:
+        ficha['peso'] = result['ponderacion_config']['ponderacion']['pesos'][str(ficha['id'])]
+        ficha['prioritario'] = ficha['id'] in result['ponderacion_config']['ponderacion']['prioritarios']
+        if ficha['id'] in (2, 3, 4, 5, 7, 9, 10, 14, 15, 18):
+            ficha['revision_definiciones'] = 'Requiere observaciones complementarias verificadas por año antes de asignar puntaje.'
+        if ficha['id'] in (3, 15):
+            ficha['escala_vigente'] = result['definiciones_config']['escalas_operativas'][
+                'proteccion_civil' if ficha['id'] == 3 else 'llamadas']
+    staff = result['fichas'][3]['datos_requeridos']
+    staff.pop('total_personal', None)
+    staff['personal_policial'] = {'tipo_dato': 'integer', 'minimo': 0, 'universo': 'Corporaciones policiales; excluye administrativos.'}
+    staff['policias_por_mil_habitantes']['formula'] = 'personal_policial / poblacion * 1000'
+    result['fichas'][8]['datos_requeridos']['naturaleza_del_dato'] = {
+        'tipo_dato': 'string', 'opciones': ['asignado_al_cierre'],
+        'precaucion': 'Unidades asignadas, no personas que recibieron equipo ni compras anuales.'}
+    result['fichas'][14]['datos_requeridos'] = {
+        'llamadas_procedentes': {'tipo_dato': 'integer', 'minimo': 0},
+        'registro_municipal': {'tipo_dato': 'boolean', 'debe_contener': 'Competencia del registro verificada por año.'},
+        'poblacion': {'tipo_dato': 'integer', 'minimo': 1},
+        'meta_respuesta': {'tipo_dato': 'string', 'obligatorio_para': 'Puntaje 5, cumplimiento documentado en cada año.'}}
     return result
 
 

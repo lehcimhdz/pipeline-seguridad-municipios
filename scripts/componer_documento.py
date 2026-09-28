@@ -50,13 +50,11 @@ def componer(result, dictionary, rules, redaccion=None):
     for period in PERIODOS:
         dimensions[period] = {}
         for dimension, ids in rules['dimensiones'].items():
-            available = [Decimal(str(section['evaluaciones'][period]['puntaje']))
-                         for section in result['indicadores'] if section['numero'] in ids
-                         and section['evaluaciones'][period].get('puntaje') is not None]
-            dimensions[period][dimension] = decimal_corto(sum(available) / len(available)) if available else None
-    result['version'] = '2.2'
+            value = result['calculos'][period].get('promedios_dimension', {}).get(dimension)
+            dimensions[period][dimension] = decimal_corto(value) if value is not None else None
+    result['version'] = '2.3'
     result['contenido_word'] = {
-        'version': '2.2', 'perfil': 'estudio_seguridad',
+        'version': '2.3', 'perfil': 'estudio_seguridad',
         'titulo': f"Estudio de Seguridad de {result['municipio']}, {result['estado']}",
         'periodo': periodo_texto(years),
         'calificaciones': {period: values['calificacion_' + period] for period in PERIODOS},

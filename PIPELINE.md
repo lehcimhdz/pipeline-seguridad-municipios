@@ -1,4 +1,4 @@
-# Pipeline del Estudio de Seguridad · contrato v2.2
+# Pipeline del Estudio de Seguridad · rama v2, contrato 2.3
 
 ## Producto y documentos de referencia
 
@@ -12,7 +12,7 @@ El flujo distingue tres originales:
 | `templates/Machote general medicion version final rzg investigación.docx` | Guía para interpretar los apartados y definir qué contenido recibe cada variable. |
 | `templates/Machote_seguridad_general_con_calificacion.docx` | Benchmark para evaluar: fichas, criterios, dimensiones, escala y candados. |
 
-`templates/seguridad_medicion.docx` es una base técnica derivada del formato de la consultora. Incluye su portada y logo, el capítulo SEGURIDAD con los 18 indicadores y la bibliografía. La migración conserva los tres originales. Las fichas internas, alternativas de redacción e instrucciones del benchmark no se insertan en el documento del cliente.
+`templates/seguridad_medicion.docx` es una base técnica derivada del formato de la consultora. Incluye portada y logo, capítulo SEGURIDAD con los 18 indicadores y bibliografía. La migración no altera sus documentos de referencia. Una operación separada y reproducible añade al benchmark interno el anexo metodológico 2.3; el formato y la guía originales no cambian. Las fichas internas e instrucciones no se insertan en el documento del cliente.
 
 La guía contiene una duplicación de Personal que no altera el catálogo: Personal es el indicador 4, evaluaciones el 5, instituto el 6 y Certificado Único Policial el 7. Se conservan 18 indicadores únicos.
 
@@ -28,7 +28,7 @@ Puede agregarse `input/word/{municipio} Anexo.docx` como contraste documental y 
 
 El paquete aporta las tablas municipales y estatales de los 18 indicadores. Las unidades y las fechas deben ser compatibles antes de comparar territorios. La identidad del estado se verifica en la documentación o se declara mediante `--estado` cuando no se dispone del Anexo. La interpretación editorial debe corresponder a esa misma identidad.
 
-No se utilizan otros paquetes, CSV, servicios externos ni información de otro municipio. La muestra editorial aporta estilo y estructura, no cifras, calificaciones ni conclusiones. Cada fuente incorporada queda vinculada por nombre y SHA-256.
+El paquete sigue siendo la fuente estadística principal. Los complementos revisados pueden aportar población y aclarar universos o denominadores: se incorporan expresamente mediante `--complemento`, nunca mediante búsquedas automáticas. Cada observación exige archivo conservado, SHA-256, año, localizador y revisión. No se trasladan datos de otro municipio. La muestra editorial aporta estilo, no cifras ni conclusiones. Véase [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md).
 
 ## Contrato y variables
 
@@ -46,7 +46,7 @@ No se utilizan otros paquetes, CSV, servicios externos ni información de otro m
 
 Los saltos `\n\n` de los valores se convierten en párrafos reales. La base ya no solicita variables de tablas, gráficas calculadas o cierres repetidos. Las ilustraciones originales se seleccionan por separado y se sitúan junto al análisis correspondiente.
 
-La composición utiliza versión `2.2` y perfil `estudio_seguridad`. Los valores publicables se conservan en `valores_plantilla`; las tablas extraídas, coordenadas, huellas, motivos de pendiente y cálculos permanecen como trazabilidad del JSON.
+La composición utiliza versión `2.3` y perfil `estudio_seguridad`. Los valores publicables se conservan en `valores_plantilla`; las tablas extraídas, coordenadas, huellas, motivos de pendiente y cálculos permanecen como trazabilidad del JSON. El contrato incluye ponderación, definiciones censales y catálogo editorial; una modificación exige regenerarlo y revisar el texto.
 
 ## Preparación e interpretación editorial
 
@@ -60,8 +60,9 @@ Este paso produce `output/json/{slug}_evidencia_seguridad.json`: evidencia orden
 
 El archivo editorial contiene:
 
-- Identidad territorial y versión 2.2.
-- Vínculos a fuentes, benchmark y reglas mediante SHA-256.
+- Identidad territorial y versión 2.3.
+- Vínculos a fuentes, benchmark, reglas, ponderación, definiciones, catálogo narrativo y evidencia complementaria mediante SHA-256.
+- `seleccion_editorial`: encuadre de cada indicador, revisión semántica y consecuencia específica revisada. No equivale a insertar un párrafo prefabricado.
 - Hechos que identifican indicador, tabla, fila, columna y valor observado.
 - Operaciones editoriales comprobables cuando un párrafo utiliza diferencias o variaciones porcentuales.
 - Dos resúmenes, 18 análisis y bibliografía, organizados en párrafos con referencias a esos hechos.
@@ -73,7 +74,7 @@ La comprobación numérica no sustituye la lectura crítica: el autor debe revis
 
 ## Calificaciones
 
-La metodología está en [METODOLOGIA.md](METODOLOGIA.md). `scripts/estructurar_reglas.py` transcribe las 18 fichas y los 90 criterios del benchmark activo y registra su huella. Si cambió un criterio frente a su implementación, se detiene para que se revise la regla ejecutable.
+La metodología está en [METODOLOGIA.md](METODOLOGIA.md). `scripts/estructurar_reglas.py` conserva la transcripción de las 18 fichas históricas y añade ponderación y definiciones revisadas. El anexo de integración 2.3 declara su precedencia sobre los criterios incompatibles; las fichas 3 y 15 tienen escalas operativas explícitas. Un cambio en los criterios históricos exige revisar la implementación.
 
 El periodo general conserva las observaciones de cada indicador. El reciente utiliza las dos ediciones censales de cierre para 1–16 y los dos años calendario de cierre para 17–18. Una celda vacía no se omite ni se transforma en cero. Las etiquetas de las tablas no se reinterpretan automáticamente como el año de referencia de un censo.
 
@@ -81,12 +82,14 @@ Se ofrecen dos métodos:
 
 | Opción | Resultado y alcance |
 | --- | --- |
-| `--calificacion evaluables` | Adaptación explícita sobre indicadores calificables. Exige al menos 2/3 por dimensión: 2 de 3, 5 de 7 y 6 de 8. Conserva igual peso para las dimensiones, declara cobertura y no permite EXCELENTE con pendientes. Es la opción predeterminada de la ejecución. |
+| `--calificacion evaluables` | Exige 2 de 3, 5 de 7 y 6 de 8 por dimensión y al menos 6 de los 8 prioritarios. Usa ponderación 25/35/40, declara cobertura y no permite EXCELENTE con pendientes. Es la opción predeterminada. |
 | `--calificacion completo` | Aplica la agregación estricta del benchmark: los 18 puntajes son necesarios. Si falta alguno, la valoración conjunta queda pendiente y se bloquea la publicación del Word final. `--preparar` conserva la evidencia para su revisión. |
 
 Los modos mantienen las mismas fichas individuales y la misma escala. La adaptación evaluable no atribuye puntajes a los pendientes ni equivale a un promedio completo. El JSON conserva un intervalo de sensibilidad de la evaluación completa; sus escenarios extremos no se publican como observaciones.
 
-El documento final exige una calificación conjunta en ambos periodos. Este control también bloquea la publicación en modo `evaluables` si alguna dimensión no alcanza la cobertura mínima. Se puede ejecutar `--preparar --calificacion completo` para obtener la evidencia y sus pendientes sin reemplazar la entrega vigente.
+El documento final exige una calificación conjunta en ambos periodos. Se bloquea si falta cobertura por dimensión, hay menos de seis prioritarios evaluables o existe un universo no aplicable sin metodología específica. `--preparar` conserva evidencia y pendientes sin reemplazar la entrega vigente. La lista de pendientes se calcula en cada ejecución: no es una lista fija de siete fichas.
+
+`--esquema dimensiones_iguales` permite comparar el promedio aritmético histórico, pero conserva los controles 2.3: no reproduce íntegramente una evaluación 2.2. `--esquema global` pondera directamente los indicadores. Cada resultado conserva sus coeficientes efectivos; con cobertura parcial cambian los pesos relativos dentro de la dimensión.
 
 Los candados, dependencias y redondeo se documentan en la metodología. No se aplican ajustes discrecionales automáticos. Las referencias jurídicas y académicas suministradas por el benchmark no se presentan como investigación externa realizada por esta ejecución.
 
@@ -160,6 +163,7 @@ Sólo tras la publicación exitosa se limpian los JSON y DOCX anteriores de las 
 Al recibir cambios en los documentos de referencia:
 
 ```sh
+python3 scripts/actualizar_benchmark_v23.py
 python3 scripts/estructurar_reglas.py
 python3 scripts/migrar_machotes_v2.py
 python3 scripts/validar_plantilla.py

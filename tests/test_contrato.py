@@ -34,7 +34,7 @@ class ContratoTests(unittest.TestCase):
         cls.dictionary = json.loads((ROOT / cls.contract['diccionario']['archivo']).read_text(encoding='utf-8'))
 
     def test_only_measurement_has_25_text_variables(self):
-        self.assertEqual(self.contract['version'], '2.2')
+        self.assertEqual(self.contract['version'], '2.3')
         self.assertEqual(self.contract['producto'], 'estudio_seguridad')
         self.assertEqual(set(self.contract['plantillas']), {'medicion'})
         self.assertEqual(self.contract['documentos_salida'], ['medicion'])
@@ -125,7 +125,8 @@ class ContratoTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             temporary = Path(directory)
             paths = [entry['origen'], *[self.contract[key]['archivo'] for key in
-                     ('diccionario', 'reglas', 'metodologia', 'formato', 'redaccion', 'guia', 'benchmark', 'normalizaciones')],
+                     ('diccionario', 'reglas', 'metodologia', 'formato', 'redaccion', 'guia', 'benchmark', 'normalizaciones',
+                      'ponderacion', 'definiciones', 'textos_narrativos')],
                      *[font['archivo'] for font in self.contract['tipografias']]]
             for relative in paths:
                 target = temporary / relative

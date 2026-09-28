@@ -10,9 +10,9 @@ CONTRACT = ROOT / 'config/contrato_documental.json'
 def cargar_contrato(verificar=True):
     contract = json.loads(CONTRACT.read_text(encoding='utf-8'))
     if verificar:
-        if (contract.get('version') != '2.2' or contract.get('producto') != 'estudio_seguridad'
+        if (contract.get('version') != '2.3' or contract.get('producto') != 'estudio_seguridad'
                 or set(contract['plantillas']) != {'medicion'}):
-            raise ValueError('Se requiere el contrato 2.2 del único documento Estudio Seguridad.')
+            raise ValueError('Se requiere el contrato 2.3 del único documento Estudio Seguridad.')
         template = contract['plantillas']['medicion']
         if sha256(ROOT / template['origen']) != template['origen_sha256']:
             raise ValueError(f"Cambió el machote original: {template['origen']}. Revisar y regenerar la base de seguridad.")
@@ -21,7 +21,8 @@ def cargar_contrato(verificar=True):
             raise ValueError('La fuente de formato no coincide con la procedencia de la base operativa.')
         for entry in [template, source, contract['guia'], contract['benchmark'], contract['diccionario'],
                       contract['reglas'], contract['metodologia'], contract['formato'],
-                      contract['redaccion'], contract['normalizaciones'], *contract.get('tipografias', [])]:
+                      contract['redaccion'], contract['normalizaciones'], contract['ponderacion'],
+                      contract['definiciones'], contract['textos_narrativos'], *contract.get('tipografias', [])]:
             if sha256(ROOT / entry['archivo']) != entry['sha256']:
                 raise ValueError(f"Cambió el contrato documental: {entry['archivo']}. Regenerar y revisar la migración.")
     return contract
@@ -40,4 +41,5 @@ def huellas():
             'guia_sha256': contract['guia']['sha256'],
             'normalizaciones_sha256': contract['normalizaciones']['sha256'],
             'formato_sha256': contract['formato']['sha256'],
-            'redaccion_sha256': contract['redaccion']['sha256']}
+            'redaccion_sha256': contract['redaccion']['sha256'],
+            **{key + '_sha256': contract[key]['sha256'] for key in ('ponderacion', 'definiciones', 'textos_narrativos')}}

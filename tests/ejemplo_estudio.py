@@ -8,11 +8,15 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from calificar import calificar_indicador, agregar, dependencias, definir_periodos
+from calificar import definir_periodos
 from componer_documento import componer
 from contrato import huellas
 from documentos import sha256
 from ilustraciones_word import catalogar_graficas, seleccionar_graficas
+from evaluacion_v23 import evaluar
+from ponderacion import agregar_ponderado
+from evidencia_complementaria import vacia, huella_objeto
+from redaccion_editorial import VINCULOS_METODOLOGICOS, huella_evaluacion
 
 
 def ejemplo(directory, *, graficas=False, modo='evaluables'):
@@ -52,6 +56,8 @@ def ejemplo(directory, *, graficas=False, modo='evaluables'):
                        'Mapas de riesgo y alerta temprana', 'Evacuación búsqueda y rescate', 'Primeros auxilios')]
         elif number in (5, 7, 15):
             header, details = ['Año', 'Porcentaje'], [['95']]
+            if number == 15:
+                header, details = ['Año', 'Porcentaje', 'Llamadas procedentes'], [['95', '100']]
         elif number == 8:
             header = ['Año', 'Elementos del uniforme', 'Otorgado', 'Frecuencia']
             details = [[item, 'Sí', 'Anual'] for item in ('Camisola', 'Pantalón', 'Botas', 'Chamarra', 'Fornitura', 'Chaleco táctico')]
@@ -66,20 +72,32 @@ def ejemplo(directory, *, graficas=False, modo='evaluables'):
             tables.append({'tabla': 99, 'ambito': 'estatal', 'filas': [header, ['2022', '90'], ['2024', '90']]})
         sections.append({'numero': number, 'nombre': ficha['nombre'], 'tablas': tables})
     periods = definir_periodos(sections)
-    evaluations = {}
-    for period in ('general', 'ultimo_periodo'):
-        evaluations[period] = {s['numero']: calificar_indicador(
-            s, rules['fichas'][s['numero'] - 1], period, mappings,
-            años_objetivo=periods['ultimo_periodo']['por_indicador'][str(s['numero'])] if period == 'ultimo_periodo' else None)
-            for s in sections}
-        dependencias(evaluations[period])
+    supplemental = vacia(municipality, state)
+    supplemental['fuentes'] = [{'id': 'prueba', 'titulo': 'Fuente ficticia para pruebas',
+                                'archivo': str(source), 'sha256': sha256(source)}]
+    provenance = {'fuente': 'prueba', 'localizador': 'Fixture sintético', 'revision': 'verificada'}
+    for year in (2022, 2024):
+        supplemental['poblacion'].append({**provenance, 'ambito': 'municipal', 'anio': year, 'valor': 1000,
+            'metodo': 'proyeccion', 'serie': 'prueba', 'fecha_referencia': f'{year}-07-01'})
+    for number, fields in {
+        2: {'universo': 'personal_unidad_pc', 'conteo_personas': 'unico'},
+        3: {'grupos_captados': list(rules['definiciones_config']['normalizacion_proteccion_civil']['grupos']), 'catalogo_completo': True},
+        5: {'universo': 'corporaciones_policiales', 'definicion': 'aprobatorias_vigentes'},
+        7: {'universo': 'corporaciones_policiales', 'definicion': 'cup_vigente'},
+        10: {'universo': 'corporaciones_policiales', 'definicion': 'capacitacion_sin_profesionalizacion'},
+        15: {'registro_municipal': True},
+    }.items():
+        supplemental['observaciones'][str(number)] = {str(y): {**provenance, **fields} for y in (2022, 2024)}
+    evaluations = evaluar(sections, rules, mappings, periods, supplemental)
     for section in sections:
         section['evaluaciones'] = {p: evaluations[p][section['numero']] for p in evaluations}
-    result = {'version': '2.2', 'municipio': municipality, 'estado': state, 'estado_ejecucion': 'compuesto',
+    result = {'version': '2.3', 'municipio': municipality, 'estado': state, 'estado_ejecucion': 'compuesto',
+              'evidencia_complementaria': supplemental, 'evidencia_complementaria_sha256': huella_objeto(supplemental),
+              'esquema_ponderacion': 'dimensiones_ponderadas',
               'contrato': huellas(), 'fuentes': [{'archivo': source.name, 'sha256': sha256(source)}],
               'rutas_fuentes': {source.name: str(source)}, 'indicadores': sections,
               'periodos_evaluacion': periods, 'metodo_calificacion': modo,
-              'calculos': {p: agregar(v, rules, modo=modo) for p, v in evaluations.items()},
+              'calculos': {p: agregar_ponderado(v, rules, modo=modo) for p, v in evaluations.items()},
               'catalogo_ilustraciones': catalogar_graficas(source), 'validaciones': []}
     facts = {}
     for section in sections:
@@ -91,9 +109,13 @@ def ejemplo(directory, *, graficas=False, modo='evaluables'):
     blocks.update(resumen_general=[paragraph('f1'), paragraph('f5'), paragraph('f11')],
                   resumen_ultimo_periodo=[paragraph('f1'), paragraph('f5'), paragraph('f11')],
                   bibliografia=[{'texto': 'Información estadística municipal proporcionada para el estudio.', 'evidencia': []}])
-    artifact = {'version': '2.2', 'municipio': municipality, 'estado': state,
+    artifact = {'version': '2.3', 'municipio': municipality, 'estado': state,
+                'seleccion_editorial': {str(i): {'encuadre_id': str(i), 'revision_semantica': True,
+                    'consecuencia_revisada': 'Revisar distribución por turno.'} for i in range(1, 19)},
                 'vinculos': {'fuentes': deepcopy(result['fuentes']),
-                            **{key: result['contrato'][key] for key in ('benchmark_sha256', 'reglas_sha256')}},
+                            'evidencia_complementaria_sha256': result['evidencia_complementaria_sha256'],
+                            'evaluacion_sha256': huella_evaluacion(result),
+                            **{key: result['contrato'][key] for key in VINCULOS_METODOLOGICOS}},
                 'revision': {'estado': 'revisada', 'tipo_autor': 'agente_editorial'},
                 'hechos': facts, 'bloques': blocks}
     writing = directory / 'redaccion.json'

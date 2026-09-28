@@ -10,5 +10,8 @@ __pycache__/
 input/**/*.docx
 input/**/*.json
 input/**/*.csv
+input/**/*.pdf
+input/**/*.xlsx
+input/**/*.xls
 output/**/*.docx
 output/**/*.json

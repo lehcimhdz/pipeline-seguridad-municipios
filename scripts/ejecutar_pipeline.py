@@ -12,10 +12,14 @@ from uuid import uuid4
 
 from documentos import leer_docx, seccion_seguridad, sha256
 from ilustraciones_word import catalogar_graficas, seleccionar_graficas
-from calificar import agregar, calificar_indicador, dependencias, definir_periodos
+from calificar import definir_periodos
 from componer_documento import componer
 from salidas import limpiar_salidas
 from contrato import huellas
+from evaluacion_v23 import evaluar
+from ponderacion import agregar_ponderado
+from evidencia_complementaria import cargar as cargar_complemento, huella_objeto
+from redaccion_editorial import huella_evaluacion
 
 ROOT = Path(__file__).resolve().parents[1]
 SUFFIXES = (' Anexo.docx', ' PAQUETE SEGURIDAD.docx')
@@ -106,7 +110,7 @@ def publicar(result, output, mode='final'):
     return dest, report, removed
 
 
-def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='evaluables'):
+def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='evaluables', complemento=None, esquema=None):
     municipality, documents = discover(input_dir)
     contract_hashes = huellas()
     evidence = {suffix: leer_docx(path) for suffix, path in documents.items()}
@@ -127,15 +131,8 @@ def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='evaluabl
         raise ValueError('La entidad declarada difiere del Anexo.')
     state = documented_state or declared_state
     periods = definir_periodos(sections)
-    evaluations = {}
-    for period in ('general', 'ultimo_periodo'):
-        calculations = {}
-        for section, ficha in zip(sections, rules['fichas']):
-            target = periods['ultimo_periodo']['por_indicador'][str(section['numero'])] if period == 'ultimo_periodo' else None
-            calculations[section['numero']] = calificar_indicador(
-                section, ficha, period, mappings, años_objetivo=target)
-        dependencias(calculations)
-        evaluations[period] = calculations
+    supplemental = cargar_complemento(complemento, municipality, state)
+    evaluations = evaluar(sections, rules, mappings, periods, supplemental)
     validations = []
     for section in sections:
         number = section['numero']
@@ -152,11 +149,11 @@ def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='evaluabl
             if calculation['puntaje'] is None:
                 validations.append({'nivel': 'alcance', 'codigo': 'INDICADOR_NO_EVALUABLE',
                                     'indicador': number, 'periodo': period, 'detalle': calculation['motivo']})
-    aggregates = {period: agregar(values, rules, modo=modo_calificacion)
+    aggregates = {period: agregar_ponderado(values, rules, modo=modo_calificacion, esquema=esquema)
                   for period, values in evaluations.items()}
     catalogue = [image for path in documents.values() for image in catalogar_graficas(path)]
     result = {
-        'version': '2.2', 'ejecucion_id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8],
+        'version': '2.3', 'ejecucion_id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8],
         'municipio': municipality, 'estado': state, 'estado_ejecucion': 'requiere_redaccion',
         'contrato': {**contract_hashes, 'normalizaciones_sha256': sha256(mappings_path)},
         'fuentes': [{'archivo': path.name, 'sha256': sha256(path),
@@ -167,8 +164,12 @@ def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='evaluabl
         'valores_plantilla': {key: None for key in dictionary['variables_documento']},
         'indicadores': sections, 'calculos': aggregates, 'periodos_evaluacion': periods,
         'metodo_calificacion': modo_calificacion, 'catalogo_ilustraciones': catalogue,
+        'esquema_ponderacion': aggregates['general']['esquema'],
+        'evidencia_complementaria': supplemental,
+        'evidencia_complementaria_sha256': huella_objeto(supplemental),
         'evidencia_documental': {documents[suffix].name: blocks for suffix, blocks in evidence.items()},
         'validaciones': validations}
+    result['evaluacion_sha256'] = huella_evaluacion(result)
     return result, dictionary, rules
 
 
@@ -180,13 +181,16 @@ def main():
     parser.add_argument('--estado', help='Entidad federativa cuando el Anexo no esté disponible.')
     parser.add_argument('--preparar', action='store_true', help='Prepara evidencia y calificaciones para que el agente redacte el estudio.')
     parser.add_argument('--calificacion', choices=('evaluables', 'completo'), default='evaluables')
+    parser.add_argument('--complemento', type=Path, help='Datos y definiciones revisados, con fuente y localizador por observación.')
+    parser.add_argument('--esquema', choices=('dimensiones_ponderadas', 'dimensiones_iguales', 'global'))
     parser.add_argument('--graficas', choices=('originales', 'ninguna'), default='originales')
     args = parser.parse_args()
     try:
         municipality, _ = discover(args.input)
         writing_path = args.redaccion or ROOT / 'input/redaccion' / f'{slug(municipality)}.json'
         writing = json.loads(writing_path.read_text(encoding='utf-8')) if writing_path.is_file() else None
-        result, dictionary, rules = preparar(args.input, writing, args.estado, args.calificacion)
+        result, dictionary, rules = preparar(args.input, writing, args.estado, args.calificacion,
+                                            args.complemento, args.esquema)
         if args.preparar:
             directory = args.output / 'json'
             directory.mkdir(parents=True, exist_ok=True)
@@ -194,7 +198,13 @@ def main():
             from renderizar_word import guardar_recibo
             guardar_recibo(result, dest)
             print(f'Evidencia para interpretación editorial: {dest}')
+            for period, calculation in result['calculos'].items():
+                print(f'{period}: {calculation["cobertura"]["evaluables"]}/18 evaluables; '
+                      f'{calculation["cobertura"]["prioritarios_evaluables"]}/8 prioritarios. '
+                      f'Calificación: {calculation["calificacion_final"] or "pendiente"}.')
             return
+        if any(c['calificacion_final'] is None for c in result['calculos'].values()):
+            raise ValueError('La evidencia revisada no alcanza la cobertura requerida. Use --preparar y complete --complemento. La entrega anterior se conserva.')
         if writing is None:
             raise ValueError(f'Falta la interpretación editorial: {writing_path}. Use --preparar para revisar la evidencia y redactar sus apartados.')
         if not result['estado']:

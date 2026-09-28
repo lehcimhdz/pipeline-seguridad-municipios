@@ -199,8 +199,9 @@ class CalificacionTests(unittest.TestCase):
         dependencias(results)
         self.assertIsNone(results[3]['puntaje'])
 
-    def test_no_external_sources_allowed_in_rules(self):
-        self.assertFalse(RULES['politica_evidencia']['fuentes_externas'])
+    def test_external_sources_require_explicit_review(self):
+        self.assertTrue(RULES['politica_evidencia']['fuentes_externas'])
+        self.assertIn('localizador', RULES['politica_evidencia']['condiciones_fuentes_externas'])
 
     def test_periods_distinguish_census_editions_from_annual_series(self):
         sections = [section(1, [['2020', 'Sí'], ['2022', 'Sí'], ['2024', 'Sí']]),

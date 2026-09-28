@@ -13,7 +13,10 @@ import tempfile
 import unicodedata
 import zipfile
 from lxml import etree as ET
-from calificar import agregar, calificar_indicador, dependencias, definir_periodos
+from calificar import definir_periodos
+from evaluacion_v23 import evaluar
+from ponderacion import agregar_ponderado
+from evidencia_complementaria import validar as validar_complemento, huella_objeto
 from componer_documento import componer
 from contrato import ROOT, CONTRACT, cargar_contrato, huellas
 from documentos import sha256
@@ -137,15 +140,15 @@ def validar_resultado(result, mode='final'):
         raise ValueError('Todos los apartados de la entrega deben contener texto editorial.')
     if values['municipio'] != municipality or values['estado'] != result['estado']:
         raise ValueError('La identidad editorial no corresponde al municipio.')
+    supplemental = validar_complemento(result['evidencia_complementaria'], municipality, result['estado'])
+    if huella_objeto(supplemental) != result.get('evidencia_complementaria_sha256'):
+        raise ValueError('Cambió la evidencia complementaria.')
+    evaluations = evaluar(sections, rules, mappings, result['periodos_evaluacion'], supplemental)
     for period in ('general', 'ultimo_periodo'):
-        computed = {}
-        for section, ficha in zip(sections, rules['fichas']):
-            target = result['periodos_evaluacion']['ultimo_periodo']['por_indicador'][str(section['numero'])] if period == 'ultimo_periodo' else None
-            computed[section['numero']] = calificar_indicador(section, ficha, period, mappings, años_objetivo=target)
-        dependencias(computed)
+        computed = evaluations[period]
         if any(section['evaluaciones'][period] != computed[section['numero']] for section in sections):
             raise ValueError('Una evaluación difiere de la evidencia y de los criterios vigentes.')
-        grade = agregar(computed, rules, modo=result['metodo_calificacion'])
+        grade = agregar_ponderado(computed, rules, modo=result['metodo_calificacion'], esquema=result['esquema_ponderacion'])
         if grade != result['calculos'][period]:
             raise ValueError('La calificación agregada difiere de su metodología.')
         if grade['calificacion_final'] is None:

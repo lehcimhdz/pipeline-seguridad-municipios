@@ -1,0 +1,291 @@
+{
+  "version": "2.4.1",
+  "proposito": "Definiciones de referencia CNGMD, población, normalización de protección civil y valoración provisional. Integra y corrige la propuesta del asesor; complementa reglas_calificacion.json y config/ponderacion.json. Las escalas_operativas y revision_integracion prevalecen sobre descripciones históricas.",
+  "fuentes_consultadas": [
+    {
+      "documento": "CNGMD 2023, Módulo 3, Sección I. Estructura organizacional y recursos",
+      "url": "https://www.inegi.org.mx/contenidos/programas/cngmd/2023/doc/cngmd_2023_m3s1.pdf"
+    },
+    {
+      "documento": "CNGMD 2023, Módulo 3, Sección II. Ejercicio de la función de seguridad pública municipal",
+      "url": "https://www.inegi.org.mx/contenidos/programas/cngmd/2023/doc/cngmd_2023_m3s2.pdf"
+    },
+    {
+      "documento": "CNGMD 2023, Módulo 4. Protección civil",
+      "url": "https://www.inegi.org.mx/contenidos/programas/cngmd/2023/doc/cngmd_2023_m4.pdf"
+    }
+  ],
+  "poblacion": {
+    "regla": "Población positiva, año, ámbito, fuente, método y serie comparables. Policía/población*1000. No mezclar una población municipal con una magnitud estatal.",
+    "fuentes_potenciales_de_anclajes_no_cargados": {
+      "2010": "Censo de Población y Vivienda 2010 (INEGI)",
+      "2015": "Encuesta Intercensal 2015 (INEGI)",
+      "2020": "Censo de Población y Vivienda 2020 (INEGI)",
+      "2025": "Encuesta Intercensal 2025 (INEGI): verificar disponibilidad, cobertura y precisión de la estimación municipal antes de utilizarla. Ningún valor se incorpora por esta referencia."
+    },
+    "fuentes_por_año_de_referencia": {
+      "2014": "Proyecciones de población de los municipios, CONAPO (alternativa: interpolación entre Censo 2010 y Encuesta Intercensal 2015)",
+      "2015": "Encuesta Intercensal 2015",
+      "2016": "Proyecciones de población de los municipios, CONAPO",
+      "2018": "Proyecciones de población de los municipios, CONAPO",
+      "2020": "Censo de Población y Vivienda 2020",
+      "2022": "Proyecciones de población de los municipios, CONAPO (alternativa: interpolación entre Censo 2020 y Encuesta Intercensal 2025)",
+      "2024": "Proyecciones de población de los municipios, CONAPO (alternativa: interpolación entre Censo 2020 y Encuesta Intercensal 2025)",
+      "2025": "Encuesta Intercensal 2025"
+    },
+    "precauciones": [
+      "La Encuesta Intercensal es una encuesta por muestreo: sus cifras municipales traen estimadores de precisión. En municipios pequeños el error relativo puede ser alto; si el coeficiente de variación supera el umbral que publique el INEGI para uso con reserva, se prefiere la proyección de CONAPO y se declara el cambio.",
+      "Verificar la edición y base de la serie CONAPO usada. Una diferencia con otra fuente exige revisión, no sustitución automática de un año ni mezcla silenciosa de metodologías.",
+      "La serie de tasas no cambia de criterio a mitad del periodo: si se opta por interpolación en lugar de CONAPO, se aplica a todos los años sin anclaje."
+    ],
+    "campos_obligatorios_en_el_paquete_editorial": [
+      "poblacion",
+      "año_referencia_poblacion",
+      "fuente_poblacion",
+      "metodo_estimacion",
+      "coeficiente_variacion_si_aplica"
+    ],
+    "indicadores_afectados": [
+      4,
+      14,
+      15
+    ],
+    "pendiente_para_el_colega": "Aportar población municipal y estatal en input/complementos/{slug}.json mediante --complemento; conservar fuentes y revisión. Sin esos denominadores las tasas de 4, 14 y 15 no se calculan. La ficha 18 requiere incidencia delictiva, no población. fuentes_por_año_de_referencia es un catálogo de alternativas, no una instrucción para mezclarlas."
+  },
+  "definiciones_por_ficha": [
+    {
+      "ficha": 4,
+      "referencia_cuestionario": "Módulo 3, Sección I, preguntas 1.3, 1.12, 1.14 y 1.1.A",
+      "definicion": "1.3 capta personal adscrito al cierre, incluidos mandos, administrativos y apoyo. 1.12 distingue organizaciones policiales de áreas de dirección, administrativas y apoyo; 1.14 desagrega funciones policiales. 1.1.A identifica existencia de institución propia y 1.1.B esquemas de coordinación: mando único no equivale a ausencia de institución.",
+      "consecuencia_para_la_regla": "Usar personal policial en el numerador, población en el denominador. Personal total sólo describe una aproximación, no acredita el estándar. Registrar institución propia y mando único por separado."
+    },
+    {
+      "ficha": 5,
+      "referencia_cuestionario": "Módulo 3, Sección I, preguntas 1.16 y 1.17",
+      "definicion": "El censo distingue seis estatus por tipo de evaluación (control de confianza, competencias básicas y desempeño): con evaluaciones aprobatorias vigentes; aprobatorias no vigentes; vigentes no aprobatorias; programados; evaluados con resultados pendientes; y sin evaluación.",
+      "consecuencia_para_la_regla": "Se acaba la ambigüedad entre evaluado y aprobado: el porcentaje del benchmark se calcula con 'aprobatorias vigentes' sobre el personal de corporaciones policiales. Los otros estatus se usan en el texto para explicar si la brecha es de programación o de reprobación."
+    },
+    {
+      "ficha": 7,
+      "referencia_cuestionario": "Módulo 3, Sección I, preguntas 1.20 y 1.21",
+      "definicion": "El Certificado Único Policial vigente se reporta al cierre del año, para el personal de corporaciones policiales y desagregado por tipo de corporación.",
+      "consecuencia_para_la_regla": "CUP vigente sobre corporaciones policiales. No marcar inconsistencia sólo porque haya control de confianza aprobado sin CUP."
+    },
+    {
+      "ficha": 10,
+      "referencia_cuestionario": "Módulo 3, Sección I, subsecciones I.2.4.2 y I.2.4.4, preguntas 1.18, 1.19, 1.22 y 1.23",
+      "definicion": "Profesionalización (formación inicial, actualización, especialización y alta dirección, acreditadas con diploma) y capacitación (acciones formativas con evaluación) son dos cosas distintas, y el censo pide expresamente no contar la profesionalización dentro de la capacitación. Las acciones formativas se reportan impartidas y concluidas.",
+      "consecuencia_para_la_regla": "La ficha debe leer ambas: la profesionalización acreditada mide formación de carrera; la capacitación mide oferta del año. El porcentaje de personal capacitado se calcula sobre el personal de la pregunta 1.12, no sobre la suma de asistentes por tema."
+    },
+    {
+      "ficha": 18,
+      "referencia_cuestionario": "CNGMD 2023, módulo 3, sección II: bloques separados de justicia cívica y Ministerio Público; revisar cada edición.",
+      "definicion": "Distinguir personas, objetos, faltas cívicas y delitos. La pregunta 2.8 se refiere al uso de la fuerza en justicia cívica; el bloque ante Ministerio Público tiene reactivos propios, incluido 2.24. No agregar destinos ni trasladar el alcance de una pregunta al otro bloque.",
+      "consecuencia_para_la_regla": "Verificar qué destino contiene el paquete. La distinción disponible en el cuestionario no prueba que esté preservada en sus tablas. Los conteos de uso de la fuerza no demuestran por sí solos respeto ni violación de derechos humanos; el máximo exige una revisión específica documentada."
+    },
+    {
+      "ficha": 1,
+      "referencia_cuestionario": "Módulo 4, Sección I, preguntas 1.1, 1.2, 1.3, 1.6, 1.9 y 1.11",
+      "definicion": "Desde 2023 el censo capta el reglamento municipal, el Plan o Programa de Protección Civil y el Plan de Emergencia por separado, con fecha de publicación, fecha de última actualización y URL; los temas o ejes rectores del plan; las etapas del ciclo de gestión integral de riesgos que cubre; si fue evaluado; y si la unidad tiene informe anual.",
+      "consecuencia_para_la_regla": "El benchmark de 'vigente y actualizado' se vuelve medible: fecha de última actualización y cobertura de la etapa de identificación y análisis de riesgos (pregunta 1.6). También permite distinguir plan de protección civil de plan de emergencia."
+    },
+    {
+      "ficha": 2,
+      "referencia_cuestionario": "Módulo 4, Sección III, preguntas 3.16 y 3.17, y Sección V",
+      "definicion": "3.16 da acciones formativas impartidas, impartidas y concluidas, y personal capacitado contado una sola vez. 3.17 las desagrega por tema y ahí una persona se cuenta tantas veces como temas concluyó. La Sección V es distinta: capacitación y difusión hacia otras instituciones, personal voluntario y población.",
+      "consecuencia_para_la_regla": "Se resuelve la duplicidad: el conteo de personas se toma de 3.16 y los temas de 3.17, sin sumarlos. Hay que verificar de cuál de las dos secciones salen los cursos del paquete, porque capacitar al personal propio y capacitar a la población no son el mismo indicador."
+    },
+    {
+      "ficha": 3,
+      "referencia_cuestionario": "Módulo 4, Sección III, pregunta 3.17",
+      "definicion": "El catálogo de 2023 tiene veintiún temas, entre ellos identificación y análisis de riesgos, mapas de peligros y riesgos, sistemas de alerta temprana, evacuación, búsqueda y rescate, primeros auxilios, incendios y manejo de extintores, materiales peligrosos, Sistema de Comando de Incidentes, simulacros, brigadas, continuidad de operaciones y verificación de inmuebles.",
+      "consecuencia_para_la_regla": "La normalización se hace por grupos temáticos y no por rótulos, y el denominador son los grupos efectivamente captados en cada edición."
+    }
+  ],
+  "normalizacion_proteccion_civil": {
+    "problema": "Los rótulos del catálogo cambian entre ediciones y el módulo cambió de lugar: hasta 2021 la protección civil estaba en el módulo 2, sección IV, y desde 2023 tiene módulo propio con un catálogo más amplio. Contar rótulos produce caídas artificiales.",
+    "regla_1_grupos": "Se cuentan grupos temáticos, no rótulos. Un grupo se acredita si en la edición se impartió cualquiera de sus temas equivalentes.",
+    "regla_2_denominador": "El denominador son los grupos captados por el cuestionario de esa edición. Un grupo que no existía en el catálogo no cuenta como ausente: se excluye y se declara la cobertura (por ejemplo, 5 de 5 grupos captados).",
+    "regla_3_umbral": "El umbral del puntaje 5 deja de ser 'cinco de seis' y pasa a ser 'al menos el 80% de los grupos captados, incluyendo siempre identificación y análisis de riesgos'. Los demás escalones se prorratean igual.",
+    "regla_4_personas": "El personal capacitado se toma de la pregunta 3.16 (conteo único). Los totales por tema de 3.17 solo se usan para acreditar cobertura temática, nunca para sumar personas.",
+    "regla_5_origen": "Se verifica si la cifra del paquete proviene de la capacitación al personal de la unidad (sección III.5) o de la capacitación y difusión a la población (sección V). No se mezclan.",
+    "grupos": {
+      "identificacion_y_analisis_de_riesgos": [
+        "Identificación y análisis de riesgos",
+        "Mapas de peligros y riesgos",
+        "Análisis de riesgos"
+      ],
+      "comando_y_manejo_de_incidentes": [
+        "Sistema de Comando de Incidentes",
+        "Manejo de crisis"
+      ],
+      "alerta_temprana": [
+        "Sistemas de alerta temprana"
+      ],
+      "evacuacion_busqueda_y_rescate": [
+        "Evacuación, búsqueda y rescate",
+        "Formación de brigadas de protección civil",
+        "Simulacros"
+      ],
+      "primeros_auxilios": [
+        "Primeros auxilios"
+      ],
+      "incendios_y_materiales_peligrosos": [
+        "Prevención y combate de incendios, y manejo de extintores",
+        "Manejo de emergencias con materiales peligrosos"
+      ]
+    },
+    "temas_complementarios_no_nucleo": [
+      "Básico - Sistema Nacional de Protección Civil (SINAPROC)",
+      "Elaboración de programas o instrumentos de protección civil",
+      "Marco regulatorio sobre protección civil",
+      "Medidas de seguridad y autoprotección civil",
+      "Señalética de protección civil",
+      "Conocimiento de normas oficiales mexicanas",
+      "Verificación de inmuebles",
+      "Evaluación de daños",
+      "Continuidad de operaciones",
+      "Otro tema"
+    ],
+    "nota_2023": "Sistema de Comando de Incidentes, continuidad de operaciones, verificación de inmuebles y evaluación de daños aparecen en el catálogo reciente; antes de su incorporación no pueden tratarse como ausencia.",
+    "refuerzo_desde_el_plan": "La pregunta 1.6 del módulo 4 declara qué etapas del ciclo de gestión integral de riesgos cubre el plan. Si el plan incluye identificación y análisis de riesgos pero la capacitación no, el texto lo señala como brecha entre documento y práctica."
+  },
+  "llamadas_procedentes": {
+    "que_mide": "Una llamada procedente es la que corresponde a una emergencia real y se canaliza a una corporación. La improcedente es muda, incompleta, de broma, insulto, prueba o no emergencia. El porcentaje mide la calidad de la demanda que entra y del filtro que la clasifica.",
+    "quien_la_produce": "El registro proviene del centro de atención de llamadas de emergencia. Muchos municipios no operan uno: el 9-1-1 lo atiende el centro de mando estatal. En esos casos la ausencia de dato no indica mal desempeño municipal.",
+    "por_que_no_es_un_indicador_de_eficacia": "Un porcentaje alto depende sobre todo del comportamiento del público, no del municipio; un porcentaje bajo puede convivir con buena atención. Tampoco mide tiempo de respuesta ni resolución.",
+    "benchmark_revisado": {
+      "principal": "Continuidad y consistencia del registro de competencia municipal y tasas descriptivas calculables. El crecimiento de llamadas no se considera una mejora del desempeño; prevalece escalas_operativas.llamadas.",
+      "secundario": "Comparación del porcentaje con el estatal del mismo año, solo como contexto de la demanda.",
+      "no_asignar_5": "Sin evidencia de tiempos de respuesta o de despacho, el máximo es 4.",
+      "dato_dudoso": "100% de procedencia se marca como dato dudoso y no puede recibir más de 3."
+    },
+    "verificar": "Módulo 3, Sección I, subsección I.7, preguntas 1.122 a 1.129, para confirmar si el reactivo distingue llamadas recibidas por el centro municipal de las canalizadas por el centro estatal."
+  },
+  "interpretacion_provisional": {
+    "principio": "Cuando falta evidencia para aplicar un criterio, el puntaje sigue siendo null y no se imputa. Pero el indicador ya no queda mudo: se emite una valoración provisional con lo que sí está disponible, etiquetada como tal, que alimenta la narración y no el cálculo.",
+    "estructura": {
+      "puntaje": "null",
+      "valoracion_provisional": {
+        "nivel_indicativo": "entero 1 a 5 o null cuando tampoco existe evidencia sustituta suficiente",
+        "base": "variables efectivamente usadas",
+        "confianza": "alta | media | baja | no_estimable",
+        "falta": "qué dato la convertiría en puntaje",
+        "computa_en_agregacion": false
+      }
+    },
+    "efecto_en_la_agregacion": "No computa ni modifica cobertura. Escenario intermedio separado; conserva íntegros los extremos 1 y 5.",
+    "efecto_en_la_narracion": "El apartado se escribe con la fórmula de tres movimientos y cierra diciendo qué falta: «con la información disponible el rubro se ubicaría en el nivel N; no se le asigna puntaje porque falta X».",
+    "reglas_por_ficha": {
+      "3": "Contar grupos temáticos con el catálogo de la edición. Si la ficha 2 es 1, el nivel indicativo es 1 con confianza alta.",
+      "4": "Sin población y personal policial acreditados, describir la plantilla sin traducir su tamaño absoluto a un nivel de desempeño.",
+      "9": "Calcular las razones con el dato tal como viene y declarar si es inventario o dotación. Si el chaleco por elemento es mayor o igual a 1 bajo cualquiera de las dos lecturas, el nivel indicativo es 4; si es menor a 0.5 en ambas, es 2. Confianza baja.",
+      "10": "Sin el porcentaje de personal, usar presencia o ausencia de temas núcleo: con dos o más grupos núcleo en la edición reciente, nivel indicativo 3; con uno, 2; sin ninguno, 1.",
+      "14": "Sin poblaciones comparables, usar continuidad y evolución del conteo: presencia en todas las ediciones y sin retrocesos, nivel indicativo 3; presencia intermitente, 2. Confianza baja.",
+      "15": "Continuidad acreditada del registro municipal permite nivel indicativo 3; no asumir competencia municipal si no se conoce quién opera el servicio.",
+      "18": "Sin incidencia delictiva municipal, comparar remisiones por cada mil habitantes con la tasa estatal equivalente: dentro de más o menos 25% de la estatal, nivel indicativo 3; muy por encima, revisar naturaleza de las remisiones antes de fijar nivel. Confianza media."
+    },
+    "limite": "Ninguna valoración provisional puede sostener por sí sola una recomendación de política ni un juicio sobre derechos; solo describe el rango en el que caería el rubro."
+  },
+  "pendientes_de_verificacion": [
+    {
+      "fuente": "Módulo 3, Sección I, subsección I.6 (preguntas 1.106 a 1.121)",
+      "pregunta": "Equipamiento y cámaras de vigilancia: confirmar si el reactivo pide inventario al cierre del año con condición de funcionamiento, como sí lo hace la pregunta 2.1 del módulo 4 para protección civil.",
+      "fichas": [
+        9,
+        14
+      ]
+    },
+    {
+      "fuente": "Módulo 3, Sección I, subsección I.7 (preguntas 1.122 a 1.129)",
+      "pregunta": "Centros de atención de llamadas de emergencia: confirmar universo del registro municipal frente al estatal.",
+      "fichas": [
+        15
+      ]
+    },
+    {
+      "fuente": "Módulo 3, Sección I, subsección I.10 (preguntas 1.138 a 1.149)",
+      "pregunta": "Academias o institutos de formación policial: confirmar si el reactivo capta el uso de academias de otra institución, que es lo que permite acreditar acceso por convenio.",
+      "fichas": [
+        6
+      ]
+    },
+    {
+      "fuente": "Módulo 3, Sección II, subsección II.6 (preguntas 2.52 a 2.56)",
+      "pregunta": "Enfrentamientos: confirmar dónde se capta el fallecimiento de personal en funciones y si distingue evento e instrumento.",
+      "fichas": [
+        17
+      ]
+    },
+    {
+      "fuente": "Ediciones 2015 a 2021 (módulo 2, sección IV)",
+      "pregunta": "Catálogos de protección civil previos al módulo propio de 2023, para completar el mapa de equivalencias.",
+      "fichas": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "fuente": "Descripción de archivos de cada edición",
+      "pregunta": "Confirmar nombres de variables y años de referencia; cada edición del censo capta dos años en las preguntas de ejercicio de la función.",
+      "fichas": [
+        17,
+        18
+      ]
+    }
+  ],
+  "cambios_para_el_modulo": [
+    "Cargar la serie de población municipal y estatal con fuente y año; habilita las fichas 4, 14 y 18.",
+    "Sustituir el denominador de las fichas 4, 5, 7, 9 y 10 por el personal de corporaciones policiales (módulo 3, pregunta 1.12, numeral 1) cuando el paquete lo traiga.",
+    "Separar en la ficha 5 el estatus 'aprobatorias vigentes' del resto de los estatus.",
+    "Normalizar los temas de protección civil por grupos y con denominador variable por edición.",
+    "Agregar el campo valoracion_provisional a la salida de cada ficha, sin efecto en la agregación.",
+    "Marcar los municipios bajo mando único para que su cero no se trate como falta de respuesta."
+  ],
+  "revision_integracion": {
+    "correcciones": [
+      "La tasa de la ficha 4 cambia el numerador policial; la población es su denominador.",
+      "Mando único y ausencia de institución municipal son situaciones distintas.",
+      "CUP nulo con control aprobado no demuestra inconsistencia: faltan otros componentes.",
+      "1.29 distingue unidades asignadas y personas que recibieron equipo; 1.110 excluye cámaras fuera de servicio.",
+      "Un escenario provisional no reduce los extremos del intervalo de sensibilidad."
+    ],
+    "pendientes": [
+      "Catálogos de protección civil 2015–2021 y correspondencia con años de referencia.",
+      "Verificar la columna y el universo exactos usados en cada tabla del Paquete.",
+      "No existe en la entrega el catálogo de 144 cierres anunciado."
+    ],
+    "decisiones": [
+      "Mantener ocho prioritarios; indicador 3 conserva peso 1.",
+      "Adoptar pesos 25/35/40 y candados 7–9 como convenciones versionadas.",
+      "Preferir una serie anual CONAPO consistente; interpolación geométrica sólo con anclajes y método explícitos.",
+      "No asignar nivel provisional cuando la base sustituta tampoco esté documentada."
+    ]
+  },
+  "escalas_operativas": {
+    "proteccion_civil": {
+      "descripcion": "Cobertura anual sobre grupos captados acreditados por edición; general usa la media de coberturas. Sin catálogo no puntúa.",
+      "niveles": {
+        "1": "0 con ausencia explícita y catálogo completo",
+        "2": ">0",
+        "3": ">=1/3",
+        "4": ">=2/3; máximo si falta análisis de riesgos",
+        "5": ">=80% y análisis de riesgos en cada observación evaluada"
+      },
+      "origen": "Convención de integración: completa escalones que la propuesta dejó sin definir."
+    },
+    "llamadas": {
+      "descripcion": "Registro de competencia municipal y población documentados. No se interpreta volumen como eficacia.",
+      "niveles": {
+        "1": "Ausencia de registro acreditada en todos los cortes aplicables",
+        "2": "Registro previo que falta en ambos cortes recientes por ausencia acreditada",
+        "3": "Registro parcial con ambos cortes recientes; o inconsistencia pendiente (incluye 100%)",
+        "4": "Registro completo y tasas calculables, sin meta de respuesta acreditada",
+        "5": "Registro completo, tasas calculables y cumplimiento documentado de meta de respuesta/despacho en todo el periodo"
+      },
+      "limite": "Vacíos no acreditados permanecen null. El crecimiento de llamadas se describe, no suma puntos por sí mismo.",
+      "origen": "Convención de integración documentada; sustituye comparación del porcentaje como desempeño."
+    }
+  }
+}
