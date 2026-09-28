@@ -43,6 +43,15 @@ class PipelineTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Anexo'):
                 discover(path)
 
+    def test_equivalent_unicode_municipality_names_are_accepted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)
+            (path / ('Garci\u0301a' + SUFFIXES[1])).touch()
+            (path / ('Garc\u00eda' + SUFFIXES[0])).touch()
+            municipality, documents = discover(path)
+            self.assertEqual(municipality, 'Garc\u00eda')
+            self.assertEqual(len(documents), 2)
+
     def test_failed_render_preserves_previous_delivery(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)

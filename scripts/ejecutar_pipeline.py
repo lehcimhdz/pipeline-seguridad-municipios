@@ -37,13 +37,13 @@ def discover(input_dir):
     if len(packages) != 1:
         raise ValueError('Se requiere exactamente un PAQUETE SEGURIDAD del municipio.')
     package = packages[0]
-    municipality = package.name.removesuffix(SUFFIXES[1]).strip()
+    municipality = unicodedata.normalize('NFC', package.name.removesuffix(SUFFIXES[1]).strip())
     if not municipality:
         raise ValueError('El archivo debe identificar el municipio.')
     documents = {SUFFIXES[1]: package}
     annexes = sorted(p for p in input_dir.glob('* Anexo.docx') if not p.name.startswith('~$'))
     if annexes:
-        if len(annexes) != 1 or annexes[0].name != municipality + SUFFIXES[0]:
+        if len(annexes) != 1 or unicodedata.normalize('NFC', annexes[0].name) != municipality + SUFFIXES[0]:
             raise ValueError('El Anexo debe corresponder al municipio del Paquete Seguridad.')
         documents[SUFFIXES[0]] = annexes[0]
     return municipality, documents
@@ -124,7 +124,7 @@ def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='disponib
     title = next((block for block in evidence.get(SUFFIXES[0], [])
                   if block['tipo'] == 'parrafo' and 'Medición del municipio' in block['texto']), None)
     identity = re.search(r'municipio de\s+(.+?),\s+([^,\n]+)', title['texto']) if title else None
-    if identity and identity[1].strip().casefold() != municipality.casefold():
+    if identity and unicodedata.normalize('NFC', identity[1].strip()).casefold() != municipality.casefold():
         raise ValueError('La identidad del Anexo no corresponde al municipio.')
     documented_state = identity[2].strip() if identity else None
     declared_state = estado or (redaccion or {}).get('estado')

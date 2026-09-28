@@ -111,6 +111,14 @@ def nombre_documento(municipio):
     return unicodedata.normalize('NFC', municipio.strip()) + ' Estudio Seguridad.docx'
 
 
+def fuentes_corresponden(municipio, fuentes):
+    municipio = unicodedata.normalize('NFC', municipio)
+    fuentes = [unicodedata.normalize('NFC', nombre) for nombre in fuentes]
+    admitidas = {municipio + sufijo for sufijo in (' PAQUETE SEGURIDAD.docx', ' Anexo.docx')}
+    return (municipio + ' PAQUETE SEGURIDAD.docx' in fuentes
+            and len(fuentes) == len(set(fuentes)) and set(fuentes) <= admitidas)
+
+
 def validar_resultado(result, mode='final'):
     if mode != 'final':
         raise ValueError('El estudio se publica en presentación final.')
@@ -120,9 +128,7 @@ def validar_resultado(result, mode='final'):
     municipality = result['municipio']
     nombre_documento(municipality)
     sources = [item['archivo'] for item in result['fuentes']]
-    admitted = {municipality + suffix for suffix in (' PAQUETE SEGURIDAD.docx', ' Anexo.docx')}
-    if (municipality + ' PAQUETE SEGURIDAD.docx' not in sources
-            or len(sources) != len(set(sources)) or not set(sources) <= admitted):
+    if not fuentes_corresponden(municipality, sources):
         raise ValueError('Las fuentes deben corresponder al Paquete Seguridad y, opcionalmente, su Anexo.')
     sections = result['indicadores']
     if [s['numero'] for s in sections] != list(range(1, 19)):

@@ -12,12 +12,18 @@ from lxml import etree as ET
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from documentos import sha256
-from renderizar_word import TEMPLATE, W, STYLE, auditar, parrafo, reemplazar, renderizar, run, texto, validar_resultado
+from renderizar_word import TEMPLATE, W, STYLE, auditar, fuentes_corresponden, parrafo, reemplazar, renderizar, run, texto, validar_resultado
 from ilustraciones_word import seleccionar_graficas
 from ejemplo_estudio import ejemplo
 
 
 class WordTests(unittest.TestCase):
+    def test_unicode_equivalent_source_names_are_accepted(self):
+        self.assertTrue(fuentes_corresponden('Garc\u00eda', [
+            'Garci\u0301a PAQUETE SEGURIDAD.docx', 'Garci\u0301a Anexo.docx']))
+        self.assertFalse(fuentes_corresponden('Garc\u00eda', [
+            'Garci\u0301a PAQUETE SEGURIDAD.docx', 'Otro Anexo.docx']))
+
     def test_fragmented_marker_preserves_surrounding_style(self):
         p = ET.Element(W + 'p')
         for text in ('Antes {muni', 'cipio} después'):
