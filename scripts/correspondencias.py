@@ -157,16 +157,17 @@ def resolver(sections, mappings, definitions, complemento):
                     entry['_conflictos'].append({'campo': 'revision', 'detalle': 'Complemento sin revisión acreditada.'})
                 else:
                     for field, value in supplied.items():
-                        if field.startswith('_'):
+                        if field.startswith('_') or field == 'evidencias_campos':
                             continue
                         if field in entry and not equivalentes(entry[field], value):
                             entry['_conflictos'].append({'campo': field, 'paquete': entry[field], 'complemento': value})
                             continue
                         if field not in ('revision', 'fuente', 'localizador'):
+                            field_source = supplied.get('evidencias_campos', {}).get(field, supplied)
                             entry['_trazabilidad'].setdefault(field, {
                                 'valor': deepcopy(value), 'tipo': 'complemento_verificado',
                                 'regla': 'evidencia_complementaria', 'evidencias': [{
-                                    'fuente': supplied.get('fuente'), 'localizador': supplied.get('localizador'),
+                                    'fuente': field_source.get('fuente'), 'localizador': field_source.get('localizador'),
                                     'anio': year, 'indicador': n}]})
                         entry[field] = deepcopy(value)
             if (n == 14 and entry.get('universo') == 'camaras_en_servicio'

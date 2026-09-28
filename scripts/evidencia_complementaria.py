@@ -99,6 +99,15 @@ def validar(value, municipio, estado):
             if not re.fullmatch(r'\d{4}', year):
                 raise ValueError('Año complementario inválido.')
             provenance(item)
+            field_evidence = item.get('evidencias_campos')
+            if field_evidence is not None:
+                fields = set(item) - {'fuente', 'localizador', 'revision', 'evidencias_campos'}
+                if not isinstance(field_evidence, dict) or set(field_evidence) != fields:
+                    raise ValueError('Cada campo requiere su propia evidencia cuando se combinan fuentes.')
+                for evidence in field_evidence.values():
+                    if not isinstance(evidence, dict):
+                        raise ValueError('Evidencia de campo inválida.')
+                    provenance(evidence)
     return deepcopy(value)
 
 
