@@ -62,6 +62,21 @@ su funcionamiento; una remisión policial no equivale a un delito resuelto.
 No sumar participantes de distintos cursos como personas únicas ni inferir
 déficits por habitante sin denominadores compatibles.
 
+Antes de escribir, leer las correspondencias del cálculo: distinguen cifras
+reportadas, conceptos homologados y lecturas condicionales. Una homologación
+automática no permite decir «se verificó» o «se comprobó» una situación que el
+paquete sólo declara. El título de CUP vigente puede sustentar esa denominación;
+un porcentaje de evaluaciones no permite añadir «aprobatorias vigentes» si el
+estatus sigue sin conocerse.
+
+La valoración provisional se explica como una limitación del argumento, no
+como una etiqueta técnica repetida en cada apartado. Si la capacitación acredita
+varios grupos, describir su alcance temático sin sumar asistentes de cursos
+distintos. Si hay llamadas en dos cortes, señalar la continuidad de la serie,
+sin atribuir la operación del servicio al municipio ni confundir más llamadas
+con mejor atención. La incertidumbre debe quedar junto a la conclusión que
+limita, sin referencias al archivo interno donde se conserva.
+
 Una diferencia entre observaciones no demuestra una tendencia continua. Las
 rupturas abruptas de una serie exigen verificar su comparabilidad antes de
 atribuirlas a decisiones de gestión. Un porcentaje superior al total posible o

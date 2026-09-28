@@ -204,7 +204,7 @@ def main():
                       f'Calificación: {calculation["calificacion_final"] or "pendiente"}.')
             return
         if any(c['calificacion_final'] is None for c in result['calculos'].values()):
-            raise ValueError('La evidencia revisada no alcanza la cobertura requerida. Use --preparar y complete --complemento. La entrega anterior se conserva.')
+            raise ValueError('La evidencia no alcanza la cobertura requerida tras resolver las correspondencias automáticas. Use --preparar para consultar los requisitos concretos pendientes; aporte sólo esas aclaraciones o datos mediante --complemento. La entrega anterior se conserva.')
         if writing is None:
             raise ValueError(f'Falta la interpretación editorial: {writing_path}. Use --preparar para revisar la evidencia y redactar sus apartados.')
         if not result['estado']:

@@ -99,11 +99,12 @@ def construir():
     result['politica_evidencia']['precedencia'] = 'El anexo de integración 2.3 y config/definiciones_cngmd.json prevalecen sobre criterios históricos incompatibles; los 90 criterios originales se conservan como transcripción, no como única especificación ejecutable.'
     result['politica_evidencia']['parametros_conservados'] = '18 indicadores y escala 1–5. Agregación, definiciones y fichas 3 y 15 revisadas explícitamente en 2.3.'
     result['convenciones_ejecutables']['implementacion_vigente'] = 'evaluacion_v23.evaluar y ponderacion.agregar_ponderado; calificar conserva las reglas base y la comparación histórica.'
+    result['politica_evidencia']['correspondencias'] = 'Resolver automáticamente campos explícitos y homologaciones autorizadas en definiciones_cngmd.json, con coordenadas por año. No exigir un complemento vacío como paso previo; sólo resolver ambigüedades o aportar datos realmente ausentes. Las contradicciones bloquean la valoración.'
     for ficha in result['fichas']:
         ficha['peso'] = result['ponderacion_config']['ponderacion']['pesos'][str(ficha['id'])]
         ficha['prioritario'] = ficha['id'] in result['ponderacion_config']['ponderacion']['prioritarios']
         if ficha['id'] in (2, 3, 4, 5, 7, 9, 10, 14, 15, 18):
-            ficha['revision_definiciones'] = 'Requiere observaciones complementarias verificadas por año antes de asignar puntaje.'
+            ficha['revision_definiciones'] = 'Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.'
         if ficha['id'] in (3, 15):
             ficha['escala_vigente'] = result['definiciones_config']['escalas_operativas'][
                 'proteccion_civil' if ficha['id'] == 3 else 'llamadas']

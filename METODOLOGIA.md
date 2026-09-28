@@ -65,7 +65,21 @@ Los parámetros proceden del benchmark, no de las calificaciones impresas en el 
 | 17 | Fallecimientos, continuidad de los registros y, cuando corresponda, tasas comparables y eventos. Los porcentajes de egresos no sustituyen los conteos de muertes. |
 | 18 | Puestas a disposición divididas entre incidencia delictiva y comparación estatal. El máximo también requiere revisión documentada de recomendaciones de derechos humanos. |
 
-Las fichas históricas, sus revisiones y condiciones ejecutables están en `reglas_calificacion.json`. Los indicadores 2, 3, 4, 5, 7, 9, 10, 14, 15 y 18 requieren confirmar sus definiciones y procedencia por año antes de puntuar. Los faltantes se calculan dinámicamente. Los campos necesarios y su contrato están en [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md); un diccionario censal describe la variable, pero no prueba qué columna se trasladó al paquete.
+Las fichas históricas, sus revisiones y condiciones ejecutables están en `reglas_calificacion.json`. Las definiciones y los requisitos de cada indicador se resuelven por año, primero con el paquete y después, si hace falta, con evidencia complementaria. No existe una exigencia general de revisión manual para todas las fichas. Los faltantes se calculan dinámicamente y señalan el requisito pendiente, no la mera ausencia de un archivo auxiliar. Los campos necesarios y su contrato están en [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md).
+
+## Correspondencias entre datos y criterios
+
+Las definiciones 2.4.2 mantienen la integración metodológica 2.3 y hacen explícita la lectura automática del paquete. Los archivos de `new-elements` aportan parámetros generales: no son datos de un municipio ni sustituyen a `input/`. El reconocimiento distingue tres operaciones:
+
+- Recuperar un dato explícito de su título o celda, conservando indicador, año, tabla, fila y columna según corresponda.
+- Homologar ese concepto con una definición o grupo temático ya adoptado, dejando identificada la regla.
+- Formular una lectura condicional cuando sigue faltando una comprobación sustantiva. No convertirla en un puntaje acreditado.
+
+Estas decisiones quedan en `correspondencias` dentro de cada evaluación, junto con sus evidencias. No reciben una marca ficticia de revisión humana. El renderizador vuelve a calcularlas a partir de las fuentes y las reglas; modificar sólo el JSON no cambia el resultado válido. Una observación complementaria documentada puede resolver una ambigüedad, pero una contradicción con información explícita exige conciliación.
+
+El título «Certificado Único Policial vigente», unido a una columna porcentual municipal, permite aplicar la definición censal adoptada para ese certificado y su universo policial. Es una homologación metodológica del dato reportado, no prueba de que se haya auditado nuevamente el levantamiento o reconstruido el denominador. El título genérico «Evaluaciones de control de confianza» no identifica el estatus aprobatorio vigente. Tampoco «servidores capacitados» identifica por sí solo personal exclusivo de protección civil ni acredita un conteo único.
+
+La homologación reconoce conceptos; no aporta cantidades inexistentes. No obtiene población a partir del tamaño de la plantilla, no transforma personal total en policías y no deduce un catálogo completo de capacitación sólo de los temas que aparecen impartidos.
 
 ## Homologaciones que sí se realizan
 
@@ -136,6 +150,12 @@ Llamadas: 5 requiere registro completo, tasas calculables y meta documentada de 
 ## Valoraciones provisionales
 
 Se conserva `valoracion_provisional` junto a un puntaje `null`: nivel indicativo o null, evidencia usada, confianza, dato faltante y `computa_en_agregacion: false`. No es una manera de completar los ocho prioritarios. Las cifras absolutas de personal no se convierten en un nivel sin denominador; el listado de cursos no se transforma en personas capacitadas.
+
+En capacitación policial, la presencia positiva de dos o más grupos núcleo en el último año observado permite nivel indicativo 3; un grupo permite 2. Los rótulos equivalentes cuentan una sola vez. Se identifica expresamente ese año para no presentar la lectura reciente como cobertura de todo el periodo. No se suman participantes repetidos ni se supone que un tema no listado equivale a cero; el nivel 1 requiere acreditar la ausencia, no una homologación fallida. Profesionalización y capacitación permanecen diferenciadas.
+
+En llamadas, dos cortes municipales recientes con conteos permiten nivel indicativo 3, de confianza baja, como lectura condicional de continuidad de la serie reportada. Si se desconoce quién opera el servicio, esa incertidumbre permanece: no se declara competencia municipal ni se asigna el puntaje definitivo. Esta convención de integración recoge la lectura de continuidad propuesta por el asesor sin atribuirle una validación adicional; reemplaza el bloqueo automático de toda interpretación por falta de confirmación del operador. Los conteos no prueban tiempos de atención, resolución ni desempeño. Un vacío tampoco basta para asignar nivel 2 por supuesto registro incompleto.
+
+En cámaras, los conteos pueden sostener una lectura provisional de presencia y evolución aun sin poblaciones comparables; no acreditan por sí mismos que los equipos funcionen. Cada valoración declara su base y qué evidencia falta para aplicar la ficha definitiva.
 
 Cuando todos los pendientes admiten nivel provisional, se calcula un escenario intermedio separado. Los extremos que asignan 1 y 5 permanecen intactos; el escenario no los estrecha ni pasa por resultado observado. Sin evidencia sustituta suficiente se declara `no_estimable`. Una institución no aplicable no se somete a esos escenarios como si fuera un dato desconocido ordinario.
 

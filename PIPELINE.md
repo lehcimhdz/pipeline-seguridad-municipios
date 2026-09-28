@@ -28,7 +28,9 @@ Puede agregarse `input/word/{municipio} Anexo.docx` como contraste documental y 
 
 El paquete aporta las tablas municipales y estatales de los 18 indicadores. Las unidades y las fechas deben ser compatibles antes de comparar territorios. La identidad del estado se verifica en la documentación o se declara mediante `--estado` cuando no se dispone del Anexo. La interpretación editorial debe corresponder a esa misma identidad.
 
-El paquete sigue siendo la fuente estadística principal. Los complementos revisados pueden aportar población y aclarar universos o denominadores: se incorporan expresamente mediante `--complemento`, nunca mediante búsquedas automáticas. Cada observación exige archivo conservado, SHA-256, año, localizador y revisión. No se trasladan datos de otro municipio. La muestra editorial aporta estilo, no cifras ni conclusiones. Véase [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md).
+El paquete sigue siendo la fuente estadística principal. Todos los datos municipales proceden de `input/`. El material del asesor recibido en `new-elements`, fuera del repositorio, aporta parámetros generales que se integran en `config/`; no se consulta como una fuente de cifras del municipio. La muestra editorial aporta estilo, no cifras ni conclusiones.
+
+Primero se resuelven las correspondencias que permiten los títulos, columnas y valores del paquete. Los complementos revisados son opcionales: pueden aportar población o aclarar los universos que sigan pendientes, sin repetir lo ya reconocido. Se incorporan expresamente mediante `--complemento`, nunca mediante búsquedas automáticas. Cada observación complementaria exige archivo conservado, SHA-256, año, localizador y revisión. Véase [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md).
 
 ## Contrato y variables
 
@@ -56,7 +58,9 @@ La escritura tiene una etapa explícita de interpretación. El programa prepara 
 python3 scripts/ejecutar_pipeline.py --preparar --estado "Nombre del estado"
 ```
 
-Este paso produce `output/json/{slug}_evidencia_seguridad.json`: evidencia ordenada, periodos, puntajes y catálogo de imágenes. No publica un nuevo Word. El archivo de redacción se guarda por defecto en `input/redaccion/{slug}.json`, o se indica mediante `--redaccion`.
+Este paso produce `output/json/{slug}_evidencia_seguridad.json`: evidencia ordenada, periodos, puntajes, valoraciones provisionales y catálogo de imágenes. Las `correspondencias` de cada evaluación registran el campo reconocido, el tipo de decisión, la regla aplicada y sus evidencias por indicador y año, con tabla, fila y columna cuando provienen de celdas. Una homologación automática no se marca como revisión humana ni como nueva comprobación externa. Los faltantes explican el requisito concreto que no pudo resolverse; un complemento vacío no es, por sí solo, motivo de bloqueo.
+
+Preparar no publica un nuevo Word. El archivo de redacción se guarda por defecto en `input/redaccion/{slug}.json`, o se indica mediante `--redaccion`.
 
 El archivo editorial contiene:
 
@@ -86,6 +90,10 @@ Se ofrecen dos métodos:
 | `--calificacion completo` | Aplica la agregación estricta del benchmark: los 18 puntajes son necesarios. Si falta alguno, la valoración conjunta queda pendiente y se bloquea la publicación del Word final. `--preparar` conserva la evidencia para su revisión. |
 
 Los modos mantienen las mismas fichas individuales y la misma escala. La adaptación evaluable no atribuye puntajes a los pendientes ni equivale a un promedio completo. El JSON conserva un intervalo de sensibilidad de la evaluación completa; sus escenarios extremos no se publican como observaciones.
+
+Las definiciones 2.4.2 incorporan correspondencias automáticas y lecturas condicionales dentro del contrato 2.3. Un CUP explícitamente vigente puede evaluarse con el porcentaje reportado bajo la homologación censal adoptada. En cambio, un título genérico no convierte una evaluación en aprobación vigente, ni un total de servidores en personal exclusivo de una unidad. Una contradicción entre un campo explícito y un complemento exige conciliación; no se impone silenciosamente una de las versiones.
+
+Las valoraciones provisionales conservan `puntaje: null` y no cuentan para cobertura ni promedio. En capacitación policial se reconocen grupos núcleo del último año disponible, sin sumar asistentes entre cursos. En llamadas, dos cortes municipales recientes permiten una lectura condicional de continuidad de la serie; no prueban quién opera el servicio ni su eficacia. El renderizador recalcula las correspondencias y las evaluaciones antes de aceptar el JSON.
 
 El documento final exige una calificación conjunta en ambos periodos. Se bloquea si falta cobertura por dimensión, hay menos de seis prioritarios evaluables o existe un universo no aplicable sin metodología específica. `--preparar` conserva evidencia y pendientes sin reemplazar la entrega vigente. La lista de pendientes se calcula en cada ejecución: no es una lista fija de siete fichas.
 
@@ -126,6 +134,7 @@ El interlineado de los títulos se aplica como mínimo para que una letra de 24 
 Paquete Seguridad + Anexo opcional
   → comprobar identidad, originales y contrato
   → extraer evidencia y catalogar gráficas existentes
+  → reconocer correspondencias y aclarar sólo los faltantes específicos
   → aplicar benchmark y declarar cobertura
   → redactar y revisar la interpretación vinculada a los hechos
   → llenar las 25 variables y reutilizar las imágenes seleccionadas

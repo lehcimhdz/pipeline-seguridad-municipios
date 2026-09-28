@@ -110,8 +110,10 @@ class EvidenciaTests(unittest.TestCase):
             self.assertEqual(huella_objeto(data), result['evidencia_complementaria_sha256'])
             mappings = json.loads((ROOT / 'config/normalizaciones.json').read_text())
             evaluations = evaluar(result['indicadores'], RULES, mappings, result['periodos_evaluacion'], vacia(result['municipio'], result['estado']))
-            for n in (2, 3, 5, 7, 10, 15):
+            for n in (2, 3, 5, 10, 15):
                 self.assertIsNone(evaluations['general'][n]['puntaje'])
+            # CUP vigente se identifica desde el título, sin exigir un sello manual.
+            self.assertIsNotNone(evaluations['general'][7]['puntaje'])
             self.assertIsNone(agregar_ponderado(evaluations['general'], RULES, modo='evaluables')['calificacion_final'])
 
     def test_fuente_modificada_y_localizador_ausente(self):

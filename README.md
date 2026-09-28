@@ -22,7 +22,9 @@ python3 scripts/validar_plantilla.py
 python3 scripts/ejecutar_pipeline.py --preparar --estado "Nombre del estado"
 ```
 
-`--preparar` genera `output/json/{slug}_evidencia_seguridad.json` con estadísticas, calificaciones y un catálogo de gráficas existentes. El estado debe quedar identificado por la documentación o declararse expresamente cuando falte el Anexo.
+`--preparar` genera `output/json/{slug}_evidencia_seguridad.json` con estadísticas, correspondencias documentadas, calificaciones y un catálogo de gráficas existentes. El estado debe quedar identificado por la documentación o declararse expresamente cuando falte el Anexo.
+
+El programa reconoce lo que los títulos y las columnas permiten establecer y lo relaciona con los parámetros generales. No exige una confirmación manual para cada celda. Los datos de cada municipio proceden de `input/`; el material recibido en `new-elements`, fuera del repositorio, aporta criterios generales, no estadísticas municipales. Sus reglas incorporadas se conservan en `config/`.
 
 Un agente editorial o una persona redacta y revisa `input/redaccion/{slug}.json`. Este archivo contiene los dos resúmenes, los 18 análisis, la bibliografía y la selección de ilustraciones. Cada párrafo remite a hechos verificables; las fuentes y el benchmark quedan vinculados por sus huellas. No se necesita una API key. Un nuevo municipio o una fuente modificada requiere una nueva interpretación revisada.
 
@@ -34,7 +36,7 @@ Opciones principales:
 
 - `--input` y `--output`: carpetas de entradas y salidas.
 - `--redaccion`: ubicación alternativa de la interpretación editorial.
-- `--complemento input/complementos/{slug}.json`: población y definiciones documentadas por año; véase [recolección](RECOLECCION_DATOS.md). No se busca ni rellena evidencia automáticamente.
+- `--complemento input/complementos/{slug}.json`: evidencia opcional para resolver denominadores y ambigüedades que no aclara el paquete; véase [recolección](RECOLECCION_DATOS.md). No requiere volver a declarar lo ya reconocido ni autoriza buscar cifras externas automáticamente.
 - `--esquema dimensiones_ponderadas|dimensiones_iguales|global`: ponderación principal o comparación explícita; la principal es 25/35/40.
 - `--calificacion evaluables|completo`: valoración con cobertura declarada o evaluación estricta de los 18 indicadores.
 - `--graficas originales|ninguna`: reutilizar las ilustraciones seleccionadas de los documentos fuente o entregar sólo texto.
@@ -46,6 +48,8 @@ Los valores predeterminados son `evaluables` y `originales`. Las gráficas se im
 La [metodología](METODOLOGIA.md) distingue las dos ediciones censales recientes para los indicadores 1–16 de los dos años recientes para 17–18. Los datos desconocidos conservan `null`.
 
 El modo `evaluables` requiere 2/3, 5/7 y 6/8 indicadores por dimensión y al menos seis de los ocho prioritarios. Los prioritarios pesan 2, los restantes 1; las dimensiones pesan 25%, 35% y 40%. No equivale a una evaluación completa. El modo `completo` exige 18 puntajes. Una valoración provisional no entra al promedio. Si faltan definiciones o datos comparables, se conserva `null`; `--preparar` permite revisar esos pendientes sin sustituir el Word anterior.
+
+Las definiciones 2.4.2, dentro de la integración 2.3, distinguen dato explícito, homologación y lectura condicional. Por ejemplo, el título «Certificado Único Policial vigente» permite reconocer ese porcentaje bajo la definición adoptada; «Evaluaciones de control de confianza» no basta para afirmar que son aprobatorias y vigentes. Las valoraciones provisionales de capacitación o continuidad de llamadas describen lo disponible, sin completar artificialmente la cobertura. Cada decisión conserva sus referencias y se recalcula antes de renderizar.
 
 La interpretación editorial debe actualizarse a 2.3 y revisarse de nuevo: cambiar sólo sus huellas no basta. El catálogo recibido aporta encuadres y ejemplos, no análisis municipales terminados ni los 144 cierres anunciados. No se requiere una API key.
 

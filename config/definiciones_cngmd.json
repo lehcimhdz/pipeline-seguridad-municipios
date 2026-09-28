@@ -1,5 +1,5 @@
 {
-  "version": "2.4.1",
+  "version": "2.4.2",
   "proposito": "Definiciones de referencia CNGMD, población, normalización de protección civil y valoración provisional. Integra y corrige la propuesta del asesor; complementa reglas_calificacion.json y config/ponderacion.json. Las escalas_operativas y revision_integracion prevalecen sobre descripciones históricas.",
   "fuentes_consultadas": [
     {
@@ -182,7 +182,7 @@
       "9": "Calcular las razones con el dato tal como viene y declarar si es inventario o dotación. Si el chaleco por elemento es mayor o igual a 1 bajo cualquiera de las dos lecturas, el nivel indicativo es 4; si es menor a 0.5 en ambas, es 2. Confianza baja.",
       "10": "Sin el porcentaje de personal, usar presencia o ausencia de temas núcleo: con dos o más grupos núcleo en la edición reciente, nivel indicativo 3; con uno, 2; sin ninguno, 1.",
       "14": "Sin poblaciones comparables, usar continuidad y evolución del conteo: presencia en todas las ediciones y sin retrocesos, nivel indicativo 3; presencia intermitente, 2. Confianza baja.",
-      "15": "Continuidad acreditada del registro municipal permite nivel indicativo 3; no asumir competencia municipal si no se conoce quién opera el servicio.",
+      "15": "Conteos de llamadas procedentes en ambas ediciones recientes de la serie municipal permiten nivel indicativo 3, con confianza baja y condicionado a confirmar competencia y universo. Describe continuidad de la serie, no eficacia ni operación propia; no se aplica si se acredita que el registro no es de competencia municipal.",
       "18": "Sin incidencia delictiva municipal, comparar remisiones por cada mil habitantes con la tasa estatal equivalente: dentro de más o menos 25% de la estatal, nivel indicativo 3; muy por encima, revisar naturaleza de las remisiones antes de fijar nivel. Confianza media."
     },
     "limite": "Ninguna valoración provisional puede sostener por sí sola una recomendación de política ni un juicio sobre derechos; solo describe el rango en el que caería el rubro."
@@ -243,6 +243,24 @@
     "Agregar el campo valoracion_provisional a la salida de cada ficha, sin efecto en la agregación.",
     "Marcar los municipios bajo mando único para que su cero no se trate como falta de respuesta."
   ],
+  "correspondencias_automaticas": {
+    "version": "1.0",
+    "principio": "Los datos municipales proceden exclusivamente de input. Las definiciones y equivalencias generales orientan su lectura, no aportan observaciones del municipio. Cada campo resuelto conserva regla y coordenadas; las homologaciones no son revisiones humanas ni verificaciones externas.",
+    "cup_vigente": {
+      "habilitada": true,
+      "titulo": "Certificado Único Policial vigente",
+      "regla": "El título explícito y una única cifra municipal en Porcentaje entre 0 y 100 por año permiten usar el porcentaje publicado como CUP vigente sobre corporaciones policiales. No se reconstruye un denominador ni se acredita una auditoría del dato original. Un complemento contradictorio bloquea la valoración.",
+      "origen": "Correspondencia metodológica de integración con la definición general de la ficha 7."
+    },
+    "no_inferir": [
+      "El personal total no acredita personal exclusivamente policial.",
+      "Servidores capacitados no demuestra conteo único ni personal exclusivo de la unidad de protección civil.",
+      "Evaluaciones de control de confianza no demuestra aprobatorias vigentes.",
+      "Los temas observados no constituyen el catálogo completo de una edición.",
+      "Datos Municipales no demuestra quién opera el servicio de llamadas.",
+      "Total de cámaras no demuestra cámaras en servicio; personas no distingue MP y justicia cívica."
+    ]
+  },
   "revision_integracion": {
     "correcciones": [
       "La tasa de la ficha 4 cambia el numerador policial; la población es su denominador.",

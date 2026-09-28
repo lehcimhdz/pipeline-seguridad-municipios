@@ -436,7 +436,8 @@
       "sin_respuesta_municipal",
       "variable_no_existente_en_edicion",
       "dato_dudoso",
-      "no_aplicable"
+      "no_aplicable",
+      "en_conflicto"
     ]
   },
   "catalogo_indicadores": [
@@ -491,7 +492,7 @@
       ],
       "peso": 2,
       "prioritario": true,
-      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 3,
@@ -531,7 +532,7 @@
       "regla_especifica": "Si el indicador 2 obtiene 1, este indicador también obtiene 1 en la misma evaluación.",
       "peso": 1,
       "prioritario": false,
-      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje.",
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.",
       "escala_vigente": {
         "descripcion": "Cobertura anual sobre grupos captados acreditados por edición; general usa la media de coberturas. Sin catálogo no puntúa.",
         "niveles": {
@@ -574,7 +575,7 @@
       ],
       "peso": 2,
       "prioritario": true,
-      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 5,
@@ -602,7 +603,7 @@
       "precaucion": "No presentar personal evaluado como equivalente a personal aprobado y vigente.",
       "peso": 2,
       "prioritario": true,
-      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 6,
@@ -651,7 +652,7 @@
       "precaucion": "Marcar como dudoso un cero aislado entre valores altos o una inconsistencia relevante con el indicador 5.",
       "peso": 1,
       "prioritario": false,
-      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 8,
@@ -721,7 +722,7 @@
       ],
       "peso": 1,
       "prioritario": false,
-      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 10,
@@ -750,7 +751,7 @@
       ],
       "peso": 2,
       "prioritario": true,
-      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 11,
@@ -854,7 +855,7 @@
       ],
       "peso": 2,
       "prioritario": true,
-      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 15,
@@ -883,7 +884,7 @@
       "precaucion": "Un porcentaje alto no es por sí mismo evidencia de mejor resultado.",
       "peso": 1,
       "prioritario": false,
-      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje.",
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.",
       "escala_vigente": {
         "descripcion": "Registro de competencia municipal y población documentados. No se interpreta volumen como eficacia.",
         "niveles": {
@@ -1018,7 +1019,7 @@
       ],
       "peso": 1,
       "prioritario": false,
-      "revision_definiciones": "Requiere observaciones complementarias verificadas por año antes de asignar puntaje."
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     }
   ],
   "campos_auxiliares": {
@@ -1051,8 +1052,10 @@
       "motivo": "string que explica por qué no puede asignarse puntaje",
       "años_observados": "array de integer",
       "años_evaluados": "array de integer",
-      "estado_dato": "reportado|pendiente|no_aplicable",
-      "valoracion_provisional": "Nivel indicativo o null, base, confianza y falta; nunca computa en la agregación.",
+      "estado_dato": "reportado|pendiente|no_aplicable|en_conflicto",
+      "correspondencias": "Por año: campos resueltos con valor, tipo (lectura_directa, homologacion, complemento_verificado), regla y evidencias; conflictos impiden puntuar. Coordenadas: tabla y fila desde 1, incluido encabezado; fuentes y huellas en el resultado.",
+      "requisitos_pendientes": "Campos o comprobaciones aún necesarios por año; no equivale a inexistencia de la variable en el cuestionario general.",
+      "valoracion_provisional": "Nivel indicativo o null, base, confianza, falta, evidencias y condiciones; indicar años usados. Nunca computa en la agregación.",
       "regla": "No confundir la calificación reportada en la entrada con una evaluación calculada; justificar toda asignación."
     },
     "ilustracion_original": {
@@ -1126,8 +1129,10 @@
     "estados": [
       "reportado",
       "pendiente",
-      "no_aplicable"
+      "no_aplicable",
+      "en_conflicto"
     ],
+    "correspondencias": "Resolución automática desde input con reglas generales y trazabilidad por año; sin convertir inferencias en revisiones humanas. El complemento sólo aporta requisitos no resueltos.",
     "puntaje": "Entero 1–5 o null; la valoración provisional nunca se incorpora al puntaje.",
     "prioritarios": [
       2,

@@ -3,6 +3,8 @@ from decimal import Decimal
 from calificar import (calificar_indicador, dependencias, filas_por_año, numero,
                        normalizar, tema_sin_informacion)
 from evidencia_complementaria import poblacion, tasas_comparables
+from correspondencias import resolver, auditoria, requisitos_pendientes
+from valoracion_provisional import provisional
 
 
 def numeric(value):
@@ -24,39 +26,10 @@ def tiene_respuesta(section, years):
                for column, value in row['celdas'].items() if column != 'Año')
 
 
-def provisional(number, section, years, obs, motivo, definitions):
-    level, confidence, basis = None, 'no_estimable', []
-    if number == 10:
-        topics = set()
-        for row in filas_por_año(section).get(years[-1], []) if years else []:
-            topic = row['celdas'].get('Tema', '')
-            if not tema_sin_informacion(topic) and numeric(row['celdas'].get('Total')) not in (None, 0):
-                topics.add(topic)
-        if topics:
-            basis = sorted(topics)
-            # Sin homologación y universo no se convierte el conteo de rótulos en nivel.
-    if number == 14 and years:
-        counts = [conteo(section, y) for y in years]
-        if all(v is not None for v in counts):
-            basis = [f'{y}: {v} cámaras reportadas' for y, v in zip(years, counts)]
-            if all(v > 0 for v in counts) and all(a <= b for a, b in zip(counts, counts[1:])):
-                level, confidence = 3, 'baja'
-            elif any(v == 0 for v in counts) and any(v > 0 for v in counts):
-                level, confidence = 2, 'baja'
-    if number == 15 and len(years) >= 2:
-        counts = [conteo(section, y, column='Llamadas procedentes') for y in years[-2:]]
-        if all(v is not None for v in counts) and all(obs.get(str(y), {}).get('registro_municipal') is True for y in years[-2:]):
-            level, confidence = 3, 'baja'
-            basis = [f'{y}: {v} llamadas procedentes' for y, v in zip(years[-2:], counts)]
-    return {'nivel_indicativo': level, 'base': basis, 'confianza': confidence,
-            'falta': motivo, 'computa_en_agregacion': False,
-            'regla': definitions['interpretacion_provisional']['reglas_por_ficha'].get(str(number),
-                     'Describir la información disponible sin asignar un nivel no acreditado.')}
-
-
 def evaluar(sections, rules, mappings, periods, complemento):
     """Ambos periodos comparten reglas y verificaciones; el renderizador recalcula esto."""
     definitions = rules['definiciones_config']
+    resolved = resolver(sections, mappings, definitions, complemento)
     evaluations = {}
     for period in ('general', 'ultimo_periodo'):
         results = {}
@@ -65,16 +38,20 @@ def evaluar(sections, rules, mappings, periods, complemento):
             target = periods['ultimo_periodo']['por_indicador'][str(n)] if period == 'ultimo_periodo' else None
             result = calificar_indicador(section, ficha, period, mappings, años_objetivo=target)
             years = result['años_evaluados']
-            obs = complemento.get('observaciones', {}).get(str(n), {})
+            obs = resolved.get(str(n), {})
             entries = [obs.get(str(y), {}) for y in years]
-            operational = complemento.get('observaciones', {}).get('4', {})
+            operational = resolved.get('4', {})
             unavailable = n >= 4 and any(operational.get(str(y), {}).get('institucion_propia') is False for y in years)
             if unavailable:
                 result.update(puntaje=None, estado_dato='no_aplicable',
                               motivo='Sin institución municipal propia en parte del periodo; requiere un universo de evaluación específico.')
             elif years and n in (2, 3, 4, 5, 7, 9, 10, 14, 15, 18):
                 result = revisar_ficha(n, section, result, years, entries, complemento, definitions)
-            if (not unavailable and result['puntaje'] is None and years
+            conflicts = any(e.get('_conflictos') for e in entries)
+            if conflicts:
+                result.update(puntaje=None, estado_dato='en_conflicto',
+                              motivo='Hay contradicciones entre las correspondencias del paquete y el complemento; revisar el detalle por año.')
+            if (not unavailable and not conflicts and result['puntaje'] is None and years
                     and not tiene_respuesta(section, years)
                     and all(e.get('revision') == 'verificada' and e.get('sin_respuesta_municipal_acreditada') is True for e in entries)):
                 result.update(puntaje=1, sin_respuesta_municipal=True,
@@ -83,21 +60,29 @@ def evaluar(sections, rules, mappings, periods, complemento):
             if result['puntaje'] is None:
                 result.setdefault('estado_dato', 'pendiente')
                 result['valoracion_provisional'] = provisional(n, section, years, obs,
-                    result.get('motivo', 'Falta evidencia suficiente.'), definitions)
-                if unavailable:
+                    result.get('motivo', 'Falta evidencia suficiente.'), definitions, mappings, complemento)
+                if unavailable or conflicts:
                     result['valoracion_provisional'].update(nivel_indicativo=None, confianza='no_estimable', base=[])
             else:
                 result['estado_dato'] = 'reportado'
+            result['correspondencias'] = auditoria(obs, years)
             results[n] = result
         dependencias(results)
         for n, result in results.items():
+            # Una dependencia no subsana evidencias contradictorias.
+            if any(v['conflictos'] for v in result['correspondencias'].values()):
+                result.update(puntaje=None, estado_dato='en_conflicto',
+                              motivo='Conciliar las contradicciones documentales por año antes de evaluar.')
             if result['puntaje'] is not None:
                 result['estado_dato'] = 'reportado'
                 result.pop('valoracion_provisional', None)
             else:
                 result.setdefault('estado_dato', 'pendiente')
-                result.setdefault('valoracion_provisional', provisional(n, sections[n-1], result['años_evaluados'],
-                    complemento.get('observaciones', {}).get(str(n), {}), result.get('motivo', 'Dependencia pendiente.'), definitions))
+                result['requisitos_pendientes'] = requisitos_pendientes(n, result['años_evaluados'],
+                                                                       resolved.get(str(n), {}), complemento)
+                if 'valoracion_provisional' not in result:
+                    result['valoracion_provisional'] = provisional(n, sections[n-1], result['años_evaluados'],
+                        resolved.get(str(n), {}), result.get('motivo', 'Dependencia pendiente.'), definitions, mappings, complemento)
         evaluations[period] = results
     return evaluations
 
@@ -117,8 +102,6 @@ def revisar_ficha(n, section, old, years, entries, data, definitions):
         return result
     if old.get('cobertura_temporal_insuficiente') and n != 15:
         return missing('Cobertura temporal insuficiente para aplicar la ficha revisada.')
-    if not all(e.get('revision') == 'verificada' for e in entries):
-        return missing(f'Falta confirmar la definición y procedencia de la ficha {n} en todos los años evaluados.')
     if n == 2:
         if not all(e.get('universo') == 'personal_unidad_pc' and e.get('conteo_personas') == 'unico' for e in entries):
             return missing('Confirmar capacitación al personal de la unidad y conteo único; no mezclar difusión a población.')
@@ -126,7 +109,11 @@ def revisar_ficha(n, section, old, years, entries, data, definitions):
     if n in (5, 7, 10):
         required = {5: 'aprobatorias_vigentes', 7: 'cup_vigente', 10: 'capacitacion_sin_profesionalizacion'}[n]
         if not all(e.get('universo') == 'corporaciones_policiales' and e.get('definicion') == required for e in entries):
-            return missing('Confirmar el universo policial y la definición del porcentaje; no inferirlos del encabezado Total o Porcentaje.')
+            messages = {
+                5: 'El porcentaje de control de confianza no distingue evaluaciones aplicadas de aprobatorias vigentes ni acredita su universo policial.',
+                7: 'Falta identificar expresamente CUP vigente y porcentaje sobre corporaciones policiales en los años evaluados.',
+                10: 'Los temas permiten una valoración de oferta formativa, pero falta el universo policial del porcentaje y separar capacitación de profesionalización.'}
+            return missing(messages[n])
         return old
     if n == 3:
         groups = definitions['normalizacion_proteccion_civil']['grupos']
