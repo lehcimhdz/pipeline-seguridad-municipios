@@ -9,7 +9,7 @@ def agregar_ponderado(results, rules, *, modo='completo', esquema=None, sensibil
     policy = rules['ponderacion_config']
     config = policy['ponderacion']
     scheme = esquema or config['esquema_predeterminado']
-    if scheme not in config['esquemas'] or modo not in ('completo', 'evaluables'):
+    if scheme not in config['esquemas'] or modo not in ('completo', 'evaluables', 'disponibles'):
         raise ValueError('Esquema o modo de agregación inválido.')
     if set(results) != set(range(1, 19)):
         raise ValueError('Se requieren los 18 indicadores.')
@@ -27,7 +27,8 @@ def agregar_ponderado(results, rules, *, modo='completo', esquema=None, sensibil
     pending = [i for i in results if i not in scores]
     not_applicable = [i for i in pending if results[i].get('estado_dato') == 'no_aplicable']
     priority_count = sum(i in scores for i in priorities)
-    minimums = policy['agregacion']['evaluables']['cobertura_minima_por_dimension']
+    coverage_policy = policy['agregacion']['disponibles' if modo == 'disponibles' else 'evaluables']
+    minimums = coverage_policy['cobertura_minima_por_dimension']
     coverage = {d: {'evaluables': sum(i in scores for i in ids), 'total': len(ids),
                     'minimo_requerido': minimums[d]} for d, ids in rules['dimensiones'].items()}
     output = {'metodo': modo, 'esquema': scheme, 'alcance': 'indicadores_evaluables' if pending else 'completo',
@@ -52,8 +53,8 @@ def agregar_ponderado(results, rules, *, modo='completo', esquema=None, sensibil
                 'calificacion': middle['calificacion_final'], 'es_observado': False, 'reduce_intervalo': False}
     insufficient = [d for d, c in coverage.items() if c['evaluables'] < c['minimo_requerido']]
     if (not_applicable or (pending and modo == 'completo') or insufficient
-            or priority_count < policy['agregacion']['evaluables']['cobertura_prioritaria_minima']):
-        output['motivo'] = 'Cobertura insuficiente o universo no comparable; completar evidencia antes de publicar.'
+            or priority_count < coverage_policy['cobertura_prioritaria_minima']):
+        output['motivo'] = 'Cobertura insuficiente o universo no comparable para la valoración seleccionada.'
         output['dimensiones_con_cobertura_insuficiente'] = insufficient
         return output
     dims = {d: sum(weights[i] * scores[i] for i in ids if i in scores) /
@@ -89,9 +90,13 @@ def agregar_ponderado(results, rules, *, modo='completo', esquema=None, sensibil
     if final >= 3 and (priority_mean < 3 or any(scores.get(i) == 1 for i in priorities)): cap(8, 2)
     if len(set(unresponsive) & set(priorities)) >= 4: cap(9, 1)
     if pending and final == 4: cap('cobertura_parcial', 3)
-    output.update(estado='calculado_parcial' if pending else 'calculado',
+    output.update(estado=('calculado_disponibles' if modo == 'disponibles' and pending
+                          else 'calculado_parcial' if pending else 'calculado'),
                   promedios_dimension={d: str(v) for d, v in dims.items()},
                   promedio_tres_dimensiones=str(mean), promedio_prioritarios=str(priority_mean),
                   calificacion_preliminar=preliminary, calificacion_final=ORDER[final],
                   pesos_efectivos=effective, candados_aplicados=caps)
+    if modo == 'disponibles' and pending:
+        output['advertencia_cobertura'] = ('Categoría calculada sólo con indicadores acreditados; '
+                                          'puede cambiar al resolver los pendientes.')
     return output

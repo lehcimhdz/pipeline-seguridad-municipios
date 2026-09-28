@@ -1,6 +1,8 @@
 """La incidencia se audita por fuente y territorio, nunca se infiere de remisiones."""
 import hashlib
+import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -44,6 +46,16 @@ class IncidenciaTests(unittest.TestCase):
         self.municipal.write_text(self.municipal.read_text().replace('Robo,1,2', 'Robo,NA,2'))
         with self.assertRaisesRegex(ValueError, 'no numérica'):
             total_anual(self.municipal, 2024, '19', '19006')
+
+    def test_csv_latin1_y_auditoria_municipal_sin_estatal(self):
+        self.municipal.write_bytes(self.municipal.read_text(encoding='utf-8').encode('latin-1'))
+        result = subprocess.run([sys.executable, str(ROOT / 'scripts/incidencia_sesnsp.py'),
+                                 '--municipal', str(self.municipal), '--entidad', '19',
+                                 '--municipio', '19006', '--anios', '2024'],
+                                capture_output=True, text=True, check=True)
+        report = json.loads(result.stdout)
+        self.assertEqual(report['totales_candidatos']['2024']['municipal']['valor'], 6)
+        self.assertNotIn('estatal', report['totales_candidatos']['2024'])
 
     def test_procedencia_por_campo_obligatoria_al_mezclar_fuentes(self):
         paths = [self.municipal, self.estatal]

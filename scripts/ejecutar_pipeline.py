@@ -111,7 +111,7 @@ def publicar(result, output, mode='final'):
     return dest, report, removed
 
 
-def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='evaluables', complemento=None, esquema=None):
+def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='disponibles', complemento=None, esquema=None):
     municipality, documents = discover(input_dir)
     contract_hashes = huellas()
     evidence = {suffix: leer_docx(path) for suffix, path in documents.items()}
@@ -188,7 +188,7 @@ def main():
     parser.add_argument('--redaccion', type=Path, help='Interpretación editorial del municipio vinculada a las fuentes.')
     parser.add_argument('--estado', help='Entidad federativa cuando el Anexo no esté disponible.')
     parser.add_argument('--preparar', action='store_true', help='Prepara evidencia y calificaciones para que el agente redacte el estudio.')
-    parser.add_argument('--calificacion', choices=('evaluables', 'completo'), default='evaluables')
+    parser.add_argument('--calificacion', choices=('disponibles', 'evaluables', 'completo'), default='disponibles')
     parser.add_argument('--complemento', type=Path, help='Datos y definiciones revisados, con fuente y localizador por observación.')
     parser.add_argument('--esquema', choices=('dimensiones_ponderadas', 'dimensiones_iguales', 'global'))
     parser.add_argument('--graficas', choices=('originales', 'ninguna'), default='originales')
@@ -211,8 +211,6 @@ def main():
                       f'{calculation["cobertura"]["prioritarios_evaluables"]}/8 prioritarios. '
                       f'Calificación: {calculation["calificacion_final"] or "pendiente"}.')
             return
-        if any(c['calificacion_final'] is None for c in result['calculos'].values()):
-            raise ValueError('La evidencia no alcanza la cobertura requerida tras resolver las correspondencias automáticas. Use --preparar para consultar los requisitos concretos pendientes; aporte sólo esas aclaraciones o datos mediante --complemento. La entrega anterior se conserva.')
         if writing is None:
             raise ValueError(f'Falta la interpretación editorial: {writing_path}. Use --preparar para revisar la evidencia y redactar sus apartados.')
         if not result['estado']:
@@ -230,7 +228,7 @@ def main():
     print(f'JSON: {dest}')
     print(f'Word: {report["archivo"]}')
     for period, calculation in result['calculos'].items():
-        print(f'{period}: {calculation["calificacion_final"]}; alcance {calculation.get("alcance", "completo")}.')
+        print(f'{period}: {calculation["calificacion_final"] or "sin valoración conjunta"}; alcance {calculation.get("alcance", "completo")}.')
     print(f'Limpieza de salidas anteriores: {removed}.')
 
 

@@ -44,16 +44,16 @@ Opciones principales:
 - `--redaccion`: ubicación alternativa de la interpretación editorial.
 - `--complemento input/complementos/{slug}.json`: evidencia opcional para resolver denominadores y ambigüedades que no aclara el paquete; véase [recolección](RECOLECCION_DATOS.md). No requiere volver a declarar lo ya reconocido ni autoriza buscar cifras externas automáticamente.
 - `--esquema dimensiones_ponderadas|dimensiones_iguales|global`: ponderación principal o comparación explícita; la principal es 25/35/40.
-- `--calificacion evaluables|completo`: valoración con cobertura declarada o evaluación estricta de los 18 indicadores.
+- `--calificacion disponibles|evaluables|completo`: valoración con los puntajes acreditados, umbrales de cobertura mayores o evaluación estricta de los 18 indicadores.
 - `--graficas originales|ninguna`: reutilizar las ilustraciones seleccionadas de los documentos fuente o entregar sólo texto.
 
-Los valores predeterminados son `evaluables` y `originales`. Las gráficas se importan sin redibujarlas; no se agregan tablas ni se construyen nuevas gráficas. Una selección editorial omite imágenes incoherentes con las tablas o innecesarias para la explicación.
+Los valores predeterminados son `disponibles` y `originales`. Las gráficas se importan sin redibujarlas; no se agregan tablas ni se construyen nuevas gráficas. Una selección editorial omite imágenes incoherentes con las tablas o innecesarias para la explicación.
 
 ## Evaluación y presentación
 
 La [metodología](METODOLOGIA.md) distingue las dos ediciones censales recientes para los indicadores 1–16 de los dos años recientes para 17–18. Los datos desconocidos conservan `null`.
 
-El modo `evaluables` requiere 2/3, 5/7 y 6/8 indicadores por dimensión y al menos seis de los ocho prioritarios. Los prioritarios pesan 2, los restantes 1; las dimensiones pesan 25%, 35% y 40%. No equivale a una evaluación completa. El modo `completo` exige 18 puntajes. Una valoración provisional no entra al promedio. Si faltan definiciones o datos comparables, se conserva `null`; `--preparar` permite revisar esos pendientes sin sustituir el Word anterior.
+El modo predeterminado `disponibles` calcula una categoría con los indicadores que sí tienen puntaje acreditado: exige al menos uno por dimensión y uno prioritario, conserva pesos y candados, y muestra «COBERTURA PARCIAL» cuando hay pendientes. Una valoración provisional no entra al promedio; los faltantes siguen en `null`. La nota del Word declara la cobertura y advierte que la categoría puede cambiar. `evaluables` mantiene el umbral más exigente de 2/3, 5/7 y 6/8 por dimensión y seis de los ocho prioritarios; `completo` exige 18 puntajes. Si ni siquiera el modo disponible tiene cobertura básica, el estudio se publica sin categoría conjunta. `--preparar` permite revisar la evidencia sin sustituir el Word anterior.
 
 Las definiciones 2.4.3, dentro de la integración 2.3, distinguen dato explícito, homologación y lectura condicional. Por ejemplo, el título «Certificado Único Policial vigente» permite reconocer ese porcentaje bajo la definición adoptada. Una gráfica que dice «aprobó las evaluaciones» aclara la aprobación, aunque no acredita vigencia; «cámaras en funcionamiento» aclara el estado de los equipos, aunque sigue haciendo falta población para calcular tasas. Las valoraciones provisionales de capacitación o continuidad de llamadas describen lo disponible, sin completar artificialmente la cobertura. Cada decisión conserva sus referencias; las lecturas de imágenes y las evaluaciones se recalculan antes de renderizar.
 

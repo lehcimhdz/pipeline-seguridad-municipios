@@ -135,6 +135,20 @@
       "tope_con_pendientes": "MUY BIEN",
       "imputacion": false,
       "sensibilidad": "asignar 1 y 5 a los pendientes con los mismos pesos para obtener límites"
+    },
+    "disponibles": {
+      "formula": "promedio ponderado de los indicadores con puntaje acreditado dentro de cada dimensión; suma con pesos 0.25, 0.35 y 0.40",
+      "cobertura_minima_por_dimension": {
+        "proteccion_civil": 1,
+        "condiciones_del_personal": 1,
+        "inteligencia_y_eficiencia_policial": 1
+      },
+      "cobertura_prioritaria_minima": 1,
+      "efecto_si_no_se_cumple": "sin valoración agregada; publicar sólo el estudio descriptivo",
+      "tope_con_pendientes": "MUY BIEN",
+      "imputacion": false,
+      "etiqueta_con_pendientes": "COBERTURA PARCIAL",
+      "interpretacion": "Valoración de los indicadores disponibles, no calificación completa de los dieciocho. Informar la cobertura y que la categoría puede cambiar con los pendientes."
     }
   },
   "pruebas_requeridas": [

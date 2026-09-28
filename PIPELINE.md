@@ -92,8 +92,9 @@ Se ofrecen dos métodos:
 
 | Opción | Resultado y alcance |
 | --- | --- |
-| `--calificacion evaluables` | Exige 2 de 3, 5 de 7 y 6 de 8 por dimensión y al menos 6 de los 8 prioritarios. Usa ponderación 25/35/40, declara cobertura y no permite EXCELENTE con pendientes. Es la opción predeterminada. |
-| `--calificacion completo` | Aplica la agregación estricta del benchmark: los 18 puntajes son necesarios. Si falta alguno, la valoración conjunta queda pendiente y se bloquea la publicación del Word final. `--preparar` conserva la evidencia para su revisión. |
+| `--calificacion disponibles` | Opción predeterminada. Calcula con los puntajes acreditados si existe al menos uno por dimensión y uno prioritario. Mantiene los pesos 25/35/40 y los candados; con pendientes publica la categoría como «COBERTURA PARCIAL», el número evaluado y una advertencia de sensibilidad. No imputa faltantes. |
+| `--calificacion evaluables` | Exige 2 de 3, 5 de 7 y 6 de 8 por dimensión y al menos 6 de los 8 prioritarios para asignar categoría. Usa ponderación 25/35/40, declara cobertura y no permite EXCELENTE con pendientes. |
+| `--calificacion completo` | Aplica la agregación estricta del benchmark: los 18 puntajes son necesarios para asignar categoría. Si falta alguno, la valoración conjunta queda pendiente, pero el estudio interpretativo puede publicarse con el alcance declarado. |
 
 Los modos mantienen las mismas fichas individuales y la misma escala. La adaptación evaluable no atribuye puntajes a los pendientes ni equivale a un promedio completo. El JSON conserva un intervalo de sensibilidad de la evaluación completa; sus escenarios extremos no se publican como observaciones.
 
@@ -101,7 +102,7 @@ Las definiciones 2.4.3 incorporan correspondencias automáticas y lecturas condi
 
 Las valoraciones provisionales conservan `puntaje: null` y no cuentan para cobertura ni promedio. En capacitación policial se reconocen grupos núcleo del último año disponible, sin sumar asistentes entre cursos. En llamadas, dos cortes municipales recientes permiten una lectura condicional de continuidad de la serie; no prueban quién opera el servicio ni su eficacia. El renderizador vuelve a leer las imágenes y recalcula las correspondencias y las evaluaciones antes de aceptar el JSON; rechaza lecturas editadas o que no puedan reproducirse con las fuentes.
 
-El documento final exige una calificación conjunta en ambos periodos. Se bloquea si falta cobertura por dimensión, hay menos de seis prioritarios evaluables o existe un universo no aplicable sin metodología específica. `--preparar` conserva evidencia y pendientes sin reemplazar la entrega vigente. La lista de pendientes se calcula en cada ejecución: no es una lista fija de siete fichas.
+El documento puede publicarse aunque no exista calificación en alguno de los periodos, siempre que la interpretación editorial esté revisada y vinculada a la evidencia vigente. En ese caso muestra «SIN VALORACIÓN CONJUNTA». En modo `disponibles`, la categoría surge sólo de los puntajes acreditados y se identifica visiblemente como parcial; no equivale a la nota de los 18 indicadores y puede cambiar al resolver pendientes. Si falta toda una dimensión, no hay prioritarios acreditados o existe un universo no comparable, no se asigna categoría. No se rebajan los criterios individuales ni se transforma un pendiente en cero o uno. `--preparar` conserva evidencia y pendientes sin reemplazar la entrega vigente.
 
 `--esquema dimensiones_iguales` permite comparar el promedio aritmético histórico, pero conserva los controles 2.3: no reproduce íntegramente una evaluación 2.2. `--esquema global` pondera directamente los indicadores. Cada resultado conserva sus coeficientes efectivos; con cobertura parcial cambian los pesos relativos dentro de la dimensión.
 

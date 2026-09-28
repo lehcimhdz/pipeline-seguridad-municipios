@@ -77,6 +77,33 @@ class PonderacionTests(unittest.TestCase):
         self.assertEqual(result['cobertura']['prioritarios_evaluables'], 5)
         self.assertIsNone(result['calificacion_final'])
 
+    def test_disponibles_califica_solo_puntajes_acreditados_y_declara_alcance(self):
+        values = scores(4)
+        retained = {1, 4, 6, 7, 11, 12, 13, 16, 17}
+        for number in values:
+            if number not in retained:
+                values[number]['puntaje'] = None
+        before = deepcopy(values)
+        strict = agregar_ponderado(values, RULES, modo='evaluables')
+        partial = agregar_ponderado(values, RULES, modo='disponibles')
+        self.assertIsNone(strict['calificacion_final'])
+        self.assertEqual(partial['calificacion_final'], 'MUY BIEN')
+        self.assertEqual(partial['estado'], 'calculado_disponibles')
+        self.assertEqual(partial['cobertura']['evaluables'], len(retained))
+        self.assertEqual(set(map(int, partial['pesos_efectivos'])), retained)
+        self.assertAlmostEqual(sum(Decimal(weight) for weight in partial['pesos_efectivos'].values()), Decimal(1))
+        self.assertEqual(values, before)
+
+    def test_disponibles_no_inventa_dimension_ni_prioritario(self):
+        values = scores(4)
+        for number in RULES['dimensiones']['proteccion_civil']:
+            values[number]['puntaje'] = None
+        self.assertIsNone(agregar_ponderado(values, RULES, modo='disponibles')['calificacion_final'])
+        values = scores(4)
+        for number in RULES['ponderacion_config']['ponderacion']['prioritarios']:
+            values[number]['puntaje'] = None
+        self.assertIsNone(agregar_ponderado(values, RULES, modo='disponibles')['calificacion_final'])
+
     def test_sensibilidad_y_provisional_no_imputan(self):
         values = scores(5); values[9]['puntaje'] = None
         values[9]['valoracion_provisional'] = {'nivel_indicativo': 3}

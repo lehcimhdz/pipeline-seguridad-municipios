@@ -9,7 +9,6 @@ import asyncio
 import csv
 from decimal import Decimal, InvalidOperation
 import hashlib
-import io
 import json
 from pathlib import Path
 import re
@@ -26,20 +25,14 @@ def key(value):
     return re.sub(r'[^a-z0-9]+', '_', clean).strip('_')
 
 
-def _rows(path):
-    data = Path(path).read_bytes()
+def _encoding(path):
+    with Path(path).open('rb') as source:
+        sample = source.read(8192)
     try:
-        content = data.decode('utf-8-sig')
+        sample.decode('utf-8-sig')
+        return 'utf-8-sig'
     except UnicodeDecodeError:
-        content = data.decode('latin-1')
-    reader = csv.DictReader(io.StringIO(content))
-    if reader.fieldnames is None:
-        raise ValueError('CSV de incidencia sin encabezado.')
-    columns = {key(name): name for name in reader.fieldnames}
-    mandatory = {'ano', 'clave_ent', *MONTHS}
-    if not mandatory <= columns.keys():
-        raise ValueError(f'CSV de incidencia sin columnas obligatorias: {sorted(mandatory - columns.keys())}')
-    return data, columns, list(reader)
+        return 'latin-1'
 
 
 def _number(value):
@@ -55,29 +48,40 @@ def _number(value):
 
 def total_anual(path, year, state_code, municipality_code=None):
     """Suma sólo filas de la geografía pedida y meses íntegramente numéricos."""
-    data, columns, rows = _rows(path)
-    municipal_column = columns.get('cve_municipio') or columns.get('clave_mun')
-    if municipality_code is not None and not municipal_column:
-        raise ValueError('El archivo no tiene clave municipal; no permite extraer ese ámbito.')
-    if municipality_code is None and municipal_column:
-        raise ValueError('Para el estado se requiere el CSV estatal, no sumar municipios incompletos.')
-    matches = []
-    for row in rows:
-        if str(row[columns['ano']]).strip() != str(year):
-            continue
-        if str(row[columns['clave_ent']]).strip().zfill(2) != str(state_code).zfill(2):
-            continue
-        if municipality_code is not None:
-            raw = str(row[municipal_column]).strip()
-            if raw.zfill(5) != str(municipality_code).zfill(5) and raw.zfill(3) != str(municipality_code)[-3:].zfill(3):
+    matches = 0
+    amount = 0
+    path = Path(path)
+    with path.open(encoding=_encoding(path), newline='') as source:
+        reader = csv.DictReader(source)
+        if reader.fieldnames is None:
+            raise ValueError('CSV de incidencia sin encabezado.')
+        columns = {key(name): name for name in reader.fieldnames}
+        mandatory = {'ano', 'clave_ent', *MONTHS}
+        if not mandatory <= columns.keys():
+            raise ValueError(f'CSV de incidencia sin columnas obligatorias: {sorted(mandatory - columns.keys())}')
+        municipal_column = columns.get('cve_municipio') or columns.get('clave_mun')
+        if municipality_code is not None and not municipal_column:
+            raise ValueError('El archivo no tiene clave municipal; no permite extraer ese ámbito.')
+        if municipality_code is None and municipal_column:
+            raise ValueError('Para el estado se requiere el CSV estatal, no sumar municipios incompletos.')
+        for row in reader:
+            if str(row[columns['ano']]).strip() != str(year):
                 continue
-        matches.append(row)
+            if str(row[columns['clave_ent']]).strip().zfill(2) != str(state_code).zfill(2):
+                continue
+            if municipality_code is not None:
+                raw = str(row[municipal_column]).strip()
+                if raw.zfill(5) != str(municipality_code).zfill(5) and raw.zfill(3) != str(municipality_code)[-3:].zfill(3):
+                    continue
+            matches += 1
+            amount += sum(_number(row[columns[month]]) for month in MONTHS)
     if not matches:
         raise ValueError('No hay filas para la geografía y el año solicitados.')
-    amount = sum(_number(row[columns[month]]) for row in matches for month in MONTHS)
+    with path.open('rb') as source:
+        digest = hashlib.file_digest(source, 'sha256').hexdigest()
     return {'anio': year, 'ambito': 'municipal' if municipality_code is not None else 'estatal',
-            'valor': amount, 'filas': len(matches), 'meses': list(MONTHS),
-            'archivo': str(Path(path)), 'sha256': hashlib.sha256(data).hexdigest(),
+            'valor': amount, 'filas': matches, 'meses': list(MONTHS),
+            'archivo': str(path), 'sha256': digest,
             'definicion': 'presuntos delitos registrados en averiguaciones previas o carpetas de investigación'}
 
 
@@ -133,16 +137,15 @@ def main():
         report['catalogo'] = asyncio.run(descubrir_y_descargar(ROOT / 'input/fuentes' if args.descargar else None))
     local = args.municipal or (ROOT / 'input/fuentes/sesnsp_incidencia_municipal.csv' if args.descargar else None)
     state = args.estatal or (ROOT / 'input/fuentes/sesnsp_incidencia_estatal.csv' if args.descargar else None)
-    if local and state:
+    if local or state:
         report['totales_candidatos'] = {str(year): {
-            'municipal': total_anual(local, year, args.entidad, args.municipio),
-            'estatal': total_anual(state, year, args.entidad)} for year in args.anios}
+            **({'municipal': total_anual(local, year, args.entidad, args.municipio)} if local else {}),
+            **({'estatal': total_anual(state, year, args.entidad)} if state else {})} for year in args.anios}
         report['advertencia'] = ('Estos totales no se incorporan automáticamente al complemento ni '
-                                 'acreditan `incidencia_comparable`; verificar cobertura y conciliación con CNGMD.')
-    elif local or state:
-        parser.error('Para auditar cifras se requieren ambos CSV de la misma edición.')
+                                 'acreditan `incidencia_comparable`; verificar cobertura y conciliación con CNGMD. '
+                                 'Para la comparación se requieren CSV municipal y estatal de la misma edición.')
     if not report:
-        parser.error('Indicar --descubrir o ambos archivos --municipal y --estatal.')
+        parser.error('Indicar --descubrir o al menos un archivo --municipal o --estatal.')
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
 

@@ -13,6 +13,15 @@ def decimal_corto(value):
     return str(Decimal(str(value)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
 
 
+def etiqueta_calificacion(calculation):
+    grade = calculation.get('calificacion_final')
+    if grade is None:
+        return 'SIN VALORACIÓN CONJUNTA'
+    if calculation.get('estado') == 'calculado_disponibles':
+        return f'{grade} (COBERTURA PARCIAL)'
+    return grade
+
+
 def _nota_calificacion(result, period):
     """Publica la cobertura del cálculo sin sustituir el juicio editorial."""
     calculation = result['calculos'][period]
@@ -23,6 +32,18 @@ def _nota_calificacion(result, period):
     if not grade:
         return (f'La información permite valorar {graded} de los {total} indicadores. '
                 'La valoración conjunta requiere completar la evidencia de los restantes.')
+    if calculation.get('estado') == 'calculado_disponibles':
+        coverage = calculation['cobertura']
+        dimensions = coverage['por_dimension']
+        detail = ', '.join(f'{name} ({entry["evaluables"]} de {entry["total"]})'
+                           for name, entry in (
+                               ('protección civil', dimensions['proteccion_civil']),
+                               ('condiciones del personal', dimensions['condiciones_del_personal']),
+                               ('inteligencia y eficiencia policial', dimensions['inteligencia_y_eficiencia_policial'])))
+        return (f'La calificación parcial {grade} considera {graded} de los {total} indicadores: {detail}. '
+                f'Entre los {coverage["prioritarios_total"]} prioritarios, '
+                f'{coverage["prioritarios_evaluables"]} cuentan con puntaje. '
+                'Los demás no se calificaron por falta de evidencia suficiente; incorporarlos puede modificar el resultado.')
     if graded < total:
         return (f'La calificación {grade} comprende {graded} de los {total} indicadores; '
                 'expresa el desempeño documentado y no presupone el resultado de los que carecen de evidencia suficiente.')
@@ -35,13 +56,13 @@ def componer(result, dictionary, rules, redaccion=None):
     editorial_control = validar_redaccion(result, artifact)
     values = {
         'municipio': result['municipio'], 'estado': result['estado'],
-        'calificacion_general': result['calculos']['general'].get('calificacion_final') or 'SIN VALORACIÓN CONJUNTA',
-        'calificacion_ultimo_periodo': result['calculos']['ultimo_periodo'].get('calificacion_final') or 'SIN VALORACIÓN CONJUNTA',
+        'calificacion_general': etiqueta_calificacion(result['calculos']['general']),
+        'calificacion_ultimo_periodo': etiqueta_calificacion(result['calculos']['ultimo_periodo']),
     }
     for key, paragraphs in artifact['bloques'].items():
         values[key] = '\n\n'.join(paragraph['texto'].strip() for paragraph in paragraphs)
     for period, key in (('general', 'resumen_general'), ('ultimo_periodo', 'resumen_ultimo_periodo')):
-        values[key] += ' ' + _nota_calificacion(result, period)
+        values[key] += '\n\n' + _nota_calificacion(result, period)
     if set(values) != set(dictionary['variables_documento']):
         raise ValueError('La interpretación editorial no corresponde a las variables del contrato documental.')
     result['valores_plantilla'] = values

@@ -71,7 +71,12 @@ def construir():
                 'formula': 'Promedio de los indicadores evaluables dentro de cada dimensión; promedio simple de las tres dimensiones.',
                 'peso_dimensiones': '1/3 cada una', 'imputacion': False,
                 'tope_con_pendientes': 'MUY BIEN',
-                'declaracion': 'Publicar cobertura y alcance parcial; conservar intervalo de sensibilidad de la evaluación completa.'}}}
+                'declaracion': 'Publicar cobertura y alcance parcial; conservar intervalo de sensibilidad de la evaluación completa.'},
+            'disponibles': {
+                'origen': 'Adaptación para publicar una valoración basada exclusivamente en indicadores acreditados',
+                'minimos': {'proteccion_civil': 1, 'condiciones_del_personal': 1, 'inteligencia_y_eficiencia_policial': 1},
+                'minimo_prioritarios': 1, 'imputacion': False,
+                'declaracion': 'La categoría es de cobertura parcial y puede cambiar al completar los indicadores pendientes.'}}}
     result['convenciones_ejecutables'] = {
         'uniformes': 'Homologar seis prendas básicas; camisola/camisa y tipos de calzado cuentan una vez por grupo. Frecuencias semestral y anual cumplen al menos anual. Dotación en una sola edición precede a incompleta.',
         'fallecimientos': 'Usar la serie municipal de conteos, no porcentajes de egresos ni sumar los desgloses. Mayoría significa más de la mitad de los años del periodo, incluidos los vacíos en el denominador; un conteo desconocido no se transforma en cero.',
@@ -85,7 +90,7 @@ def construir():
         'muestra_estilo': 'Referencia editorial; no aporta datos, calificaciones ni estándares.',
         'faltantes': 'Puntaje null cuando falta evidencia comparable; no convertir vacíos en cero, ausencia municipal o puntaje 1.',
         'calificaciones_reportadas': 'Se conservan para contraste, sin sustituir los puntajes calculados.',
-        'agregacion': 'Modo completo requiere 18 puntajes; modo evaluables es una adaptación explícita con cobertura mínima por dimensión y alcance parcial.',
+        'agregacion': 'Modo completo requiere 18 puntajes; evaluables conserva los umbrales de cobertura; disponibles calcula con los puntajes acreditados, al menos uno por dimensión y uno prioritario, y declara alcance parcial.',
         'ultimo_periodo': 'Dos ediciones censales recientes para indicadores 1–16; dos años calendario recientes para 17–18. No omitir celdas vacías al seleccionar.',
         'parametros_conservados': '18 indicadores, 90 criterios, escala 1–5, tres dimensiones, dependencias y candados de la transcripción histórica.',
         'limites': 'Los umbrales del benchmark no acreditan vigencia normativa ni estándares externos. Las tasas requieren denominadores documentados; no se completan con cifras de la muestra editorial.'}
@@ -93,6 +98,9 @@ def construir():
         formula=result['ponderacion_config']['agregacion']['evaluables']['formula'],
         peso_dimensiones='25% protección civil, 35% condiciones del personal, 40% inteligencia y eficiencia policial',
         minimo_prioritarios=6)
+    result['agregacion']['modos']['disponibles'].update(
+        formula=result['ponderacion_config']['agregacion']['disponibles']['formula'],
+        peso_dimensiones='25% protección civil, 35% condiciones del personal, 40% inteligencia y eficiencia policial')
     result['agregacion']['esquema_predeterminado'] = 'dimensiones_ponderadas'
     result['politica_evidencia']['fuentes_externas'] = True
     result['politica_evidencia']['condiciones_fuentes_externas'] = 'Complementos explícitos: archivo íntegro con SHA-256, identidad municipal, año, localizador y revisión. No búsqueda ni imputación automática.'

@@ -35,7 +35,7 @@
   },
   "reglas": {
     "archivo": "reglas_calificacion.json",
-    "sha256": "acbd995887c76ee6279015b65d3c2491e8753772dbd737446cb497d0035d2108"
+    "sha256": "44581c924b1c45311bb430472154c8873cdb65be809d3832ad96c003f251843f"
   },
   "metodologia": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
@@ -55,7 +55,7 @@
   },
   "ponderacion": {
     "archivo": "config/ponderacion.json",
-    "sha256": "824a0c657744e468e2725ce1a9c30abe2b4a36e552124784ec7b31ac5ef73c8c"
+    "sha256": "eac59ce53147c7156a5cdb3ea672b35d7bdc4a691c1ba5e985bbb8dff467ea06"
   },
   "definiciones": {
     "archivo": "config/definiciones_cngmd.json",

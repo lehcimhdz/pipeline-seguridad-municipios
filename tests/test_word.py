@@ -100,10 +100,39 @@ class WordTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'párrafo'):
                 validar_resultado(result)
 
-    def test_full_method_cannot_be_forged_to_publish_missing_scores(self):
+    def test_full_method_publishes_study_without_forging_a_joint_grade(self):
         with tempfile.TemporaryDirectory() as directory:
-            result = ejemplo(Path(directory), modo='completo')
-            with self.assertRaisesRegex(ValueError, 'cobertura'):
+            root = Path(directory)
+            result = ejemplo(root, modo='completo')
+            self.assertIsNone(result['calculos']['general']['calificacion_final'])
+            self.assertEqual(result['valores_plantilla']['calificacion_general'], 'SIN VALORACIÓN CONJUNTA')
+            validar_resultado(result)
+            path = root / 'municipio.json'
+            path.write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')
+            report = renderizar(path, root / 'word')
+            with zipfile.ZipFile(report['archivo']) as archive:
+                text = texto(ET.fromstring(archive.read('word/document.xml')))
+            self.assertIn('SIN VALORACIÓN CONJUNTA', text)
+            self.assertIn('La valoración conjunta requiere completar la evidencia', text)
+            result['valores_plantilla']['calificacion_general'] = 'REGULAR'
+            with self.assertRaisesRegex(ValueError, 'calificación publicada'):
+                validar_resultado(result)
+
+    def test_disponibles_publica_categoria_identificada_como_parcial(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            result = ejemplo(root, modo='disponibles')
+            self.assertEqual(result['calculos']['general']['estado'], 'calculado_disponibles')
+            self.assertEqual(result['valores_plantilla']['calificacion_general'], 'MUY BIEN (COBERTURA PARCIAL)')
+            path = root / 'municipio.json'
+            path.write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')
+            report = renderizar(path, root / 'word')
+            with zipfile.ZipFile(report['archivo']) as archive:
+                text = texto(ET.fromstring(archive.read('word/document.xml')))
+            self.assertIn('MUY BIEN (COBERTURA PARCIAL)', text)
+            self.assertIn('Los demás no se calificaron por falta de evidencia suficiente', text)
+            result['valores_plantilla']['calificacion_general'] = 'MUY BIEN'
+            with self.assertRaisesRegex(ValueError, 'calificación publicada'):
                 validar_resultado(result)
 
     def test_modified_grade_or_score_is_rejected(self):

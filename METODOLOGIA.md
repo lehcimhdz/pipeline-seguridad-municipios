@@ -111,7 +111,7 @@ Las siguientes dependencias sí están expresadas en el benchmark:
 
 Si falta el indicador requerido para una dependencia que puede cambiar el resultado, no se inventa su valor.
 
-## Agregación completa y adaptación sobre indicadores evaluables
+## Agregación completa y valoraciones de cobertura parcial
 
 El modo `completo` requiere los 18 puntajes. En la integración 2.3 el esquema principal calcula la media ponderada de cada dimensión y luego aplica estos pesos:
 
@@ -125,13 +125,15 @@ Los prioritarios son 2, 4, 5, 10, 11, 12, 13 y 14, con peso 2; los restantes pes
 
 El modo `evaluables` exige 2 de 3, 5 de 7 y 6 de 8 por dimensión y al menos seis de los ocho prioritarios. Calcula medias ponderadas sólo sobre los puntajes acreditados y conserva el peso 25/35/40 de las dimensiones. No incorpora pendientes como ceros, unos ni estimaciones. Los coeficientes efectivos se registran: con cobertura parcial cambian los pesos internos. La razón máxima de efecto entre prioritarios es 1.875 con cobertura completa, pero puede superar 2 al faltar secundarios; no se promete el mismo límite para coberturas parciales.
 
+El modo `disponibles`, predeterminado para generar el estudio, relaja **sólo la cobertura mínima de la agregación**: exige al menos un puntaje acreditado en cada dimensión y uno de los ocho prioritarios. Mantiene las definiciones de las fichas, los pesos 25/35/40, los candados y el tope MUY BIEN cuando hay pendientes. Repondera únicamente dentro de cada dimensión sobre los indicadores calificados; no asigna puntajes a los ausentes. Su resultado se denomina «categoría de cobertura parcial», nunca evaluación completa de los 18 indicadores. El Word informa cobertura total, por dimensión y prioritaria, y advierte que la categoría puede cambiar. Si falta toda una dimensión, no hay prioritarios acreditados o existe un universo no aplicable, no se asigna categoría.
+
 Cuando existen pendientes, este modo devuelve `calculado_parcial`, declara la cobertura total y por dimensión y limita la categoría máxima a MUY BIEN. La narración debe identificar el alcance, por ejemplo: «La valoración de los 14 indicadores evaluables es MUY BIEN; cuatro rubros no cuentan con elementos suficientes para asignarles puntaje». El archivo puede ser una entrega editorial final y, al mismo tiempo, declarar honestamente el alcance de su evaluación.
 
 El cálculo conserva también un intervalo de sensibilidad de la evaluación completa: asigna hipotéticamente 1 y 5 a los pendientes únicamente para obtener límites inferior y superior. Esos escenarios no sustituyen los puntajes `null` ni se presentan como observaciones. Si las categorías extremas difieren, la categoría completa sigue siendo indeterminada.
 
-La API activa es `ponderacion.agregar_ponderado(..., modo='completo')`; la CLI elige `evaluables` por defecto y registra la selección. `calificar.agregar` permanece para comparación histórica y pruebas, no es el agregador del documento final. `dimensiones_iguales` usa pesos individuales 1 y tercios por dimensión; reproduce el promedio histórico, pero conserva candados nuevos. `global` divide la suma de productos puntaje × peso entre pesos evaluables. Ninguna comparación cambia automáticamente el esquema elegido.
+La API activa es `ponderacion.agregar_ponderado(..., modo='completo')`; la CLI elige `disponibles` por defecto y registra la selección. `calificar.agregar` permanece para comparación histórica y pruebas, no es el agregador del documento final. `dimensiones_iguales` usa pesos individuales 1 y tercios por dimensión; reproduce el promedio histórico, pero conserva candados nuevos. `global` divide la suma de productos puntaje × peso entre pesos evaluables. Ninguna comparación cambia automáticamente el esquema elegido.
 
-La publicación del Word exige una calificación conjunta en ambos periodos. En modo `completo`, cualquier pendiente bloquea la publicación; en `evaluables`, la bloquea una cobertura insuficiente por dimensión o prioridad. Un universo no aplicable también bloquea la agregación ordinaria. `--preparar` conserva la evidencia para revisión sin publicar ni sustituir la entrega vigente.
+La categoría completa exige cobertura suficiente en ambos periodos. En modo `completo`, cualquier pendiente impide asignarla; en `evaluables`, la impide una cobertura insuficiente por dimensión o prioridad. El modo `disponibles` permite una categoría **parcial**, con su etiqueta y nota de alcance visibles. Un universo no aplicable impide la agregación ordinaria. La falta de categoría **no bloquea la publicación del estudio**: el Word dice «SIN VALORACIÓN CONJUNTA» y añade cobertura efectiva. Una interpretación editorial revisada y vinculada a la evidencia sigue siendo obligatoria. `--preparar` conserva la evidencia para revisión sin publicar ni sustituir la entrega vigente.
 
 ## Candados y precisión
 

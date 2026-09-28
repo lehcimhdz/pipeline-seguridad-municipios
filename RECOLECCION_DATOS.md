@@ -44,8 +44,8 @@ El complemento puede provenir del CNGMD (datos abiertos CSV sin token) o de la A
 python3 scripts/ejecutar_pipeline.py --preparar --estado "Nombre del estado" --complemento input/complementos/{slug}.json
 ```
 
-Cuando la cobertura y la redacción revisada lo permitan, ejecutar el mismo
-comando sin `--preparar`. Hay que indicar de nuevo `--complemento`: no se carga
+Cuando la redacción revisada esté vinculada a la evidencia, ejecutar el mismo
+comando sin `--preparar`. La cobertura insuficiente impide una calificación conjunta, pero no la publicación del estudio con alcance declarado. Hay que indicar de nuevo `--complemento`: no se carga
 silenciosamente un archivo municipal encontrado por nombre.
 
 Objeto inicial, todavía sin datos:
@@ -74,7 +74,7 @@ como verificada una correspondencia pendiente. No subir estos archivos a Git.
 
 Si una observación combina fuentes, usar además `evidencias_campos`: un objeto con una entrada por **cada campo de dato** de la observación. Cada entrada incluye `fuente`, `localizador` y `revision: "verificada"`. Esto impide atribuir el denominador del SESNSP al CNGMD o viceversa. La procedencia general de la observación también se mantiene.
 
-La búsqueda opcional de incidencia en el catálogo de datos.gob.mx utiliza `open-data-mexico` únicamente para localizar los CSV del SESNSP. No necesita token; se instala aparte y no forma parte de la preparación ordinaria:
+La búsqueda opcional de incidencia en el catálogo de datos.gob.mx utiliza `open-data-mexico` únicamente para localizar los CSV del SESNSP. No necesita token; se instala aparte y no forma parte de la preparación ordinaria. Si el archivo ya está disponible, no se necesita esta dependencia:
 
 ```sh
 python3 -m pip install -r requirements-discovery.txt
@@ -82,7 +82,7 @@ python3 scripts/incidencia_sesnsp.py --descubrir
 python3 scripts/incidencia_sesnsp.py --descubrir --descargar
 ```
 
-Si el servidor de descargas no permite el acceso, obtener los CSV municipal y estatal de la **misma edición** por el canal oficial y auditarlos localmente:
+Si el servidor de descargas no permite el acceso, obtener los CSV municipal y estatal de la **misma edición** por el canal oficial y auditarlos localmente. El auditor admite uno solo para revisión preliminar, pero no completa la comparación:
 
 ```sh
 python3 scripts/incidencia_sesnsp.py --municipal input/fuentes/sesnsp_incidencia_municipal.csv --estatal input/fuentes/sesnsp_incidencia_estatal.csv --entidad 19 --municipio 19006 --anios 2023 2024
@@ -132,7 +132,7 @@ Cada entrada conserva la procedencia; los requisitos por ficha son:
 | 15 | `registro_municipal: true` indica competencia del registro, no existencia automática del centro. Población y conteos de llamadas del paquete. Para 5: `meta_respuesta` documentada y `meta_respuesta_cumplida: true` en cada año. `ausencia_registro_acreditada` distingue inexistencia comprobada de vacío; `dato_dudoso` limita a 3. |
 | 18 | `personas_mp`, `delitos_municipales`, `personas_mp_estatal`, `delitos_estatales`; `incidencia_comparable: true` sólo tras conciliación. Para 5: `revision_derechos: "sin_recomendaciones_documentada"` y `control_uso_fuerza: "revisado"`. Las personas ante el MP provienen del CNGMD; la incidencia delictiva, del SESNSP. Documentar cada componente con `evidencias_campos`; no usar el total de puestas a disposición ni sumar municipios con datos faltantes para estimar el estado. |
 
-En el complemento local de Apodaca ya constan 3 083 y 2 994 probables personas responsables registradas en puestas a disposición ante el Ministerio Público (2023 y 2024), localizadas en `m3s2p19` del CNGMD 2025. Esos numeradores municipales **no** completan la ficha 18: faltan denominadores de incidencia municipal y estatal, un numerador estatal íntegro y la conciliación de comparabilidad. Los códigos `NA` y `NSS` del CNGMD estatal no son ceros. Hasta resolverlos, la ficha permanece sin calificación.
+En el complemento local de Apodaca constan 3 083 y 2 994 probables personas responsables registradas en puestas a disposición ante el Ministerio Público (2023 y 2024), localizadas en `m3s2p19` del CNGMD 2025. Los CSV del SESNSP de la serie 2015–2025, corte agosto de 2026, aportan 8 752 y 7 899 presuntos delitos municipales, y 97 035 y 90 187 estatales, respectivamente. Cada total suma los doce meses de 98 filas por año, con `Clave_Ent=19` y, en el municipal, `Cve. Municipio=19006`. Estos datos **no** completan la ficha 18: falta un numerador estatal íntegro de personas ante el Ministerio Público y la conciliación de comparabilidad. Personas puestas a disposición y presuntos delitos son universos distintos; su cociente no mide esclarecimiento. En `m3s2p19` del CNGMD, Nuevo León contiene 16 `NA` y 16 `NSS` en 2023, y 21 `NA` y 5 `NSS` en 2024; no son ceros ni autorizan sumar sólo los municipios con cifra. Hasta resolverlo, la ficha permanece sin calificación.
 
 Confirmar una definición no modifica silenciosamente las celdas del paquete.
 Si el paquete está equivocado, solicitar su corrección y volver a preparar con
@@ -155,10 +155,7 @@ reclasifica como falta de respuesta para activar esos candados.
 
 ## Revisión antes de entregar
 
-Revisar `indicadores[].evaluaciones` y `calculos` en la preparación. Se necesitan
-2/3, 5/7 y 6/8 evaluables por dimensión y seis de los ocho prioritarios. Un
-provisional no cuenta. Si no se alcanza esa cobertura, el pipeline conserva la
-entrega anterior y no imprime una nota conjunta inventada.
+Revisar `indicadores[].evaluaciones` y `calculos` en la preparación. El modo predeterminado `disponibles` asigna una categoría de **cobertura parcial** cuando existe al menos un indicador con puntaje por dimensión y uno prioritario; declara los denominadores efectivos y no imputa pendientes. El modo `evaluables` conserva mínimos de 2/3, 5/7 y 6/8 por dimensión y seis prioritarios; `completo` exige 18 puntajes. Un provisional no cuenta. Si ni siquiera se alcanza la cobertura básica, el estudio muestra «SIN VALORACIÓN CONJUNTA» con nota de alcance. Una redacción desactualizada o una contradicción documental bloqueante sí impiden sustituir la entrega anterior.
 
 Actualizar la interpretación editorial a 2.3 sólo después de leer los nuevos
 resultados. Las huellas de ponderación, definiciones, textos y complemento deben

@@ -17,7 +17,7 @@ from calificar import definir_periodos
 from evaluacion_v23 import evaluar
 from ponderacion import agregar_ponderado
 from evidencia_complementaria import validar as validar_complemento, huella_objeto
-from componer_documento import componer
+from componer_documento import componer, etiqueta_calificacion
 from contrato import ROOT, CONTRACT, cargar_contrato, huellas
 from documentos import sha256
 from editorial import configurar
@@ -164,9 +164,8 @@ def validar_resultado(result, mode='final'):
         grade = agregar_ponderado(computed, rules, modo=result['metodo_calificacion'], esquema=result['esquema_ponderacion'])
         if grade != result['calculos'][period]:
             raise ValueError('La calificación agregada difiere de su metodología.')
-        if grade['calificacion_final'] is None:
-            raise ValueError('La evidencia aún no alcanza la cobertura exigida para asignar una calificación.')
-        if values[f'calificacion_{period}'] != grade['calificacion_final']:
+        published_grade = etiqueta_calificacion(grade)
+        if values[f'calificacion_{period}'] != published_grade:
             raise ValueError('La calificación publicada no corresponde a la evaluación.')
     catalogue = result.get('catalogo_ilustraciones', [])
     selected = content.get('ilustraciones', [])
@@ -234,12 +233,15 @@ def seleccionar_documento(root, result, mode, perfil, files):
                 value = result['valores_plantilla'][match[1]]
                 reemplazar(p, match[0], value)
                 if match[1].startswith('calificacion_'):
+                    category = value.removesuffix(' (COBERTURA PARCIAL)')
+                    color_value = ('666666' if category == 'SIN VALORACIÓN CONJUNTA'
+                                   else format_config['colores_calificacion'][category])
                     for r in p.iter(W + 'r'):
                         props = r.find(W + 'rPr')
                         if props is not None:
                             for color in props.findall(W + 'color'):
                                 props.remove(color)
-                            ET.SubElement(props, W + 'color', {W + 'val': format_config['colores_calificacion'][value]})
+                            ET.SubElement(props, W + 'color', {W + 'val': color_value})
     return originals
 
 
