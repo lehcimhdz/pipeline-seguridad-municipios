@@ -21,7 +21,8 @@ from componer_documento import componer
 from contrato import ROOT, CONTRACT, cargar_contrato, huellas
 from documentos import sha256
 from editorial import configurar
-from ilustraciones_word import importar_grafica, seleccionar_graficas
+from ilustraciones_word import importar_grafica, seleccionar_graficas, catalogar_graficas
+from lectura_graficas import validar_lecturas
 from salidas import limpiar_salidas
 from redaccion_consultoria import comprobar_texto, validar_publicacion
 
@@ -143,6 +144,18 @@ def validar_resultado(result, mode='final'):
     supplemental = validar_complemento(result['evidencia_complementaria'], municipality, result['estado'])
     if huella_objeto(supplemental) != result.get('evidencia_complementaria_sha256'):
         raise ValueError('Cambió la evidencia complementaria.')
+    catalogue = result.get('catalogo_ilustraciones', [])
+    if ('lecturas_graficas' in result or any('lecturas_graficas' in s for s in sections)
+            or any(i['indicador'] in (2, 4, 5, 14) for i in catalogue)):
+        canonical = [i for name in sources for i in catalogar_graficas(result['rutas_fuentes'][name])]
+        if catalogue != canonical:
+            raise ValueError('El catálogo de gráficas difiere de los documentos de entrada.')
+        readings = result.get('lecturas_graficas')
+        if not isinstance(readings, list):
+            raise ValueError('Falta la lectura de las gráficas de entrada; volver a preparar.')
+        validar_lecturas(readings, catalogue, result['rutas_fuentes'])
+        if any(s.get('lecturas_graficas') != [i for i in readings if i['indicador'] == s['numero']] for s in sections):
+            raise ValueError('La evidencia gráfica de un indicador difiere de su fuente.')
     evaluations = evaluar(sections, rules, mappings, result['periodos_evaluacion'], supplemental)
     for period in ('general', 'ultimo_periodo'):
         computed = evaluations[period]

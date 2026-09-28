@@ -12,6 +12,7 @@ from uuid import uuid4
 
 from documentos import leer_docx, seccion_seguridad, sha256
 from ilustraciones_word import catalogar_graficas, seleccionar_graficas
+from lectura_graficas import leer_graficas
 from calificar import definir_periodos
 from componer_documento import componer
 from salidas import limpiar_salidas
@@ -132,8 +133,15 @@ def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='evaluabl
     state = documented_state or declared_state
     periods = definir_periodos(sections)
     supplemental = cargar_complemento(complemento, municipality, state)
+    catalogue = [image for path in documents.values() for image in catalogar_graficas(path)]
+    readings = leer_graficas(catalogue, {p.name: str(p.resolve()) for p in documents.values()})
+    for section in sections:
+        section['lecturas_graficas'] = [item for item in readings if item['indicador'] == section['numero']]
     evaluations = evaluar(sections, rules, mappings, periods, supplemental)
-    validations = []
+    validations = [{'nivel': 'revision', 'codigo': 'LECTURA_GRAFICA_INCOMPLETA',
+                    'indicador': item['indicador'], 'fuente': item['fuente'],
+                    'parte': item['parte'], 'detalle': item['lectura']['estado']}
+                   for item in readings if item['lectura']['estado'] in ('error', 'no_disponible')]
     for section in sections:
         number = section['numero']
         section['evaluaciones'] = {period: values[number] for period, values in evaluations.items()}
@@ -151,7 +159,6 @@ def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='evaluabl
                                     'indicador': number, 'periodo': period, 'detalle': calculation['motivo']})
     aggregates = {period: agregar_ponderado(values, rules, modo=modo_calificacion, esquema=esquema)
                   for period, values in evaluations.items()}
-    catalogue = [image for path in documents.values() for image in catalogar_graficas(path)]
     result = {
         'version': '2.3', 'ejecucion_id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8],
         'municipio': municipality, 'estado': state, 'estado_ejecucion': 'requiere_redaccion',
@@ -164,6 +171,7 @@ def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='evaluabl
         'valores_plantilla': {key: None for key in dictionary['variables_documento']},
         'indicadores': sections, 'calculos': aggregates, 'periodos_evaluacion': periods,
         'metodo_calificacion': modo_calificacion, 'catalogo_ilustraciones': catalogue,
+        'lecturas_graficas': readings,
         'esquema_ponderacion': aggregates['general']['esquema'],
         'evidencia_complementaria': supplemental,
         'evidencia_complementaria_sha256': huella_objeto(supplemental),

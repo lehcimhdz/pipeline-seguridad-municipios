@@ -5,6 +5,7 @@ coordenadas son las de documentos.registros: tabla y fila comienzan en uno,
 incluido el encabezado. Las fuentes y sus huellas se conservan en el resultado.
 """
 from copy import deepcopy
+import re
 from calificar import filas_por_año, normalizar, numero, coincide
 from evidencia_complementaria import poblacion, tasas_comparables
 
@@ -14,6 +15,39 @@ def equivalentes(a, b):
         return type(a) is type(b) and a == b
     x, y = numero(str(a)), numero(str(b))
     return x == y if x is not None and y is not None else a == b
+
+
+def conceptos_graficos(section, year, policy, estado=None):
+    """Reconoce títulos completos; las cifras se siguen tomando de las tablas."""
+    config = policy.get('titulos_graficas', {})
+    if config.get('habilitada') is not True:
+        return []
+    rules = config.get('por_indicador', {}).get(str(section['numero']), [])
+    found = []
+    for item in section.get('lecturas_graficas', []):
+        reading = item.get('lectura', {})
+        if reading.get('estado') != 'leida' or item.get('indicador') != section['numero']:
+            continue
+        title = ' '.join(normalizar(reading.get('titulo', '')).split())
+        match = re.fullmatch(r'(.+?):\s*(.+?)\s*\((\d{4})\s*[-–—]\s*(\d{4})\)\.?', title)
+        if not match or not int(match[3]) <= year <= int(match[4]):
+            continue
+        if item['ambito'] == 'municipal':
+            municipality = item['fuente'].removesuffix(' PAQUETE SEGURIDAD.docx').removesuffix(' Anexo.docx')
+            if match[1].strip() != normalizar(municipality):
+                continue
+        elif item['ambito'] == 'estatal' and estado and match[1].strip() != normalizar(estado):
+            continue
+        description = match[2].strip(' ,.')
+        for rule in rules:
+            if description != normalizar(rule['descripcion']):
+                continue
+            found.append({'campo': rule['campo'], 'valor': rule['valor'], 'ambito': item['ambito'],
+                'evidencia': {'fuente': item['fuente'], 'fuente_sha256': item['fuente_sha256'],
+                    'parte': item['parte'], 'sha256': item['sha256'], 'bloque': item['bloque'],
+                    'ambito': item['ambito'], 'anio': year, 'titulo': reading['titulo'],
+                    'metodo': 'ocr_local', 'motor': reading['motor'], 'idioma': reading['idioma']}})
+    return found
 
 
 def resolver(sections, mappings, definitions, complemento):
@@ -96,6 +130,27 @@ def resolver(sections, mappings, definitions, complemento):
                 if len(columns) == 1:
                     extract('personas_reportadas', next(iter(columns)))
 
+            concepts = conceptos_graficos(section, year, policy, complemento.get('estado'))
+            fields = {}
+            for concept in concepts:
+                key = concept['campo'], concept['ambito']
+                fields.setdefault(key, []).append(concept)
+            for (field, scope), facts in fields.items():
+                values = {fact['valor'] for fact in facts}
+                evidence = [fact['evidencia'] for fact in facts]
+                if len(values) != 1:
+                    entry['_conflictos'].append({'campo': field, 'ambito': scope,
+                        'detalle': 'Los títulos de las gráficas discrepan.', 'evidencias': evidence})
+                    continue
+                if scope == 'municipal' or field == 'universo_camaras':
+                    target = f'universo_{scope}' if field == 'universo_camaras' else field
+                    assign(target, facts[0]['valor'], evidence,
+                           'correspondencias_automaticas.titulos_graficas', 'lectura_grafica')
+            if n == 14 and all(entry.get(f'universo_{scope}') == 'camaras_en_servicio' for scope in ('municipal', 'estatal')):
+                assign('universo', 'camaras_en_servicio',
+                       entry['_trazabilidad']['universo_municipal']['evidencias'] + entry['_trazabilidad']['universo_estatal']['evidencias'],
+                       'correspondencias_automaticas.titulos_graficas', 'lectura_grafica')
+
             supplied = manual.get(str(year), {})
             if supplied:
                 if supplied.get('revision') != 'verificada':
@@ -114,6 +169,14 @@ def resolver(sections, mappings, definitions, complemento):
                                     'fuente': supplied.get('fuente'), 'localizador': supplied.get('localizador'),
                                     'anio': year, 'indicador': n}]})
                         entry[field] = deepcopy(value)
+            if (n == 14 and entry.get('universo') == 'camaras_en_servicio'
+                    and any(entry.get(f'universo_{scope}') == 'camaras_fuera_de_servicio' for scope in ('municipal', 'estatal'))):
+                entry['_conflictos'].append({'campo': 'universo',
+                    'detalle': 'El complemento declara cámaras en servicio y una gráfica declara equipos fuera de servicio.'})
+            if (n == 5 and entry.get('definicion') == 'aprobatorias_vigentes'
+                    and entry.get('estatus_evaluaciones') == 'no_aprobadas'):
+                entry['_conflictos'].append({'campo': 'definicion',
+                    'detalle': 'El complemento declara aprobación vigente y la gráfica identifica evaluaciones no aprobadas.'})
             observations[str(n)][str(year)] = entry
 
     # La dotación usa el mismo personal policial del año, nunca el Total general.
@@ -153,6 +216,9 @@ def requisitos_pendientes(n, years, obs, data):
     for year in years:
         entry = obs.get(str(year), {})
         needed = [f'{key}={value}' for key, value in definitions.get(n, {}).items() if entry.get(key) != value]
+        if n == 5 and entry.get('estatus_evaluaciones') == 'aprobadas' and 'definicion=aprobatorias_vigentes' in needed:
+            needed.remove('definicion=aprobatorias_vigentes')
+            needed.append('vigencia_de_las_evaluaciones_aprobadas')
         for key in quantities.get(n, ()):
             value = numero(str(entry.get(key, '')))
             if value is None or value < 0 or (key in ('delitos_municipales', 'delitos_estatales') and value == 0):

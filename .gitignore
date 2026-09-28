@@ -13,5 +13,6 @@ input/**/*.csv
 input/**/*.pdf
 input/**/*.xlsx
 input/**/*.xls
+input/fuentes/**
 output/**/*.docx
 output/**/*.json

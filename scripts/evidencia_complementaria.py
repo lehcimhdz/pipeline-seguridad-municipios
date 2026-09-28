@@ -58,12 +58,16 @@ def validar(value, municipio, estado):
                 raise ValueError('La población debe ser positiva.')
         except (InvalidOperation, KeyError) as exc:
             raise ValueError('Población inválida.') from exc
-        if (item.get('metodo') not in ('reconstruccion', 'proyeccion', 'censo', 'encuesta', 'interpolacion_geometrica')
+        if (item.get('metodo') not in ('reconstruccion', 'proyeccion', 'censo', 'encuesta', 'interpolacion_geometrica', 'censo_base_fija')
                 or not item.get('serie') or not item.get('fecha_referencia')):
             raise ValueError('Población sin método, serie o fecha de referencia.')
         try:
             reference = date.fromisoformat(item['fecha_referencia'])
-            if reference.year != year:
+            if item['metodo'] == 'censo_base_fija':
+                if (reference.year >= year or item.get('anio_referencia_poblacion') != reference.year
+                        or item.get('uso_como_base_fija') is not True):
+                    raise ValueError('Base censal fija sin año de referencia anterior y declaración expresa.')
+            elif reference.year != year:
                 raise ValueError('El año y la fecha de población no coinciden.')
         except (TypeError, ValueError) as exc:
             raise ValueError('Fecha de referencia poblacional inválida o incompatible con el año.') from exc

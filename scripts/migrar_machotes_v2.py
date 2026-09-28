@@ -281,6 +281,7 @@ def depurar_diccionario(previous, found, rules):
             'evidencia_complementaria_sha256': 'Huella del objeto canónico completo; invalida redacción si cambia.',
             'evaluacion_sha256': 'Huella de puntajes, cálculos y periodos; cambiar modo o esquema exige revisar la redacción.',
             'evidencia_documental': 'Bloques originales de las entradas recibidas, conservados para auditoría.',
+            'lecturas_graficas': 'OCR local por imagen: estado, texto, título, idioma y motor, con fuente, indicador, ámbito y huellas. Las cifras se toman de las tablas. Se verifica la lectura antes de publicar.',
             'validaciones': 'Pendientes de revisión, inconsistencias y límites; los códigos no son texto del informe.',
             'contrato': 'Versiones y huellas de los componentes que produjeron el resultado.',
             'contenido_word': 'Perfil estudio_seguridad, 25 variables de texto, ilustraciones originales y controles de publicación.',
@@ -290,6 +291,7 @@ def depurar_diccionario(previous, found, rules):
             'ficha_indicador': {
                 'numero': 'integer 1..18', 'nombre': 'string', 'dimension': 'codigo de dimensión',
                 'tablas': 'Tablas originales y localizadores de evidencia.',
+                'lecturas_graficas': 'Subconjunto del registro de OCR correspondiente a este indicador; no inferir conceptos de otro ámbito o fuera del periodo explícito del título.',
                 'evaluaciones': {'general': 'evaluacion_indicador', 'ultimo_periodo': 'evaluacion_indicador'},
                 'control_cruzado_anexo': 'Correspondencia de tablas y calificación reportada entre los dos documentos.'},
             'evaluacion_indicador': {
@@ -297,7 +299,7 @@ def depurar_diccionario(previous, found, rules):
                 'motivo': 'string que explica por qué no puede asignarse puntaje',
                 'años_observados': 'array de integer', 'años_evaluados': 'array de integer',
                 'estado_dato': 'reportado|pendiente|no_aplicable|en_conflicto',
-                'correspondencias': 'Por año: campos resueltos con valor, tipo (lectura_directa, homologacion, complemento_verificado), regla y evidencias; conflictos impiden puntuar. Coordenadas: tabla y fila desde 1, incluido encabezado; fuentes y huellas en el resultado.',
+                'correspondencias': 'Por año: campos resueltos con valor, tipo (lectura_directa, lectura_grafica, homologacion, complemento_verificado), regla y evidencias; conflictos impiden puntuar. Coordenadas: tabla y fila desde 1, incluido encabezado; fuentes y huellas en el resultado.',
                 'requisitos_pendientes': 'Campos o comprobaciones aún necesarios por año; no equivale a inexistencia de la variable en el cuestionario general.',
                 'valoracion_provisional': 'Nivel indicativo o null, base, confianza, falta, evidencias y condiciones; indicar años usados. Nunca computa en la agregación.',
                 'regla': 'No confundir la calificación reportada en la entrada con una evaluación calculada; justificar toda asignación.'},

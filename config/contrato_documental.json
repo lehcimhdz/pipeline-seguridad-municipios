@@ -26,20 +26,20 @@
   },
   "benchmark": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "3c1e1c60021cfa1332b95aab29dbbfb321fc98b42322f79b114e5a3dc629c30a",
+    "sha256": "60f1196af9b709e09efff2f6ccb0b1f02cffd88c9cf4efa09f1b77fd560daf69",
     "rol": "Criterios para construir la metodología de calificación e interpretación."
   },
   "diccionario": {
     "archivo": "diccionario_datos_diagnostico_seguridad_municipal.json",
-    "sha256": "28f47f63da28123a4511e9376eeb80fa926f5cd7889be4f6d8286c20bfdeeffd"
+    "sha256": "0e15d1fe503324c26ff4b057426ba6d4f8ee46774ec6790d23d50c4353abd47b"
   },
   "reglas": {
     "archivo": "reglas_calificacion.json",
-    "sha256": "4c6caf614e78686b83b7bf60015dc0cc5bb2f7fd0d7addbf949951376db52b26"
+    "sha256": "acbd995887c76ee6279015b65d3c2491e8753772dbd737446cb497d0035d2108"
   },
   "metodologia": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "3c1e1c60021cfa1332b95aab29dbbfb321fc98b42322f79b114e5a3dc629c30a"
+    "sha256": "60f1196af9b709e09efff2f6ccb0b1f02cffd88c9cf4efa09f1b77fd560daf69"
   },
   "formato": {
     "archivo": "config/formato_editorial.json",
@@ -59,7 +59,7 @@
   },
   "definiciones": {
     "archivo": "config/definiciones_cngmd.json",
-    "sha256": "97b805c4cd0d42b07dd3a12592c10c03ff05fc7b73c4ce47491c818191ef14ff"
+    "sha256": "e84f97bebcaa26cb0ddb7806cddb713c2dd371f9bd9bfc33aa4588370358dcc3"
   },
   "textos_narrativos": {
     "archivo": "config/textos_narrativos.json",

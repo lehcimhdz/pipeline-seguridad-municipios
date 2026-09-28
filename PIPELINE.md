@@ -30,7 +30,9 @@ El paquete aporta las tablas municipales y estatales de los 18 indicadores. Las 
 
 El paquete sigue siendo la fuente estadística principal. Todos los datos municipales proceden de `input/`. El material del asesor recibido en `new-elements`, fuera del repositorio, aporta parámetros generales que se integran en `config/`; no se consulta como una fuente de cifras del municipio. La muestra editorial aporta estilo, no cifras ni conclusiones.
 
-Primero se resuelven las correspondencias que permiten los títulos, columnas y valores del paquete. Los complementos revisados son opcionales: pueden aportar población o aclarar los universos que sigan pendientes, sin repetir lo ya reconocido. Se incorporan expresamente mediante `--complemento`, nunca mediante búsquedas automáticas. Cada observación complementaria exige archivo conservado, SHA-256, año, localizador y revisión. Véase [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md).
+Primero se resuelven las correspondencias que permiten los títulos, columnas y valores del paquete, junto con los títulos de las gráficas de Seguridad del paquete y del Anexo. Los complementos revisados son opcionales: pueden aportar población o aclarar los universos que sigan pendientes, sin repetir lo ya reconocido. Se incorporan expresamente mediante `--complemento`, nunca mediante búsquedas automáticas. Cada observación complementaria exige archivo conservado, SHA-256, año, localizador y revisión. Véase [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md).
+
+Para Apodaca se verificaron datos abiertos del CNGMD con referencia 2022 y 2024: el estatus «evaluaciones aprobatorias vigentes» se distingue de la mera aprobación, y el personal de corporaciones policiales se separa del total institucional. Se conservan los ZIP y un complemento local en `input/`, ignorados por Git. La API del Banco de Indicadores confirmó la población censal de 2020; por decisión metodológica explícita se usa como **base fija 2020** para tasas recientes, no como población observada en 2022 o 2024. No se obtiene población censal anual. La preparación de Apodaca debe ejecutarse con `--complemento input/complementos/apodaca.json`; el archivo no se carga automáticamente.
 
 ## Contrato y variables
 
@@ -59,6 +61,10 @@ python3 scripts/ejecutar_pipeline.py --preparar --estado "Nombre del estado"
 ```
 
 Este paso produce `output/json/{slug}_evidencia_seguridad.json`: evidencia ordenada, periodos, puntajes, valoraciones provisionales y catálogo de imágenes. Las `correspondencias` de cada evaluación registran el campo reconocido, el tipo de decisión, la regla aplicada y sus evidencias por indicador y año, con tabla, fila y columna cuando provienen de celdas. Una homologación automática no se marca como revisión humana ni como nueva comprobación externa. Los faltantes explican el requisito concreto que no pudo resolverse; un complemento vacío no es, por sí solo, motivo de bloqueo.
+
+La preparación también realiza lectura óptica local de las gráficas de Seguridad mediante Tesseract. `lecturas_graficas` conserva el texto completo reconocido, el título, el estado de lectura, idioma y motor, junto con el archivo, la imagen y su SHA-256. Estas lecturas se vinculan al indicador correspondiente. Los años del título delimitan el alcance de cada aclaración; no se extrapola a otras ediciones. Las cifras calculables siguen procediendo de las tablas, no del reconocimiento de números en una imagen.
+
+Para habilitar esta lectura, instalar `tesseract` y sus datos de español: `brew install tesseract tesseract-lang` en macOS o `sudo apt-get install tesseract-ocr tesseract-ocr-spa` en Debian/Ubuntu. Se prefiere español; si no está disponible, se utiliza inglés. El motor y las imágenes permanecen en el equipo. Sin motor, idioma utilizable o lectura válida se registra el problema y se conservan los pendientes correspondientes; no se completan títulos por conjetura.
 
 Preparar no publica un nuevo Word. El archivo de redacción se guarda por defecto en `input/redaccion/{slug}.json`, o se indica mediante `--redaccion`.
 
@@ -91,9 +97,9 @@ Se ofrecen dos métodos:
 
 Los modos mantienen las mismas fichas individuales y la misma escala. La adaptación evaluable no atribuye puntajes a los pendientes ni equivale a un promedio completo. El JSON conserva un intervalo de sensibilidad de la evaluación completa; sus escenarios extremos no se publican como observaciones.
 
-Las definiciones 2.4.2 incorporan correspondencias automáticas y lecturas condicionales dentro del contrato 2.3. Un CUP explícitamente vigente puede evaluarse con el porcentaje reportado bajo la homologación censal adoptada. En cambio, un título genérico no convierte una evaluación en aprobación vigente, ni un total de servidores en personal exclusivo de una unidad. Una contradicción entre un campo explícito y un complemento exige conciliación; no se impone silenciosamente una de las versiones.
+Las definiciones 2.4.3 incorporan correspondencias automáticas y lecturas condicionales dentro del contrato 2.3. Un CUP explícitamente vigente puede evaluarse con el porcentaje reportado bajo la homologación censal adoptada. El título de una gráfica puede acreditar que las evaluaciones fueron aprobadas o que las cámaras estaban en funcionamiento, dentro del periodo expresado. Aprobar no equivale a tener una evaluación vigente; mencionar elementos de seguridad pública no permite descontar administrativos. Una contradicción entre un campo explícito y un complemento exige conciliación; no se impone silenciosamente una de las versiones.
 
-Las valoraciones provisionales conservan `puntaje: null` y no cuentan para cobertura ni promedio. En capacitación policial se reconocen grupos núcleo del último año disponible, sin sumar asistentes entre cursos. En llamadas, dos cortes municipales recientes permiten una lectura condicional de continuidad de la serie; no prueban quién opera el servicio ni su eficacia. El renderizador recalcula las correspondencias y las evaluaciones antes de aceptar el JSON.
+Las valoraciones provisionales conservan `puntaje: null` y no cuentan para cobertura ni promedio. En capacitación policial se reconocen grupos núcleo del último año disponible, sin sumar asistentes entre cursos. En llamadas, dos cortes municipales recientes permiten una lectura condicional de continuidad de la serie; no prueban quién opera el servicio ni su eficacia. El renderizador vuelve a leer las imágenes y recalcula las correspondencias y las evaluaciones antes de aceptar el JSON; rechaza lecturas editadas o que no puedan reproducirse con las fuentes.
 
 El documento final exige una calificación conjunta en ambos periodos. Se bloquea si falta cobertura por dimensión, hay menos de seis prioritarios evaluables o existe un universo no aplicable sin metodología específica. `--preparar` conserva evidencia y pendientes sin reemplazar la entrega vigente. La lista de pendientes se calcula en cada ejecución: no es una lista fija de siete fichas.
 
@@ -134,6 +140,7 @@ El interlineado de los títulos se aplica como mínimo para que una letra de 24 
 Paquete Seguridad + Anexo opcional
   → comprobar identidad, originales y contrato
   → extraer evidencia y catalogar gráficas existentes
+  → leer títulos de las gráficas de Seguridad y delimitar sus años
   → reconocer correspondencias y aclarar sólo los faltantes específicos
   → aplicar benchmark y declarar cobertura
   → redactar y revisar la interpretación vinculada a los hechos

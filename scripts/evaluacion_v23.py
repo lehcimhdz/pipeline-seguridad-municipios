@@ -104,11 +104,15 @@ def revisar_ficha(n, section, old, years, entries, data, definitions):
         return missing('Cobertura temporal insuficiente para aplicar la ficha revisada.')
     if n == 2:
         if not all(e.get('universo') == 'personal_unidad_pc' and e.get('conteo_personas') == 'unico' for e in entries):
+            if any(e.get('tipo_participantes') == 'servidores_publicos' for e in entries):
+                return missing('Se reportan servidores públicos capacitados; falta precisar pertenencia a la unidad de protección civil y conteo único en cada año.')
             return missing('Confirmar capacitación al personal de la unidad y conteo único; no mezclar difusión a población.')
         return old
     if n in (5, 7, 10):
         required = {5: 'aprobatorias_vigentes', 7: 'cup_vigente', 10: 'capacitacion_sin_profesionalizacion'}[n]
         if not all(e.get('universo') == 'corporaciones_policiales' and e.get('definicion') == required for e in entries):
+            if n == 5 and all(e.get('estatus_evaluaciones') == 'aprobadas' for e in entries):
+                return missing('Las gráficas identifican evaluaciones aprobadas; falta precisar su vigencia y el universo de corporaciones policiales.')
             messages = {
                 5: 'El porcentaje de control de confianza no distingue evaluaciones aplicadas de aprobatorias vigentes ni acredita su universo policial.',
                 7: 'Falta identificar expresamente CUP vigente y porcentaje sobre corporaciones policiales en los años evaluados.',

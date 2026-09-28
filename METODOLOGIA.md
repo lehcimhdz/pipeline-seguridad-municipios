@@ -69,7 +69,7 @@ Las fichas históricas, sus revisiones y condiciones ejecutables están en `regl
 
 ## Correspondencias entre datos y criterios
 
-Las definiciones 2.4.2 mantienen la integración metodológica 2.3 y hacen explícita la lectura automática del paquete. Los archivos de `new-elements` aportan parámetros generales: no son datos de un municipio ni sustituyen a `input/`. El reconocimiento distingue tres operaciones:
+Las definiciones 2.4.3 mantienen la integración metodológica 2.3 y hacen explícita la lectura automática del paquete y las gráficas de Seguridad del Anexo. Los archivos de `new-elements` aportan parámetros generales: no son datos de un municipio ni sustituyen a `input/`. El reconocimiento distingue tres operaciones:
 
 - Recuperar un dato explícito de su título o celda, conservando indicador, año, tabla, fila y columna según corresponda.
 - Homologar ese concepto con una definición o grupo temático ya adoptado, dejando identificada la regla.
@@ -77,9 +77,15 @@ Las definiciones 2.4.2 mantienen la integración metodológica 2.3 y hacen expl�
 
 Estas decisiones quedan en `correspondencias` dentro de cada evaluación, junto con sus evidencias. No reciben una marca ficticia de revisión humana. El renderizador vuelve a calcularlas a partir de las fuentes y las reglas; modificar sólo el JSON no cambia el resultado válido. Una observación complementaria documentada puede resolver una ambigüedad, pero una contradicción con información explícita exige conciliación.
 
-El título «Certificado Único Policial vigente», unido a una columna porcentual municipal, permite aplicar la definición censal adoptada para ese certificado y su universo policial. Es una homologación metodológica del dato reportado, no prueba de que se haya auditado nuevamente el levantamiento o reconstruido el denominador. El título genérico «Evaluaciones de control de confianza» no identifica el estatus aprobatorio vigente. Tampoco «servidores capacitados» identifica por sí solo personal exclusivo de protección civil ni acredita un conteo único.
+Los títulos incrustados en imágenes forman parte de la evidencia documental. La lectura óptica local conserva el texto reconocido, su estado, idioma, motor y huella de la imagen en `lecturas_graficas`; el renderizador la reproduce antes de admitir sus correspondencias. Se utiliza el título completo y su intervalo de años para precisar un concepto. Los números de las tablas siguen sustentando los cálculos. Una imagen ilegible o una lectura no disponible deja el requisito pendiente; no autoriza a completar palabras o años por semejanza con otro municipio.
+
+El título «Certificado Único Policial vigente», unido a una columna porcentual municipal, permite aplicar la definición censal adoptada para ese certificado y su universo policial. Es una homologación metodológica del dato reportado, no prueba de que se haya auditado nuevamente el levantamiento o reconstruido el denominador. El título genérico «Evaluaciones de control de confianza» no identifica el estatus aprobatorio vigente. Una gráfica que especifica «aprobó las evaluaciones» sí permite recuperar la aprobación; la vigencia sigue pendiente si no se declara. Tampoco «servidores públicos capacitados» identifica por sí solo personal exclusivo de protección civil ni acredita un conteo único, y «elementos de seguridad pública» no confirma un total exclusivamente policial sin administrativos.
+
+En cámaras, la expresión «en funcionamiento» permite reconocer equipos en servicio para los ámbitos y años que identifique el título. Esa precisión evita pedir nuevamente un dato ya expresado en la gráfica. El puntaje definitivo todavía requiere poblaciones municipal y estatal comparables; la aclaración del concepto no aporta esos denominadores.
 
 La homologación reconoce conceptos; no aporta cantidades inexistentes. No obtiene población a partir del tamaño de la plantilla, no transforma personal total en policías y no deduce un catálogo completo de capacitación sólo de los temas que aparecen impartidos.
+
+Cuando se emplea `censo_base_fija`, el denominador es la población censal observada el 15 de marzo de 2020 para el municipio y el estado. Los numeradores de 2022 o 2024 se dividen por esa misma base; el resultado es una tasa **con base censal 2020**, no una tasa por habitantes efectivamente observados en esos años. La comparación entre municipios y periodos queda condicionada por el crecimiento demográfico no incorporado. La fuente, el año del numerador y el año de la base se conservan en el complemento. Esta opción no autoriza atribuir una población 2024 al INEGI ni aplicar la base 2020 a 2014–2018.
 
 ## Homologaciones que sí se realizan
 
@@ -155,7 +161,7 @@ En capacitación policial, la presencia positiva de dos o más grupos núcleo en
 
 En llamadas, dos cortes municipales recientes con conteos permiten nivel indicativo 3, de confianza baja, como lectura condicional de continuidad de la serie reportada. Si se desconoce quién opera el servicio, esa incertidumbre permanece: no se declara competencia municipal ni se asigna el puntaje definitivo. Esta convención de integración recoge la lectura de continuidad propuesta por el asesor sin atribuirle una validación adicional; reemplaza el bloqueo automático de toda interpretación por falta de confirmación del operador. Los conteos no prueban tiempos de atención, resolución ni desempeño. Un vacío tampoco basta para asignar nivel 2 por supuesto registro incompleto.
 
-En cámaras, los conteos pueden sostener una lectura provisional de presencia y evolución aun sin poblaciones comparables; no acreditan por sí mismos que los equipos funcionen. Cada valoración declara su base y qué evidencia falta para aplicar la ficha definitiva.
+En cámaras, los conteos pueden sostener una lectura provisional de presencia y evolución aun sin poblaciones comparables; no acreditan por sí mismos que los equipos funcionen. Si el título de la gráfica especifica funcionamiento y cubre los años evaluados, esa condición queda documentada, mientras permanecen pendientes los denominadores que falten. Cada valoración declara su base y qué evidencia falta para aplicar la ficha definitiva.
 
 Cuando todos los pendientes admiten nivel provisional, se calcula un escenario intermedio separado. Los extremos que asignan 1 y 5 permanecen intactos; el escenario no los estrecha ni pasa por resultado observado. Sin evidencia sustituta suficiente se declara `no_estimable`. Una institución no aplicable no se somete a esos escenarios como si fuera un dato desconocido ordinario.
 

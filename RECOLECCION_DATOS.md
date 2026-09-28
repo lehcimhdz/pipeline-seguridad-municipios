@@ -9,23 +9,36 @@ el material de `new-elements` aporta parámetros generales para el pipeline.
 ## Antes de solicitar más información
 
 Ejecutar primero `--preparar` sin complemento y leer las `correspondencias` y
-los motivos de pendiente en `indicadores[].evaluaciones`. El programa reconoce
-títulos, columnas y conceptos bajo las reglas adoptadas. No hay que transcribir
+los motivos de pendiente en `indicadores[].evaluaciones`. Revisar también
+`lecturas_graficas`: el programa reconoce títulos, columnas y texto incrustado
+en las gráficas de Seguridad del paquete y del Anexo bajo las reglas adoptadas. No hay que transcribir
 esas correspondencias en un archivo de confirmaciones ni declarar
 `revision: "verificada"` para habilitar cada ficha.
 
 El título de CUP vigente permite homologar su porcentaje bajo la definición
 censal adoptada. Un encabezado genérico de control de confianza, en cambio, no
-identifica aprobación y vigencia. En capacitación, «servidores» no prueba por
+identifica aprobación y vigencia. Si el título de la gráfica dice que los
+elementos aprobaron las evaluaciones, queda aclarada la aprobación; todavía
+debe comprobarse vigencia. «Cámaras en funcionamiento» permite reconocer
+equipos en servicio en los ámbitos y años indicados, sin aportar población.
+En capacitación, «servidores públicos» no prueba por
 sí solo pertenencia a la unidad ni un conteo único. El complemento debe atender
 esas diferencias concretas, no confirmar en bloque todas las estadísticas.
+
+La lectura de imágenes requiere Tesseract local; véase la instalación en
+[README.md](README.md). Si no está disponible o falla una lectura, el aviso no
+demuestra que el documento carezca de esa aclaración. Revisar la imagen y
+resolver la lectura antes de solicitar información adicional. No extraer
+cifras mediante OCR para reemplazar las tablas ni extender la definición a
+años que no cubra el título. La procedencia y las lecturas se comprueban de
+nuevo antes de renderizar.
 
 ## Archivo y ejecución
 
 Guardar el complemento revisado en `input/complementos/{slug}.json`. Conservar
 sus fuentes en `input/fuentes/`: PDF, CSV, XLSX o DOCX quedan fuera de Git. Usar
 fuentes oficiales o aclaraciones documentadas del productor del paquete.
-No se requieren tokens ni servicios de IA.
+El complemento puede provenir del CNGMD (datos abiertos CSV sin token) o de la API del Banco de Indicadores del INEGI. El token de esta última se lee sólo desde `.env`, nunca se copia al complemento, a las fuentes conservadas ni a Git.
 
 ```sh
 python3 scripts/ejecutar_pipeline.py --preparar --estado "Nombre del estado" --complemento input/complementos/{slug}.json
@@ -65,13 +78,17 @@ Cada registro de `poblacion` contiene:
 
 - `ambito`: `municipal` o `estatal`; la identidad corresponde al encabezado del archivo.
 - `anio`, `valor` positivo, `serie`, `fecha_referencia` ISO (`AAAA-MM-DD`).
-- `metodo`: `reconstruccion`, `proyeccion`, `censo`, `encuesta` o `interpolacion_geometrica`.
+- `metodo`: `reconstruccion`, `proyeccion`, `censo`, `encuesta`, `interpolacion_geometrica` o `censo_base_fija`.
 - Fuente, localizador y revisión, como se explicó arriba.
 
 Se admite una sola serie por ámbito. Las tasas comparadas exigen la misma serie,
 método y fecha en ambos ámbitos. Preferir una serie anual consistente; distinguir
 el año de referencia del dato del año de edición censal. En las tablas del
 paquete esa correspondencia debe confirmarse, no inferirse.
+
+Si se decide usar el Censo de Población 2020 como denominador fijo para una tasa de 2022 o 2024, declarar `metodo: "censo_base_fija"`, `fecha_referencia: "2020-03-15"`, `anio_referencia_poblacion: 2020` y `uso_como_base_fija: true` en ambos ámbitos. `anio` indica el año del numerador, **no** el año en que se observó esa población. Esto permite una tasa de referencia con base 2020, no una estimación de habitantes de 2022 o 2024. No aplicar el censo 2020 retrospectivamente a años anteriores. El estudio deberá decir que la base es fija y que el crecimiento demográfico posterior no está incorporado.
+
+La consulta para Apodaca recuperó 656 464 habitantes en el municipio y 5 784 442 en Nuevo León, ambos observados en 2020. Los CSV municipales del CNGMD permitieron cotejar 877 de 920 evaluaciones aprobatorias vigentes en 2022 y 662 de 736 en 2024. El censo de gobiernos no reemplaza el paquete municipal: sus filas se usan sólo donde coinciden ámbito, concepto y periodo. La tabla de capacitación y difusión de protección civil clasifica participantes de eventos; no acredita por sí sola personas únicas capacitadas dentro de la Unidad Municipal, por lo que no habilita la ficha 2.
 
 Una interpolación exige `anclajes`, exactamente dos registros con `anio`,
 `valor`, fuente, localizador y revisión. El año interpolado debe estar dentro
@@ -89,11 +106,11 @@ Cada entrada conserva la procedencia; los requisitos por ficha son:
 | 2 | `universo: "personal_unidad_pc"`, `conteo_personas: "unico"`. Acreditar que no son cursos de difusión a población ni suma de participantes repetidos. |
 | 3 | `grupos_captados`: claves de grupos en `config/definiciones_cngmd.json`; `catalogo_completo: true`. Si no se impartió ningún núcleo, `ausencia_temas_acreditada: true`; un tema no homologado no demuestra ausencia. |
 | 4 | `personal_policial`: conteo sin administrativos; población del año. `institucion_propia: false` sólo cuando su ausencia esté documentada, no por mando único. Una ausencia afecta a los rubros policiales del periodo. |
-| 5 | `universo: "corporaciones_policiales"`, `definicion: "aprobatorias_vigentes"`: no basta saber cuántas personas fueron evaluadas. |
+| 5 | `universo: "corporaciones_policiales"`, `definicion: "aprobatorias_vigentes"`: no basta saber cuántas personas fueron evaluadas. Una gráfica que explicita aprobación resuelve esa parte; aclarar la vigencia y el universo si siguen pendientes. |
 | 7 | Mismo universo; `definicion: "cup_vigente"`. No requiere complemento cuando el título y la columna ya permiten la homologación adoptada. Aclarar encabezados distintos o contradicciones. No inferir inconsistencia automáticamente por CUP cero y controles aprobados positivos. |
 | 9 | `personal_policial`, `chalecos`, `radios`, `menos_letal` (conteos), `naturaleza_del_dato: "asignado_al_cierre"`. No confundir compras o entregas anuales con disponibilidad. |
 | 10 | Mismo universo policial; `definicion: "capacitacion_sin_profesionalizacion"`. Confirmar denominador de porcentajes y no sumar personas entre cursos. |
-| 14 | `universo: "camaras_en_servicio"`; los conteos salen del paquete. Poblaciones municipal y estatal compatibles. |
+| 14 | `universo: "camaras_en_servicio"` sólo si no queda reconocido mediante títulos explícitos para los ámbitos y años correspondientes; los conteos salen del paquete. Poblaciones municipal y estatal compatibles. |
 | 15 | `registro_municipal: true` indica competencia del registro, no existencia automática del centro. Población y conteos de llamadas del paquete. Para 5: `meta_respuesta` documentada y `meta_respuesta_cumplida: true` en cada año. `ausencia_registro_acreditada` distingue inexistencia comprobada de vacío; `dato_dudoso` limita a 3. |
 | 18 | `personas_mp`, `delitos_municipales`, `personas_mp_estatal`, `delitos_estatales`; `incidencia_comparable: true`. Para 5: `revision_derechos: "sin_recomendaciones_documentada"` y `control_uso_fuerza: "revisado"`. La fuente y localizador deben respaldar todos los componentes; si procede, conservar un expediente de conciliación con las referencias de cada uno. |
 

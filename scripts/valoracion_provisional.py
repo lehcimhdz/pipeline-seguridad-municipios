@@ -199,7 +199,7 @@ def _equipamiento(section, years, obs, result):
                                 'no acredita funcionamiento, distribución por turno ni protección efectiva.')
 
 
-def _camaras(section, years, result):
+def _camaras(section, years, obs, result):
     counts = []
     for year in years:
         value, evidence = _conteo(section, year)
@@ -212,8 +212,12 @@ def _camaras(section, years, result):
             result.update(nivel_indicativo=3, confianza='baja')
         elif any(v == 0 for v in counts) and any(v > 0 for v in counts):
             result.update(nivel_indicativo=2, confianza='baja')
-    result['condiciones'].append('La continuidad del conteo no acredita cámaras en servicio ni '
-                                'cobertura equivalente a la estatal.')
+    if years and all(obs.get(str(y), {}).get('universo') == 'camaras_en_servicio' for y in years):
+        result['condiciones'].append('La evidencia identifica cámaras en servicio; comparar la cobertura '
+                                    'municipal y estatal por habitante requiere poblaciones compatibles.')
+    else:
+        result['condiciones'].append('La continuidad del conteo no acredita cámaras en servicio ni '
+                                    'cobertura equivalente a la estatal.')
 
 
 def _llamadas(section, years, obs, result):
@@ -290,7 +294,7 @@ def provisional(number, section, years, obs, motivo, definitions, mappings=None,
     elif number == 10:
         _capacitacion(section, years, obs, mappings or {}, result)
     elif number == 14:
-        _camaras(section, years, result)
+        _camaras(section, years, obs, result)
     elif number == 15:
         _llamadas(section, years, obs, result)
     elif number == 18:

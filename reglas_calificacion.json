@@ -2,7 +2,7 @@
   "version": "2.3",
   "fuente": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "3c1e1c60021cfa1332b95aab29dbbfb321fc98b42322f79b114e5a3dc629c30a"
+    "sha256": "60f1196af9b709e09efff2f6ccb0b1f02cffd88c9cf4efa09f1b77fd560daf69"
   },
   "alcance": "Estudio de seguridad en el formato de la consultora; estadísticas del paquete de seguridad y contraste opcional con su anexo.",
   "criterio_operativo": {
@@ -2677,7 +2677,7 @@
     }
   },
   "definiciones_config": {
-    "version": "2.4.2",
+    "version": "2.4.3",
     "proposito": "Definiciones de referencia CNGMD, población, normalización de protección civil y valoración provisional. Integra y corrige la propuesta del asesor; complementa reglas_calificacion.json y config/ponderacion.json. Las escalas_operativas y revision_integracion prevalecen sobre descripciones históricas.",
     "fuentes_consultadas": [
       {
@@ -2922,13 +2922,57 @@
       "Marcar los municipios bajo mando único para que su cero no se trate como falta de respuesta."
     ],
     "correspondencias_automaticas": {
-      "version": "1.0",
+      "version": "1.1",
       "principio": "Los datos municipales proceden exclusivamente de input. Las definiciones y equivalencias generales orientan su lectura, no aportan observaciones del municipio. Cada campo resuelto conserva regla y coordenadas; las homologaciones no son revisiones humanas ni verificaciones externas.",
       "cup_vigente": {
         "habilitada": true,
         "titulo": "Certificado Único Policial vigente",
         "regla": "El título explícito y una única cifra municipal en Porcentaje entre 0 y 100 por año permiten usar el porcentaje publicado como CUP vigente sobre corporaciones policiales. No se reconstruye un denominador ni se acredita una auditoría del dato original. Un complemento contradictorio bloquea la valoración.",
         "origen": "Correspondencia metodológica de integración con la definición general de la ficha 7."
+      },
+      "titulos_graficas": {
+        "habilitada": true,
+        "regla": "OCR local de las gráficas originales, vinculado al indicador, ámbito, archivo, imagen y huellas. Sólo se reconocen descripciones completas y años dentro del intervalo del título. Las cifras siguen procediendo de las tablas. Reconocer aprobaciones no demuestra vigencia; personal de seguridad pública no excluye administrativos. Para cámaras, ambos ámbitos deben declarar funcionamiento antes de comparar tasas.",
+        "por_indicador": {
+          "2": [
+            {
+              "descripcion": "Número de servidores públicos capacitados",
+              "campo": "tipo_participantes",
+              "valor": "servidores_publicos"
+            }
+          ],
+          "4": [
+            {
+              "descripcion": "Número de elementos de seguridad pública",
+              "campo": "descripcion_personal",
+              "valor": "elementos_seguridad_publica"
+            }
+          ],
+          "5": [
+            {
+              "descripcion": "Porcentaje de elementos de seguridad pública que aprobó las evaluaciones de control de confianza",
+              "campo": "estatus_evaluaciones",
+              "valor": "aprobadas"
+            },
+            {
+              "descripcion": "Porcentaje de elementos de seguridad pública que no aprobó las evaluaciones de control de confianza",
+              "campo": "estatus_evaluaciones",
+              "valor": "no_aprobadas"
+            }
+          ],
+          "14": [
+            {
+              "descripcion": "Número de cámaras en funcionamiento",
+              "campo": "universo_camaras",
+              "valor": "camaras_en_servicio"
+            },
+            {
+              "descripcion": "Número de cámaras fuera de servicio",
+              "campo": "universo_camaras",
+              "valor": "camaras_fuera_de_servicio"
+            }
+          ]
+        }
       },
       "no_inferir": [
         "El personal total no acredita personal exclusivamente policial.",
