@@ -78,7 +78,7 @@
       "regla": "Prosa diagnóstica consultiva; hallazgos y sus límites, sin archivos, rutas, códigos ni mensajes del sistema."
     },
     "trazabilidad": "Conservar localizadores, huellas y validaciones en metadatos; publicar títulos de fuentes y notas sustantivas.",
-    "periodos": "Aplicar la definición de reglas_calificacion.json y declarar años observados/evaluados; no inventar observaciones anuales.",
+    "periodos": "Aplicar la definición de config/reglas_calificacion.json y declarar años observados/evaluados; no inventar observaciones anuales.",
     "años": "Las etiquetas de las tablas no se identifican automáticamente con el año de referencia del censo.",
     "porcentajes": "Conservar unidades de la fuente; no convertir conteos a porcentajes sin denominador."
   },
@@ -1025,7 +1025,7 @@
   "campos_auxiliares": {
     "identidad_evidencia": "Párrafo original que identifica municipio y estado.",
     "fuentes": "Paquete y Anexo si está disponible, con nombre, rol y SHA-256; trazabilidad interna.",
-    "evidencia_complementaria": "Versión 1.0, identidad, fuentes conservadas, poblacion por ámbito/año y observaciones por indicador/año; RECOLECCION_DATOS.md.",
+    "evidencia_complementaria": "Versión 1.0, identidad, fuentes conservadas, poblacion por ámbito/año y observaciones por indicador/año; docs/RECOLECCION_DATOS.md.",
     "evidencia_complementaria_sha256": "Huella del objeto canónico completo; invalida redacción si cambia.",
     "evaluacion_sha256": "Huella de puntajes, cálculos y periodos; cambiar modo o esquema exige revisar la redacción.",
     "evidencia_documental": "Bloques originales de las entradas recibidas, conservados para auditoría.",
@@ -1069,7 +1069,7 @@
     }
   },
   "calculos_derivados": {
-    "metodologia": "reglas_calificacion.json",
+    "metodologia": "config/reglas_calificacion.json",
     "periodos": [
       "general",
       "ultimo_periodo"
@@ -1127,7 +1127,7 @@
     "ponderacion": "config/ponderacion.json",
     "definiciones": "config/definiciones_cngmd.json",
     "referencia_editorial": "config/textos_narrativos.json",
-    "complemento": "Objeto evidencia_complementaria, versión 1.0: fuentes, poblacion y observaciones por indicador/año; véase RECOLECCION_DATOS.md.",
+    "complemento": "Objeto evidencia_complementaria, versión 1.0: fuentes, poblacion y observaciones por indicador/año; véase docs/RECOLECCION_DATOS.md.",
     "estados": [
       "reportado",
       "pendiente",
@@ -1146,6 +1146,18 @@
       13,
       14
     ],
+    "prioridad_cierre": {
+      "indicadores": [
+        5,
+        7
+      ],
+      "periodo": "ultimo_periodo",
+      "peso_primera_edicion": 1,
+      "peso_ultima_edicion": 2,
+      "condicion": "Sólo si el porcentaje comparable del último corte supera al anterior y ambas definiciones están acreditadas.",
+      "formula": "(porcentaje_primero + 2 * porcentaje_ultimo) / 3; en los demás casos se conserva el promedio ordinario.",
+      "limites": "No reemplaza la exigencia de mínimo anual para el nivel 5, no imputa faltantes y no desactiva candados por mejoras en otros indicadores. Aumentos de conteos o llamadas no se presumen mejoras."
+    },
     "pesos_dimension": {
       "proteccion_civil": 0.25,
       "condiciones_del_personal": 0.35,

@@ -10,7 +10,7 @@ from calificar import agregar, calificar_indicador, categoria, dependencias, def
 from documentos import sha256
 from estructurar_reglas import construir
 
-RULES = json.loads((ROOT / 'reglas_calificacion.json').read_text())
+RULES = json.loads((ROOT / 'config/reglas_calificacion.json').read_text())
 MAPPINGS = json.loads((ROOT / 'config/normalizaciones.json').read_text())
 
 

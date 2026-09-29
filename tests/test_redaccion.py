@@ -62,6 +62,8 @@ class RedaccionTests(unittest.TestCase):
         self.assertTrue(all(isinstance(value, str) for value in result['valores_plantilla'].values()))
         self.assertEqual(result['indicadores'], original)
         self.assertIn('14 de los 18', result['valores_plantilla']['resumen_general'])
+        self.assertIn('Marco de Sendai', result['valores_plantilla']['resumen_general'])
+        self.assertIn('Ley General del Sistema Nacional de Seguridad Pública', result['valores_plantilla']['bibliografia'])
         self.assertNotIn('aviso_borrador', result['contenido_word'])
         self.assertEqual(result['valores_plantilla']['analisis_indicador_01'], artifact['bloques']['analisis_indicador_01'][0]['texto'])
 
@@ -127,6 +129,11 @@ class RedaccionTests(unittest.TestCase):
                      'Calificación desde VARIABLE_INTERNA.', 'Como modelo de inteligencia artificial, recomiendo revisar.'):
             with self.subTest(text=text), self.assertRaises(ValueError):
                 comprobar_texto(text)
+
+    def test_guard_admite_referencias_publicas_pero_no_rutas_locales(self):
+        comprobar_texto('Congreso de la Unión. (2025). Ley General del Sistema Nacional de Seguridad Pública. https://www.diputados.gob.mx/LeyesBiblio/pdf/LGSNSP.pdf')
+        with self.assertRaises(ValueError):
+            comprobar_texto('C:/Users/usuario/documento')
 
     def test_guard_no_inspecciona_los_metadatos_tecnicos(self):
         result, artifact, dictionary, rules = ejemplo_editorial()

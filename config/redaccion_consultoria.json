@@ -1,9 +1,17 @@
 {
-  "version": "2.2",
+  "version": "2.3",
   "perfil": "estudio_seguridad",
   "idioma": "es-MX",
   "tono": "Directo, sustantivo y orientado a decisiones de gestión municipal.",
   "referencia_estilistica": "Muestra Estudio Seguridad: exclusivamente tono y organización argumental; nunca evidencia del municipio analizado.",
+  "marco_general": {
+    "texto": "La lectura toma como referentes la gestión del riesgo del Marco de Sendai (Oficina de las Naciones Unidas para la Reducción del Riesgo de Desastres [UNDRR], 2015), la protección civil (Congreso de la Unión, 2012) y la organización de la seguridad pública (Congreso de la Unión, 2025). Estos principios orientan el análisis; las cifras no constituyen por sí mismas una evaluación de cumplimiento legal.",
+    "referencias_apa": [
+      "Congreso de la Unión. (2012). Ley General de Protección Civil (última reforma publicada el 21 de diciembre de 2023). Cámara de Diputados. https://www.diputados.gob.mx/LeyesBiblio/pdf/LGPC.pdf",
+      "Congreso de la Unión. (2025). Ley General del Sistema Nacional de Seguridad Pública. Cámara de Diputados. https://www.diputados.gob.mx/LeyesBiblio/pdf/LGSNSP.pdf",
+      "Oficina de las Naciones Unidas para la Reducción del Riesgo de Desastres. (2015). Marco de Sendai para la Reducción del Riesgo de Desastres 2015–2030. https://www.undrr.org/publication/sendai-framework-disaster-risk-reduction-2015-2030"
+    ]
+  },
   "criterios": [
     "Abrir con un hallazgo sobre el municipio, precisar años y magnitudes e incorporar el contexto estatal cuando sea comparable.",
     "Desarrollar la implicación para la gestión y una recomendación específica del tema, sin atribuir causas no acreditadas.",
@@ -16,11 +24,12 @@
     "Escribir cada apartado como un argumento propio: elegir las cifras pertinentes, explicar su relación y proponer decisiones ligadas a ese hallazgo.",
     "Redactar los dos resúmenes en tres párrafos cada uno. Sintetizar prioridades; no concatenar las frases de los dieciocho apartados.",
     "Conservar la prosa editorial revisada y sus referencias de evidencia. Ante fuentes o criterios nuevos, exigir una nueva interpretación; nunca sustituirla por frases automáticas.",
+    "Incluir el marco general verificado una sola vez y conservar al final sus referencias APA; no usar una ley posterior para declarar cumplimiento en años anteriores.",
     "Presentar el estudio como documento final, sin avisos de trabajo ni instrucciones para llenar documentos."
   ],
   "patrones_no_publicables": {
     "referencia_informatica": "\\b(?:json|pipeline|sha[ -]?256|checksum|docx|snake_case|None|null)\\b",
-    "ruta_local": "(?:file://|/(?:Users|home|tmp|private|var)/|[A-Za-z]:[\\\\/]|\\b(?:input|output|scripts|templates|config)/)",
+    "ruta_local": "(?:file://|/(?:Users|home|tmp|private|var)/|(?<![A-Za-z])[A-Za-z]:[\\\\/]|\\b(?:input|output|scripts|templates|config)/)",
     "archivo_local": "\\b[^\\s/]+\\.(?:json|docx?|py|md|csv|ya?ml|env)\\b",
     "identificador_interno": "\\b(?:calificacion_|analisis_|introduccion_|conclusiones_|tablas_|graficas_|resumen_|puntaje_|benchmark_|minimos_|base_calificacion|motivo_asignacion)[a-z0-9_]*\\b",
     "periodo_interno": "\\b(?:ultimo_periodo|periodo_general)\\b",

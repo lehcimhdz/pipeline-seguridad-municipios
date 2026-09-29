@@ -345,6 +345,16 @@ def calificar_indicador(section, ficha, period, mappings=None, *, años_objetivo
         values.append(value)
     if ficha['metodo'] == 'porcentaje':
         metrics = {'promedio': sum(values) / len(values), 'minimo': min(values)}
+        priority = ficha.get('prioridad_cierre')
+        if (priority and period == priority['periodo'] and len(values) == 2
+                and values[-1] > values[-2]):
+            first = Decimal(str(priority['peso_primera_edicion']))
+            last = Decimal(str(priority['peso_ultima_edicion']))
+            metrics['promedio'] = (first * values[-2] + last * values[-1]) / (first + last)
+            result['prioridad_cierre_aplicada'] = {
+                'anio_primero': selected[0], 'anio_ultimo': selected[1],
+                'valor_primero': str(values[-2]), 'valor_ultimo': str(values[-1]),
+                'peso_primero': str(first), 'peso_ultimo': str(last)}
     else:
         metrics = {'todas': all(values), 'alguna': any(values), 'ultima': values[-1],
                    'dos_recientes': len(values) >= 2 and all(values[-2:]),

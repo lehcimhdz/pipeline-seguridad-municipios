@@ -2,7 +2,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 
 from redaccion_editorial import cargar_redaccion, validar_redaccion
-from redaccion_consultoria import PERIODOS, periodo_texto, validar_publicacion
+from redaccion_consultoria import PERIODOS, cargar_estilo, periodo_texto, validar_publicacion
 
 
 def puntaje(value):
@@ -61,6 +61,9 @@ def componer(result, dictionary, rules, redaccion=None):
     }
     for key, paragraphs in artifact['bloques'].items():
         values[key] = '\n\n'.join(paragraph['texto'].strip() for paragraph in paragraphs)
+    marco = cargar_estilo()['marco_general']
+    values['resumen_general'] = marco['texto'] + '\n\n' + values['resumen_general']
+    values['bibliografia'] += '\n\n' + '\n\n'.join(marco['referencias_apa'])
     for period, key in (('general', 'resumen_general'), ('ultimo_periodo', 'resumen_ultimo_periodo')):
         values[key] += '\n\n' + _nota_calificacion(result, period)
     if set(values) != set(dictionary['variables_documento']):

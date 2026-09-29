@@ -5,6 +5,8 @@ el formato de la consultora. Debe poder leerse como un estudio terminado:
 explica qué ocurre, qué significan los cambios y qué decisiones permiten tomar.
 La evidencia y las verificaciones técnicas se conservan por separado.
 
+Las rutas indicadas en esta guía se interpretan desde la raíz del repositorio.
+
 ## Referencias y responsabilidades
 
 `Muestra Estudio Seguridad.docx` orienta la escritura: síntesis con una posición
@@ -24,6 +26,13 @@ Cada documento tiene una función distinta:
 Las calificaciones las calcula el módulo metodológico. La redacción no cambia
 puntajes ni resuelve faltantes mediante opiniones. El criterio de agregación y
 su cobertura se explican brevemente junto a los resúmenes del estudio.
+
+El estudio abre su síntesis con un marco breve y común: gestión del riesgo
+(Marco de Sendai), protección civil y organización de la seguridad pública.
+Las tres referencias verificadas se incorporan al final en formato APA. Son
+referentes para interpretar la evidencia, no una certificación de cumplimiento
+jurídico ni una explicación causal de los cambios observados. La redacción
+municipal desarrolla después los hechos propios sin repetir ese preámbulo.
 
 ## Un argumento por párrafo
 

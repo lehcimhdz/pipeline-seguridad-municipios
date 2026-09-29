@@ -1,6 +1,6 @@
 {
   "version": "2.4.3",
-  "proposito": "Definiciones de referencia CNGMD, población, normalización de protección civil y valoración provisional. Integra y corrige la propuesta del asesor; complementa reglas_calificacion.json y config/ponderacion.json. Las escalas_operativas y revision_integracion prevalecen sobre descripciones históricas.",
+  "proposito": "Definiciones de referencia CNGMD, población, normalización de protección civil y valoración provisional. Integra y corrige la propuesta del asesor; complementa config/reglas_calificacion.json y config/ponderacion.json. Las escalas_operativas y revision_integracion prevalecen sobre descripciones históricas.",
   "fuentes_consultadas": [
     {
       "documento": "CNGMD 2023, Módulo 3, Sección I. Estructura organizacional y recursos",

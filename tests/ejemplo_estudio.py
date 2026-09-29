@@ -40,9 +40,9 @@ def ejemplo(directory, *, graficas=False, modo='evaluables'):
         archive.writestr('word/document.xml', xml)
         archive.writestr('word/_rels/document.xml.rels', f'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="{r}/image" Target="media/original.png"/></Relationships>')
         archive.writestr('word/media/original.png', png)
-    rules = json.loads((ROOT / 'reglas_calificacion.json').read_text())
+    rules = json.loads((ROOT / 'config/reglas_calificacion.json').read_text())
     mappings = json.loads((ROOT / 'config/normalizaciones.json').read_text())
-    dictionary = json.loads((ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json').read_text())
+    dictionary = json.loads((ROOT / 'config/diccionario_datos_diagnostico_seguridad_municipal.json').read_text())
     sections = []
     for ficha in rules['fichas']:
         number = ficha['id']

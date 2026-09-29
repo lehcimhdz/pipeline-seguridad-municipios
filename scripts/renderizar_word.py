@@ -27,8 +27,8 @@ from salidas import limpiar_salidas
 from redaccion_consultoria import comprobar_texto, validar_publicacion
 
 TEMPLATE = ROOT / 'templates/seguridad_medicion.docx'
-DICTIONARY = ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json'
-RULES = ROOT / 'reglas_calificacion.json'
+DICTIONARY = ROOT / 'config/diccionario_datos_diagnostico_seguridad_municipal.json'
+RULES = ROOT / 'config/reglas_calificacion.json'
 W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
 XML = '{http://www.w3.org/XML/1998/namespace}'
 NS = {'w': W[1:-1]}

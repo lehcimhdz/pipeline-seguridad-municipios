@@ -8,7 +8,7 @@ from documentos import leer_docx, sha256
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'config/metodologia_seguridad.json'
 BENCHMARK = ROOT / 'templates/Machote_seguridad_general_con_calificacion.docx'
-DEST = ROOT / 'reglas_calificacion.json'
+DEST = ROOT / 'config/reglas_calificacion.json'
 
 
 def construir():
@@ -111,6 +111,8 @@ def construir():
     for ficha in result['fichas']:
         ficha['peso'] = result['ponderacion_config']['ponderacion']['pesos'][str(ficha['id'])]
         ficha['prioritario'] = ficha['id'] in result['ponderacion_config']['ponderacion']['prioritarios']
+        if ficha['id'] in result['ponderacion_config']['prioridad_cierre']['indicadores']:
+            ficha['prioridad_cierre'] = result['ponderacion_config']['prioridad_cierre']
         if ficha['id'] in (2, 3, 4, 5, 7, 9, 10, 14, 15, 18):
             ficha['revision_definiciones'] = 'Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.'
         if ficha['id'] in (3, 15):

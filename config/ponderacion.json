@@ -1,7 +1,16 @@
 {
   "version": "2.3",
-  "descripcion": "Ponderación de indicadores y candados de prioridad. Se integra a reglas_calificacion.json.",
+  "descripcion": "Ponderación de indicadores y candados de prioridad. Se integra a config/reglas_calificacion.json.",
   "compatibilidad": "dimensiones_iguales reproduce sólo el promedio aritmético histórico; conserva los controles nuevos y no equivale íntegramente a v2.2.",
+  "prioridad_cierre": {
+    "indicadores": [5, 7],
+    "periodo": "ultimo_periodo",
+    "peso_primera_edicion": 1,
+    "peso_ultima_edicion": 2,
+    "condicion": "Sólo si el porcentaje comparable del último corte supera al anterior y ambas definiciones están acreditadas.",
+    "formula": "(porcentaje_primero + 2 * porcentaje_ultimo) / 3; en los demás casos se conserva el promedio ordinario.",
+    "limites": "No reemplaza la exigencia de mínimo anual para el nivel 5, no imputa faltantes y no desactiva candados por mejoras en otros indicadores. Aumentos de conteos o llamadas no se presumen mejoras."
+  },
   "ponderacion": {
     "esquema_predeterminado": "dimensiones_ponderadas",
     "prioritarios": [

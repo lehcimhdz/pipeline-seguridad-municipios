@@ -14,7 +14,7 @@ from evidencia_complementaria import vacia
 from ejemplo_estudio import ejemplo
 from renderizar_word import validar_resultado
 
-RULES = json.loads((ROOT / 'reglas_calificacion.json').read_text())
+RULES = json.loads((ROOT / 'config/reglas_calificacion.json').read_text())
 MAPPINGS = json.loads((ROOT / 'config/normalizaciones.json').read_text())
 
 

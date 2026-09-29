@@ -13,13 +13,13 @@ La muestra de estudio aportada por el usuario sirve para orientar la escritura. 
 
 ## Procedencia y reproducción de las reglas
 
-`python3 scripts/estructurar_reglas.py` lee el benchmark activo y conserva la transcripción histórica de sus 18 fichas y 90 criterios, coordenadas y huella SHA-256. Integra `config/ponderacion.json` y `config/definiciones_cngmd.json` en `config/metodologia_seguridad.json` y `reglas_calificacion.json`, versión 2.3.
+`python3 scripts/estructurar_reglas.py` lee el benchmark activo y conserva la transcripción histórica de sus 18 fichas y 90 criterios, coordenadas y huella SHA-256. Integra `config/ponderacion.json` y `config/definiciones_cngmd.json` en `config/metodologia_seguridad.json` y `config/reglas_calificacion.json`, versión 2.3.
 
 El documento remitido como benchmark revisado no contenía cambios textuales en las fichas. Por ello `scripts/actualizar_benchmark_v23.py` incorpora un anexo interno explícito e idempotente. Ese anexo, las escalas operativas y las definiciones revisadas prevalecen sobre formulaciones históricas incompatibles, en particular «no hay dato = 1», cobertura temática y llamadas. Las fórmulas y convenciones añadidas no se atribuyen a una validación externa ni a una aprobación adicional del asesor. El formato de la consultora no se modifica.
 
 El programa comprueba que los criterios del documento coincidan con los que sustentan la lógica ejecutable. Si cambió un criterio, se detiene para revisar su implementación; no conserva silenciosamente una regla anterior. La migración documental debe regenerarse después para actualizar las huellas del contrato.
 
-Las referencias académicas y normativas se reciben como parte del benchmark. Su inclusión no significa que el proceso haya consultado nuevamente esas obras, verificado la vigencia de una ley ni acreditado cumplimiento jurídico. La narración distingue entre lo declarado en las estadísticas, el parámetro de evaluación adoptado y las conclusiones que efectivamente pueden sostener los datos.
+Las referencias académicas y normativas se reciben como parte del benchmark. Para el breve marco público se cotejaron los textos oficiales del Marco de Sendai, la Ley General de Protección Civil y la Ley General del Sistema Nacional de Seguridad Pública vigente desde 2025; sus referencias APA están en `config/redaccion_consultoria.json`. Esto no equivale a verificar todas las obras del benchmark ni a acreditar cumplimiento jurídico. La ley de 2025 sirve como contexto actual y no se aplica retroactivamente para declarar cumplimiento en observaciones anteriores. La narración distingue entre las estadísticas, el parámetro de evaluación adoptado y las conclusiones que efectivamente pueden sostener los datos.
 
 ## Periodos de evaluación
 
@@ -65,7 +65,26 @@ Los parámetros proceden del benchmark, no de las calificaciones impresas en el 
 | 17 | Fallecimientos, continuidad de los registros y, cuando corresponda, tasas comparables y eventos. Los porcentajes de egresos no sustituyen los conteos de muertes. |
 | 18 | Puestas a disposición divididas entre incidencia delictiva y comparación estatal. El máximo también requiere revisión documentada de recomendaciones de derechos humanos. |
 
-Las fichas históricas, sus revisiones y condiciones ejecutables están en `reglas_calificacion.json`. Las definiciones y los requisitos de cada indicador se resuelven por año, primero con el paquete y después, si hace falta, con evidencia complementaria. No existe una exigencia general de revisión manual para todas las fichas. Los faltantes se calculan dinámicamente y señalan el requisito pendiente, no la mera ausencia de un archivo auxiliar. Los campos necesarios y su contrato están en [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md).
+Las fichas históricas, sus revisiones y condiciones ejecutables están en `config/reglas_calificacion.json`. Las definiciones y los requisitos de cada indicador se resuelven por año, primero con el paquete y después, si hace falta, con evidencia complementaria. No existe una exigencia general de revisión manual para todas las fichas. Los faltantes se calculan dinámicamente y señalan el requisito pendiente, no la mera ausencia de un archivo auxiliar. Los campos necesarios y su contrato están en [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md).
+
+### Prioridad del último corte
+
+La misma regla rige para todos los municipios. En las fichas porcentuales 5
+(control de confianza) y 7 (CUP vigente), cuando ambas ediciones recientes
+son comparables, están acreditadas y el porcentaje final supera al anterior,
+la calificación **del periodo reciente** utiliza:
+
+`promedio_reciente = (porcentaje_anterior + 2 × porcentaje_último) / 3`.
+
+Si no hay mejora acreditada, se conserva la media ordinaria. La calificación
+general mantiene su serie completa. Sigue vigente el mínimo de cada año para
+obtener 5, así como los candados y la declaración de cobertura parcial. Un
+avance de un rubro no borra un retroceso observado en otro. La convención 1:2
+es una decisión metodológica del equipo, no una ponderación estimada por una
+fuente externa; su efecto y los dos valores utilizados se registran en el JSON.
+Otros indicadores ya distinguen continuidad y último corte mediante sus
+propias fichas; no se aplica la fórmula porcentual a existencias, equipos,
+llamadas, fallecimientos ni remisiones, donde “más” no siempre es “mejor”.
 
 ## Correspondencias entre datos y criterios
 

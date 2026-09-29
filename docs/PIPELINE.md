@@ -32,13 +32,13 @@ El paquete sigue siendo la fuente estadística principal. Todos los datos munici
 
 Primero se resuelven las correspondencias que permiten los títulos, columnas y valores del paquete, junto con los títulos de las gráficas de Seguridad del paquete y del Anexo. Los complementos revisados son opcionales: pueden aportar población o aclarar los universos que sigan pendientes, sin repetir lo ya reconocido. Se incorporan expresamente mediante `--complemento`, nunca mediante búsquedas automáticas. Cada observación complementaria exige archivo conservado, SHA-256, año, localizador y revisión. Véase [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md).
 
-Para Apodaca se verificaron datos abiertos del CNGMD con referencia 2022 y 2024: el estatus «evaluaciones aprobatorias vigentes» se distingue de la mera aprobación, y el personal de corporaciones policiales se separa del total institucional. Se conservan los ZIP y un complemento local en `input/`, ignorados por Git. La API del Banco de Indicadores confirmó la población censal de 2020; por decisión metodológica explícita se usa como **base fija 2020** para tasas recientes, no como población observada en 2022 o 2024. No se obtiene población censal anual. La preparación de Apodaca debe ejecutarse con `--complemento input/complementos/apodaca.json`; el archivo no se carga automáticamente.
+Si se incorpora un complemento municipal, debe conservarse en `input/complementos/{slug}.json` junto a sus fuentes descargadas en `input/fuentes/`. Los porcentajes de evaluaciones aprobatorias vigentes se distinguen de la mera aprobación, y el personal policial se separa del total institucional. Una población censal anterior sólo puede utilizarse como base fija explícita para tasas posteriores, nunca como población observada en esos años. El complemento se indica mediante `--complemento`: no se carga automáticamente.
 
 ## Contrato y variables
 
 `config/contrato_documental.json` registra la versión, el alcance, las referencias documentales y las huellas. Vincula los tres originales, la base operativa, el diccionario, el benchmark transcrito, las reglas, las normalizaciones y la configuración editorial. La validación rechaza activos desactualizados.
 
-`diccionario_datos_diagnostico_seguridad_municipal.json` define **25 variables de tipo string**, con nombres ASCII en `snake_case` y una aparición por variable:
+`config/diccionario_datos_diagnostico_seguridad_municipal.json` define **25 variables de tipo string**, con nombres ASCII en `snake_case` y una aparición por variable:
 
 | Variables | Contenido |
 | --- | --- |
@@ -76,6 +76,7 @@ El archivo editorial contiene:
 - Hechos que identifican indicador, tabla, fila, columna y valor observado.
 - Operaciones editoriales comprobables cuando un párrafo utiliza diferencias o variaciones porcentuales.
 - Dos resúmenes, 18 análisis y bibliografía, organizados en párrafos con referencias a esos hechos.
+- Un encuadre general breve basado en el Marco de Sendai y las leyes generales de protección civil y seguridad pública se agrega a la síntesis. Sus fuentes verificadas se incorporan a la bibliografía en APA; no sustituyen las fuentes estadísticas municipales ni implican una evaluación jurídica de cumplimiento.
 - Selección de ilustraciones originales y declaración de revisión y tipo de autor: `agente_editorial` o `persona`.
 
 El control editorial comprueba fuentes, coincidencia de celdas, operaciones y cifras citadas. Una nueva fuente, una modificación del benchmark o reglas distintas invalidan la vinculación anterior y exigen revisar la interpretación. Ninguna clave de API es necesaria para ejecutar el pipeline.
@@ -87,6 +88,12 @@ La comprobación numérica no sustituye la lectura crítica: el autor debe revis
 La metodología está en [METODOLOGIA.md](METODOLOGIA.md). `scripts/estructurar_reglas.py` conserva la transcripción de las 18 fichas históricas y añade ponderación y definiciones revisadas. El anexo de integración 2.3 declara su precedencia sobre los criterios incompatibles; las fichas 3 y 15 tienen escalas operativas explícitas. Un cambio en los criterios históricos exige revisar la implementación.
 
 El periodo general conserva las observaciones de cada indicador. El reciente utiliza las dos ediciones censales de cierre para 1–16 y los dos años calendario de cierre para 17–18. Una celda vacía no se omite ni se transforma en cero. Las etiquetas de las tablas no se reinterpretan automáticamente como el año de referencia de un censo.
+
+Cuando control de confianza (5) o CUP vigente (7) mejora entre dos porcentajes
+recientes comparables, el último recibe peso doble en el promedio de su ficha.
+No es una bonificación general: si el último corte empeora o falta evidencia,
+se mantiene el criterio ordinario. Los candados siguen vigentes. Véase
+[METODOLOGIA.md](METODOLOGIA.md#prioridad-del-último-corte).
 
 Se ofrecen dos métodos:
 
@@ -187,4 +194,4 @@ python3 scripts/validar_plantilla.py
 python3 -m unittest discover -s tests -v
 ```
 
-La migración actualiza la base operativa, el diccionario y las referencias del contrato. Después de un cambio metodológico o de fuentes debe revisarse también la interpretación editorial. El [diagrama editable](flujo_pipeline.drawio) representa esta separación entre fuentes estadísticas, benchmark, guía y formato de entrega.
+La migración actualiza la base operativa, el diccionario y las referencias del contrato. Después de un cambio metodológico o de fuentes debe revisarse también la interpretación editorial. El [diagrama editable](diagramas/flujo_pipeline.drawio) representa esta separación entre fuentes estadísticas, benchmark, guía y formato de entrega.

@@ -10,14 +10,14 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from ponderacion import agregar_ponderado
-from calificar import agregar
+from calificar import agregar, calificar_indicador
 from evidencia_complementaria import validar, vacia, huella_objeto, tasas_comparables
 from evaluacion_v23 import evaluar, revisar_ficha
 from ejemplo_estudio import ejemplo
 from test_redaccion import ejemplo_editorial
 from redaccion_editorial import validar_redaccion, huella_evaluacion
 
-RULES = json.loads((ROOT / 'reglas_calificacion.json').read_text())
+RULES = json.loads((ROOT / 'config/reglas_calificacion.json').read_text())
 
 
 def scores(value=4):
@@ -25,6 +25,21 @@ def scores(value=4):
 
 
 class PonderacionTests(unittest.TestCase):
+    def test_prioridad_de_ultimo_corte_es_general_y_condicional(self):
+        ficha = RULES['fichas'][6]
+        section = {'numero': 7, 'tablas': [{'tabla': 1, 'ambito': 'municipal',
+                   'filas': [['Año', 'Porcentaje'], ['2022', '65.5'], ['2024', '72.4']]}]}
+        general = calificar_indicador(section, ficha, 'general')
+        recent = calificar_indicador(section, ficha, 'ultimo_periodo', años_objetivo=[2022, 2024])
+        self.assertEqual(general['puntaje'], 2)
+        self.assertEqual(recent['puntaje'], 3)
+        self.assertEqual(recent['metricas']['promedio'], '70.1')
+        self.assertEqual(recent['prioridad_cierre_aplicada']['peso_ultimo'], '2')
+        section['tablas'][0]['filas'][2][1] = '60.0'
+        decline = calificar_indicador(section, ficha, 'ultimo_periodo', años_objetivo=[2022, 2024])
+        self.assertNotIn('prioridad_cierre_aplicada', decline)
+        self.assertEqual(decline['metricas']['promedio'], '62.75')
+
     def test_promedio_y_coeficientes_completos(self):
         result = agregar_ponderado(scores(), RULES)
         self.assertEqual(Decimal(result['promedio_tres_dimensiones']), 4)

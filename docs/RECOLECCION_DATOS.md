@@ -26,7 +26,7 @@ sí solo pertenencia a la unidad ni un conteo único. El complemento debe atende
 esas diferencias concretas, no confirmar en bloque todas las estadísticas.
 
 La lectura de imágenes requiere Tesseract local; véase la instalación en
-[README.md](README.md). Si no está disponible o falla una lectura, el aviso no
+[README.md](../README.md). Si no está disponible o falla una lectura, el aviso no
 demuestra que el documento carezca de esa aclaración. Revisar la imagen y
 resolver la lectura antes de solicitar información adicional. No extraer
 cifras mediante OCR para reemplazar las tablas ni extender la definición a

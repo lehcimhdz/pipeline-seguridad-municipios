@@ -2,7 +2,7 @@
   "version": "2.3",
   "fuente": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "60f1196af9b709e09efff2f6ccb0b1f02cffd88c9cf4efa09f1b77fd560daf69"
+    "sha256": "9fa749e1d25f6d078312ca8ea748b1fed39e5b0ca9ec40c3b22ed1c5155d02a3"
   },
   "alcance": "Estudio de seguridad en el formato de la consultora; estadísticas del paquete de seguridad y contraste opcional con su anexo.",
   "criterio_operativo": {
@@ -811,7 +811,19 @@
       ],
       "peso": 2,
       "prioritario": true,
-      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.",
+      "prioridad_cierre": {
+        "indicadores": [
+          5,
+          7
+        ],
+        "periodo": "ultimo_periodo",
+        "peso_primera_edicion": 1,
+        "peso_ultima_edicion": 2,
+        "condicion": "Sólo si el porcentaje comparable del último corte supera al anterior y ambas definiciones están acreditadas.",
+        "formula": "(porcentaje_primero + 2 * porcentaje_ultimo) / 3; en los demás casos se conserva el promedio ordinario.",
+        "limites": "No reemplaza la exigencia de mínimo anual para el nivel 5, no imputa faltantes y no desactiva candados por mejoras en otros indicadores. Aumentos de conteos o llamadas no se presumen mejoras."
+      }
     },
     {
       "id": 6,
@@ -1129,7 +1141,19 @@
       ],
       "peso": 1,
       "prioritario": false,
-      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.",
+      "prioridad_cierre": {
+        "indicadores": [
+          5,
+          7
+        ],
+        "periodo": "ultimo_periodo",
+        "peso_primera_edicion": 1,
+        "peso_ultima_edicion": 2,
+        "condicion": "Sólo si el porcentaje comparable del último corte supera al anterior y ambas definiciones están acreditadas.",
+        "formula": "(porcentaje_primero + 2 * porcentaje_ultimo) / 3; en los demás casos se conserva el promedio ordinario.",
+        "limites": "No reemplaza la exigencia de mínimo anual para el nivel 5, no imputa faltantes y no desactiva candados por mejoras en otros indicadores. Aumentos de conteos o llamadas no se presumen mejoras."
+      }
     },
     {
       "id": 8,
@@ -2540,8 +2564,20 @@
   },
   "ponderacion_config": {
     "version": "2.3",
-    "descripcion": "Ponderación de indicadores y candados de prioridad. Se integra a reglas_calificacion.json.",
+    "descripcion": "Ponderación de indicadores y candados de prioridad. Se integra a config/reglas_calificacion.json.",
     "compatibilidad": "dimensiones_iguales reproduce sólo el promedio aritmético histórico; conserva los controles nuevos y no equivale íntegramente a v2.2.",
+    "prioridad_cierre": {
+      "indicadores": [
+        5,
+        7
+      ],
+      "periodo": "ultimo_periodo",
+      "peso_primera_edicion": 1,
+      "peso_ultima_edicion": 2,
+      "condicion": "Sólo si el porcentaje comparable del último corte supera al anterior y ambas definiciones están acreditadas.",
+      "formula": "(porcentaje_primero + 2 * porcentaje_ultimo) / 3; en los demás casos se conserva el promedio ordinario.",
+      "limites": "No reemplaza la exigencia de mínimo anual para el nivel 5, no imputa faltantes y no desactiva candados por mejoras en otros indicadores. Aumentos de conteos o llamadas no se presumen mejoras."
+    },
     "ponderacion": {
       "esquema_predeterminado": "dimensiones_ponderadas",
       "prioritarios": [
@@ -2705,7 +2741,7 @@
   },
   "definiciones_config": {
     "version": "2.4.3",
-    "proposito": "Definiciones de referencia CNGMD, población, normalización de protección civil y valoración provisional. Integra y corrige la propuesta del asesor; complementa reglas_calificacion.json y config/ponderacion.json. Las escalas_operativas y revision_integracion prevalecen sobre descripciones históricas.",
+    "proposito": "Definiciones de referencia CNGMD, población, normalización de protección civil y valoración provisional. Integra y corrige la propuesta del asesor; complementa config/reglas_calificacion.json y config/ponderacion.json. Las escalas_operativas y revision_integracion prevalecen sobre descripciones históricas.",
     "fuentes_consultadas": [
       {
         "documento": "CNGMD 2023, Módulo 3, Sección I. Estructura organizacional y recursos",

@@ -29,6 +29,7 @@ def actualizar():
     add('Este anexo prevalece sobre los criterios históricos incompatibles del cuerpo anterior. Conserva 18 indicadores y escala de 1 a 5. Las nuevas convenciones son decisiones de integración del equipo, no estándares externos verificados. Es material interno; no se entrega con el estudio municipal.')
     add('Ponderación y cobertura', True)
     add('Protección civil: 25%; condiciones del personal: 35%; inteligencia y eficiencia policial: 40%. Dentro de cada dimensión, los indicadores 2, 4, 5, 10, 11, 12, 13 y 14 pesan 2; los restantes pesan 1. Sólo entran al promedio puntajes observados y acreditados.')
+    add('Prioridad del cierre: en las fichas 5 y 7, cuando los porcentajes comparables de las dos ediciones recientes muestran una mejora en la última, el promedio para calificar el periodo reciente es (primero + 2 × último) / 3. Sin mejora se conserva el promedio ordinario. El mínimo anual exigido para el nivel 5 y los candados permanecen. No se equiparan aumentos de conteos con mejor desempeño.')
     add('Cobertura mínima: 2 de 3, 5 de 7 y 6 de 8 indicadores por dimensión, además de seis de los ocho prioritarios. El modo completo requiere los dieciocho. Con pendientes, el máximo es MUY BIEN. Un universo no aplicable requiere una metodología específica y bloquea la calificación conjunta; no equivale a incumplimiento.')
     for item in weights['candados_adicionales']:
         add('Candado ' + str(item['id']) + ': ' + item['condicion'] + ' ' +

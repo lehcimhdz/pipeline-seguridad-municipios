@@ -117,10 +117,10 @@ def preparar(input_dir, redaccion=None, estado=None, modo_calificacion='disponib
     evidence = {suffix: leer_docx(path) for suffix, path in documents.items()}
     sections = seccion_seguridad(evidence[SUFFIXES[1]])
     annex_sections = seccion_seguridad(evidence[SUFFIXES[0]]) if SUFFIXES[0] in evidence else None
-    rules = json.loads((ROOT / 'reglas_calificacion.json').read_text(encoding='utf-8'))
+    rules = json.loads((ROOT / 'config/reglas_calificacion.json').read_text(encoding='utf-8'))
     mappings_path = ROOT / 'config/normalizaciones.json'
     mappings = json.loads(mappings_path.read_text(encoding='utf-8'))
-    dictionary = json.loads((ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json').read_text(encoding='utf-8'))
+    dictionary = json.loads((ROOT / 'config/diccionario_datos_diagnostico_seguridad_municipal.json').read_text(encoding='utf-8'))
     title = next((block for block in evidence.get(SUFFIXES[0], [])
                   if block['tipo'] == 'parrafo' and 'Medición del municipio' in block['texto']), None)
     identity = re.search(r'municipio de\s+(.+?),\s+([^,\n]+)', title['texto']) if title else None

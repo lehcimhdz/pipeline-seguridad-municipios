@@ -264,7 +264,7 @@ def depurar_diccionario(previous, found, rules):
             'redaccion_publicable': {'configuracion': 'config/redaccion_consultoria.json',
                 'regla': 'Prosa diagnóstica consultiva; hallazgos y sus límites, sin archivos, rutas, códigos ni mensajes del sistema.'},
             'trazabilidad': 'Conservar localizadores, huellas y validaciones en metadatos; publicar títulos de fuentes y notas sustantivas.',
-            'periodos': 'Aplicar la definición de reglas_calificacion.json y declarar años observados/evaluados; no inventar observaciones anuales.',
+            'periodos': 'Aplicar la definición de config/reglas_calificacion.json y declarar años observados/evaluados; no inventar observaciones anuales.',
             'años': 'Las etiquetas de las tablas no se identifican automáticamente con el año de referencia del censo.',
             'porcentajes': 'Conservar unidades de la fuente; no convertir conteos a porcentajes sin denominador.',
         },
@@ -277,7 +277,7 @@ def depurar_diccionario(previous, found, rules):
         'campos_auxiliares': {
             'identidad_evidencia': 'Párrafo original que identifica municipio y estado.',
             'fuentes': 'Paquete y Anexo si está disponible, con nombre, rol y SHA-256; trazabilidad interna.',
-            'evidencia_complementaria': 'Versión 1.0, identidad, fuentes conservadas, poblacion por ámbito/año y observaciones por indicador/año; RECOLECCION_DATOS.md.',
+            'evidencia_complementaria': 'Versión 1.0, identidad, fuentes conservadas, poblacion por ámbito/año y observaciones por indicador/año; docs/RECOLECCION_DATOS.md.',
             'evidencia_complementaria_sha256': 'Huella del objeto canónico completo; invalida redacción si cambia.',
             'evaluacion_sha256': 'Huella de puntajes, cálculos y periodos; cambiar modo o esquema exige revisar la redacción.',
             'evidencia_documental': 'Bloques originales de las entradas recibidas, conservados para auditoría.',
@@ -308,7 +308,7 @@ def depurar_diccionario(previous, found, rules):
                 'regla': 'Copiar bytes originales y conservar proporción; omitir imágenes inconsistentes o irrelevantes. No reconstruir tablas ni gráficas.'},
         },
         'calculos_derivados': {
-            'metodologia': 'reglas_calificacion.json', 'periodos': ['general', 'ultimo_periodo'],
+            'metodologia': 'config/reglas_calificacion.json', 'periodos': ['general', 'ultimo_periodo'],
             'promedio_por_dimension': 'Aplicar las reglas de agregación, cobertura y límites documentadas en la metodología vigente.',
             'promedio_tres_dimensiones': 'Media ponderada 25/35/40 por defecto; registrar esquema y coeficientes efectivos. Esquemas alternativos explícitos para comparación.',
             'clasificacion': 'Aplicar escala, redondeo y candados de las reglas conservando sus motivos.',
@@ -335,12 +335,12 @@ def depurar_diccionario(previous, found, rules):
 
 
 def main():
-    dictionary_path = ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json'
+    dictionary_path = ROOT / 'config/diccionario_datos_diagnostico_seguridad_municipal.json'
     previous = json.loads(dictionary_path.read_text(encoding='utf-8'))
-    rules_path = ROOT / 'reglas_calificacion.json'
+    rules_path = ROOT / 'config/reglas_calificacion.json'
     rules = json.loads(rules_path.read_text(encoding='utf-8'))
     if rules['version'] != '2.3':
-        raise ValueError('Regenerar primero reglas_calificacion.json con estructurar_reglas.py para la versión 2.3.')
+        raise ValueError('Regenerar primero config/reglas_calificacion.json con estructurar_reglas.py para la versión 2.3.')
     if not REDACCION.is_file():
         raise ValueError('Falta la configuración del estilo de redacción consultiva.')
     guide = guia_path()
@@ -380,11 +380,12 @@ def main():
     dictionary['metodologia_v23'] = {
         'ponderacion': 'config/ponderacion.json', 'definiciones': 'config/definiciones_cngmd.json',
         'referencia_editorial': 'config/textos_narrativos.json',
-        'complemento': 'Objeto evidencia_complementaria, versión 1.0: fuentes, poblacion y observaciones por indicador/año; véase RECOLECCION_DATOS.md.',
+        'complemento': 'Objeto evidencia_complementaria, versión 1.0: fuentes, poblacion y observaciones por indicador/año; véase docs/RECOLECCION_DATOS.md.',
         'estados': ['reportado', 'pendiente', 'no_aplicable', 'en_conflicto'],
         'correspondencias': 'Resolución automática desde input con reglas generales y trazabilidad por año; sin convertir inferencias en revisiones humanas. El complemento sólo aporta requisitos no resueltos.',
         'puntaje': 'Entero 1–5 o null; la valoración provisional nunca se incorpora al puntaje.',
         'prioritarios': rules['ponderacion_config']['ponderacion']['prioritarios'],
+        'prioridad_cierre': rules['ponderacion_config']['prioridad_cierre'],
         'pesos_dimension': rules['ponderacion_config']['ponderacion']['esquemas']['dimensiones_ponderadas']['peso_dimension'],
         'publicacion': 'Exige cobertura por dimensión y al menos seis prioritarios; no sustituir evidencia faltante por prosa.'}
     dump(dictionary_path, dictionary)
@@ -419,7 +420,7 @@ def main():
         'fuentes_entrada': ['{municipio} PAQUETE SEGURIDAD.docx'],
         'fuentes_opcionales': ['{municipio} Anexo.docx'],
         'fuentes_complementarias': {'opcion': '--complemento', 'version': '1.0',
-            'contrato': 'RECOLECCION_DATOS.md', 'validacion': 'Fuentes con huella y observaciones verificadas; no se autocompletan. Se mantienen separadas de las correspondencias automáticas extraídas del paquete.'},
+            'contrato': 'docs/RECOLECCION_DATOS.md', 'validacion': 'Fuentes con huella y observaciones verificadas; no se autocompletan. Se mantienen separadas de las correspondencias automáticas extraídas del paquete.'},
         'documentos_salida': ['medicion'],
         'nombre_salida': '{municipio} Estudio Seguridad.docx',
         'ilustraciones': 'Reproducción de imágenes originales verificadas; sin generar tablas o gráficas nuevas.',

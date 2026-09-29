@@ -26,9 +26,9 @@ La lectura del texto incrustado en las gráficas utiliza Tesseract instalado en 
 
 `--preparar` genera `output/json/{slug}_evidencia_seguridad.json` con estadísticas, correspondencias documentadas, calificaciones y un catálogo de gráficas existentes. El estado debe quedar identificado por la documentación o declararse expresamente cuando falte el Anexo.
 
-Para la revisión actual de Apodaca, ejecutar `python3 scripts/ejecutar_pipeline.py --preparar --complemento input/complementos/apodaca.json`. El complemento conserva los CSV municipales del CNGMD y la población censal 2020 consultada al INEGI. Las tasas recientes usan esa población sólo como **base fija de referencia**, no como población observada en 2022 o 2024. El token de la API permanece en `.env` e ignorado por Git; los archivos municipales y las fuentes descargadas permanecen en `input/`, también ignorados.
+Cuando un municipio requiere evidencia adicional, preparar con `--complemento input/complementos/{slug}.json`. Las fuentes descargadas y el complemento permanecen en `input/`, fuera de Git. Si se utiliza población censal de 2020 como base fija para tasas recientes, debe declararse expresamente: no es población observada en cada año posterior. El token opcional de la API permanece en `.env`, también ignorado por Git.
 
-La ficha 18 puede reunir datos de CNGMD y SESNSP, pero requiere procedencia por campo y conciliación expresa antes de calificarse. El descubrimiento y la auditoría opcionales de CSV del SESNSP están descritos en [recolección de datos](RECOLECCION_DATOS.md); no se consultan ni incorporan cifras externas durante la ejecución ordinaria.
+La ficha 18 puede reunir datos de CNGMD y SESNSP, pero requiere procedencia por campo y conciliación expresa antes de calificarse. El descubrimiento y la auditoría opcionales de CSV del SESNSP están descritos en [recolección de datos](docs/RECOLECCION_DATOS.md); no se consultan ni incorporan cifras externas durante la ejecución ordinaria.
 
 El programa reconoce lo que los títulos, las columnas y el texto de las gráficas de Seguridad permiten establecer y lo relaciona con los parámetros generales. La lectura de imágenes conserva texto, procedencia y huella; aclara conceptos sin sustituir las cifras de las tablas ni ampliar los años indicados en el título. No exige una confirmación manual para cada celda. Los datos de cada municipio proceden de `input/`; el material recibido en `new-elements`, fuera del repositorio, aporta criterios generales, no estadísticas municipales. Sus reglas incorporadas se conservan en `config/`.
 
@@ -42,7 +42,7 @@ Opciones principales:
 
 - `--input` y `--output`: carpetas de entradas y salidas.
 - `--redaccion`: ubicación alternativa de la interpretación editorial.
-- `--complemento input/complementos/{slug}.json`: evidencia opcional para resolver denominadores y ambigüedades que no aclara el paquete; véase [recolección](RECOLECCION_DATOS.md). No requiere volver a declarar lo ya reconocido ni autoriza buscar cifras externas automáticamente.
+- `--complemento input/complementos/{slug}.json`: evidencia opcional para resolver denominadores y ambigüedades que no aclara el paquete; véase [recolección](docs/RECOLECCION_DATOS.md). No requiere volver a declarar lo ya reconocido ni autoriza buscar cifras externas automáticamente.
 - `--esquema dimensiones_ponderadas|dimensiones_iguales|global`: ponderación principal o comparación explícita; la principal es 25/35/40.
 - `--calificacion disponibles|evaluables|completo`: valoración con los puntajes acreditados, umbrales de cobertura mayores o evaluación estricta de los 18 indicadores.
 - `--graficas originales|ninguna`: reutilizar las ilustraciones seleccionadas de los documentos fuente o entregar sólo texto.
@@ -51,7 +51,7 @@ Los valores predeterminados son `disponibles` y `originales`. Las gráficas se i
 
 ## Evaluación y presentación
 
-La [metodología](METODOLOGIA.md) distingue las dos ediciones censales recientes para los indicadores 1–16 de los dos años recientes para 17–18. Los datos desconocidos conservan `null`.
+La [metodología](docs/METODOLOGIA.md) distingue las dos ediciones censales recientes para los indicadores 1–16 de los dos años recientes para 17–18. Los datos desconocidos conservan `null`.
 
 El modo predeterminado `disponibles` calcula una categoría con los indicadores que sí tienen puntaje acreditado: exige al menos uno por dimensión y uno prioritario, conserva pesos y candados, y muestra «COBERTURA PARCIAL» cuando hay pendientes. Una valoración provisional no entra al promedio; los faltantes siguen en `null`. La nota del Word declara la cobertura y advierte que la categoría puede cambiar. `evaluables` mantiene el umbral más exigente de 2/3, 5/7 y 6/8 por dimensión y seis de los ocho prioritarios; `completo` exige 18 puntajes. Si ni siquiera el modo disponible tiene cobertura básica, el estudio se publica sin categoría conjunta. `--preparar` permite revisar la evidencia sin sustituir el Word anterior.
 
@@ -81,4 +81,15 @@ python3 scripts/validar_plantilla.py
 python3 -m unittest discover -s tests -v
 ```
 
-La documentación detallada está en [PIPELINE.md](PIPELINE.md), [METODOLOGIA.md](METODOLOGIA.md) y [ESTILO_REDACCION.md](ESTILO_REDACCION.md). El [diagrama editable](flujo_pipeline.drawio) describe el flujo y sus controles.
+La documentación detallada está en [PIPELINE.md](docs/PIPELINE.md), [METODOLOGIA.md](docs/METODOLOGIA.md) y [ESTILO_REDACCION.md](docs/ESTILO_REDACCION.md). El [diagrama editable](docs/diagramas/flujo_pipeline.drawio) describe el flujo y sus controles.
+
+## Organización del repositorio
+
+- `docs/`: uso del pipeline, metodología, escritura, recolección y diagrama.
+- `config/`: contrato, reglas, diccionario de datos y parámetros generales.
+- `templates/`: originales de consulta y base operativa del Word; sus rutas no cambian.
+- `scripts/` y `tests/`: implementación y pruebas automatizadas.
+- `input/` y `output/`: evidencia municipal y entregables, excluidos de Git.
+- `assets/fonts/`: tipografías Archivo y su licencia.
+
+Los comandos de esta guía se ejecutan desde la raíz del repositorio.
