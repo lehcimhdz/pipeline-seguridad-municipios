@@ -67,7 +67,7 @@ Las definiciones integradas 2.5, dentro de la ponderación 2.3, distinguen dato 
 
 La interpretación editorial debe actualizarse a 2.3 y revisarse de nuevo: cambiar sólo sus huellas no basta. El catálogo recibido aporta encuadres y ejemplos, no análisis municipales terminados ni los 144 cierres anunciados. No se requiere un servicio de IA. La consulta opcional al Banco de Indicadores del INEGI sí requiere el token local; la preparación ordinaria usa los archivos conservados y no hace llamadas de red.
 
-La entrega usa Archivo, el logo de la consultora, el formato editorial solicitado y ningún resaltado amarillo. Los títulos de 24 pt tienen interlineado mínimo de 14 pt para evitar recortes. Las gráficas originales conservan los textos y tipografías incrustados en sus imágenes; cambiarlos exigiría redibujarlas. El documento visible no contiene instrucciones, nombres de archivos internos ni referencias a una versión de trabajo.
+Ambas entregas usan Archivo, el logo de la consultora y el formato editorial solicitado, sin resaltado amarillo. El documento electoral incorpora portada propia y referencias separadas; no añade tablas ni gráficas. Los títulos de 24 pt tienen interlineado mínimo de 14 pt para evitar recortes. Las gráficas originales del estudio conservan los textos y tipografías incrustados en sus imágenes; cambiarlos exigiría redibujarlas. Los documentos visibles no contienen instrucciones, nombres de archivos internos ni referencias a una versión de trabajo.
 
 ## Salidas y mantenimiento
 

@@ -5,30 +5,35 @@
       "tipo": "norma",
       "cita": "(Congreso de la Unión, 2012)",
       "referencia_apa": "Congreso de la Unión. (2012). Ley General de Protección Civil (última reforma publicada el 21 de diciembre de 2023). Cámara de Diputados. https://www.diputados.gob.mx/LeyesBiblio/pdf/LGPC.pdf",
+      "titulo_cursiva": "Ley General de Protección Civil",
       "uso": "Programas municipales, gestión integral del riesgo y preparación; no certifica cumplimiento histórico."
     },
     "marco_sendai": {
       "tipo": "marco_internacional_no_vinculante",
       "cita": "(UNDRR, 2015)",
       "referencia_apa": "Oficina de las Naciones Unidas para la Reducción del Riesgo de Desastres. (2015). Marco de Sendai para la Reducción del Riesgo de Desastres 2015–2030. https://www.undrr.org/publication/sendai-framework-disaster-risk-reduction-2015-2030",
+      "titulo_cursiva": "Marco de Sendai para la Reducción del Riesgo de Desastres 2015–2030",
       "uso": "Comprensión del riesgo y preparación; no denominar tratado ni obligación jurídica municipal."
     },
     "ley_seguridad_publica": {
       "tipo": "norma",
       "cita": "(Congreso de la Unión, 2025)",
       "referencia_apa": "Congreso de la Unión. (2025). Ley General del Sistema Nacional de Seguridad Pública. Cámara de Diputados. https://www.diputados.gob.mx/LeyesBiblio/pdf/LGSNSP.pdf",
+      "titulo_cursiva": "Ley General del Sistema Nacional de Seguridad Pública",
       "uso": "Certificación e información policial como referente vigente para propuestas; no aplicar retroactivamente a observaciones previas."
     },
     "braga_focalizacion": {
       "tipo": "revision_academica",
       "cita": "(Braga et al., 2019)",
       "referencia_apa": "Braga, A. A., Turchan, B., Papachristos, A. V., & Hureau, D. M. (2019). Hot spots policing of small geographic areas effects on crime. Campbell Systematic Reviews, 15(3), e1046. https://doi.org/10.1002/cl2.1046",
+      "titulo_cursiva": "Campbell Systematic Reviews",
       "uso": "Sustenta evaluar patrullaje focalizado; no demuestra que haya reducido el delito en el municipio estudiado."
     },
     "piza_camaras": {
       "tipo": "revision_academica",
       "cita": "(Piza et al., 2019)",
       "referencia_apa": "Piza, E. L., Welsh, B. C., Farrington, D. P., & Thomas, A. L. (2019). CCTV surveillance for crime prevention: A 40-year systematic review with meta-analysis. Criminology & Public Policy, 18(1), 135–159. https://doi.org/10.1111/1745-9133.12419",
+      "titulo_cursiva": "Criminology & Public Policy",
       "uso": "Sólo cuando se propongan cámaras: efectos modestos y dependientes del lugar, monitoreo y otras intervenciones; no prometer eficacia automática."
     }
   }

@@ -3,11 +3,19 @@
 
 from copy import deepcopy
 import hashlib
+from io import BytesIO
 import json
 from pathlib import Path
+import zipfile
 
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Cm, Pt
 from docx.text.paragraph import Paragraph
+
+from editorial import configurar
+from fuentes_word import incrustar
+from migrar_machotes_v2 import save
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -80,6 +88,7 @@ def main():
     if [p.text.strip() for p in children] != ['Protección Civil', 'Seguridad']:
         raise ValueError('El capítulo debe contener Protección Civil y Seguridad, en ese orden.')
 
+    replace_whole(paragraphs[0], 'PLATAFORMA ELECTORAL', 'Plataforma Electoral')
     heading(paragraphs[start], spec['seccion'])
     introduction = next((p for p in chapter if p.text.strip() == '[INSERTAR INTRODUCCIÓN]'), None)
     if introduction is None:
@@ -115,8 +124,56 @@ def main():
     bibliography = Paragraph(bibliography_node, document)
     bibliography.clear()
     bibliography.add_run('{fuentes_clave}')
+    for paragraph in list(document.paragraphs):
+        if not paragraph.text.strip():
+            body.remove(paragraph._p)
+
+    cover_title, identity = document.paragraphs[:2]
+    configurar(cover_title._p, 'medicion', 'titulo')
+    for run in cover_title.runs:
+        run.bold = False
+    configurar(identity._p, 'medicion', 'cuerpo')
+    for run in identity.runs:
+        run.bold = False
+    identity.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    section = document.sections[0]
+    usable = section.page_height - section.top_margin - section.bottom_margin
+    cover_title.paragraph_format.space_before = Pt(max(0, usable / 12700 / 2 - 55))
+    section.different_first_page_header_footer = True
+    footer = section.first_page_footer.paragraphs[0]
+    footer.clear()
+    footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    source_study = Document(ROOT / 'templates/seguridad_medicion.docx')
+    images = [part.blob for part in source_study.part.related_parts.values()
+              if getattr(part, 'content_type', '').startswith('image/')]
+    if len(images) != 1:
+        raise ValueError('No se identificó un logo único de InstitutionWorks en la base de medición.')
+    footer.add_run().add_picture(BytesIO(images[0]), width=Cm(5))
+    body_paragraphs = document.paragraphs[2:]
+    for index, paragraph in enumerate(body_paragraphs):
+        value = paragraph.text.strip()
+        if value == spec['seccion']:
+            role, initial = 'capitulo', True
+            paragraph.paragraph_format.page_break_before = True
+        elif value in (*spec['subsecciones'], 'Fuentes clave'):
+            role, initial = 'subcapitulo', True
+        elif value == '{fuentes_clave}':
+            role, initial = 'bibliografia', True
+        else:
+            role = 'cuerpo'
+            previous = body_paragraphs[index - 1].text.strip() if index else ''
+            initial = previous == spec['seccion'] or previous in spec['subsecciones']
+        configurar(paragraph._p, 'medicion', role, inicial=initial)
+        if role == 'bibliografia':
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        for run in paragraph.runs:
+            run.bold = False
     destination = ROOT / spec['plantilla']
     document.save(destination)
+    with zipfile.ZipFile(destination) as archive:
+        files = {name: archive.read(name) for name in archive.namelist()}
+    incrustar(files)
+    save(destination, files)
     print(destination)
 
 

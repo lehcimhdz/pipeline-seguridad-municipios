@@ -8,7 +8,11 @@ import unicodedata
 import zipfile
 
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.text.paragraph import Paragraph
 
+from editorial import configurar
 from redaccion_consultoria import comprobar_texto
 
 
@@ -97,6 +101,9 @@ def cargar(result, path):
             'redaccion_sha256': sha256(path), 'fuentes_clave_sha256': sha256(catalog_path),
             'valores_plantilla': values,
             'referencias': sorted(cited),
+            'referencias_formateadas': [
+                {'texto': source['referencia_apa'], 'titulo_cursiva': source['titulo_cursiva']}
+                for ref, source in catalog.items() if ref in cited],
             'indicadores_por_variable': {key: artifact['campos'][key]['indicadores']
                                         for key in spec['variables']}}
 
@@ -115,6 +122,34 @@ def renderizar(content, destination):
             for marker in MARKER.findall(run.text):
                 if marker not in content['valores_plantilla']:
                     raise ValueError(f'Variable electoral desconocida: {marker}.')
+                if marker == 'fuentes_clave':
+                    references = content.get('referencias_formateadas') or [
+                        {'texto': line, 'titulo_cursiva': ''}
+                        for line in content['valores_plantilla'][marker].splitlines() if line.strip()]
+                    if not references:
+                        raise ValueError('La plataforma electoral requiere fuentes clave.')
+                    for index, source in enumerate(references):
+                        if index:
+                            node = OxmlElement('w:p')
+                            bibliography._p.addnext(node)
+                            bibliography = Paragraph(node, paragraph._parent)
+                        else:
+                            bibliography = paragraph
+                            bibliography.clear()
+                        value, italic = source['texto'], source['titulo_cursiva']
+                        if italic and italic in value:
+                            before, after = value.split(italic, 1)
+                            bibliography.add_run(before)
+                            bibliography.add_run(italic).italic = True
+                            bibliography.add_run(after)
+                        else:
+                            bibliography.add_run(value)
+                        configurar(bibliography._p, 'medicion', 'bibliografia', inicial=index == 0)
+                        bibliography.alignment = WD_ALIGN_PARAGRAPH.LEFT
+                        for source_run in bibliography.runs:
+                            source_run.bold = False
+                    seen.append(marker)
+                    continue
                 run.text = run.text.replace('{' + marker + '}', content['valores_plantilla'][marker])
                 seen.append(marker)
     if set(seen) != set(content['valores_plantilla']) or len(seen) != len(content['valores_plantilla']):

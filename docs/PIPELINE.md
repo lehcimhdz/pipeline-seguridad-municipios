@@ -141,8 +141,14 @@ El cuerpo sigue `config/formato_editorial.json`. Las fuentes Archivo se incluyen
 | Cuerpo | Archivo Light | 12 / 16 pt |
 | Notas al pie | Archivo Light | 9 / 11 pt |
 | Bibliografía | Archivo Light y Light Italic | 12 / 16 pt |
+| Títulos de tabla, si se incorporan | Archivo Medium | 12 / 14 pt |
+| Contenido de tabla, si se incorpora | Archivo Light | 11 / 14 pt |
+| Título y ejes de gráfica, si se incorporan | Archivo Medium | 12 / 14 pt |
+| Categorías y datos de gráfica, si se incorporan | Archivo Medium / Archivo Light | 9 pt |
 
 La portada centra el título y conserva el logo InstitutionWorks a 5 cm de ancho, con altura proporcional y ubicado en la zona inferior. Los capítulos se centran y los subcapítulos se alinean a la izquierda. El cuerpo es de una columna, sin espacio adicional entre párrafos y con sangría de 5 mm salvo el inicial. La bibliografía usa la misma regla de sangría; las notas se alinean a la izquierda.
+
+La plataforma electoral derivada aplica el mismo perfil de medición a su portada, capítulo, incisos, cuerpo y bibliografía. La portada lleva el logo original en el pie de la primera página; el capítulo empieza en la página siguiente. Las referencias se distribuyen en párrafos separados, alineados a la izquierda para evitar grandes espacios entre palabras, y sus títulos correspondientes llevan Archivo Light Italic. El apartado electoral no contiene notas al pie, tablas ni gráficas: los estilos previstos para esos elementos no justifican agregarlos. El machote electoral recibido permanece intacto.
 
 El interlineado de los títulos se aplica como mínimo para que una letra de 24 pt no quede recortada dentro de una altura exacta de 14 pt. No se utiliza resaltado amarillo. La auditoría comprueba variables resueltas, tipografía de las inserciones, ausencia de nuevas tablas o gráficas e integridad de las imágenes originales.
 
