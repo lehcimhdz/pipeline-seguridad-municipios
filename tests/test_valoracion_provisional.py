@@ -164,7 +164,7 @@ class ValoracionProvisionalTests(unittest.TestCase):
         result = evaluate(18, source, years=[2024], obs=observations, data=population)
         self.assertEqual(result['nivel_indicativo'], 3)
         self.assertFalse(result['computa_en_agregacion'])
-        self.assertIn('No sustituye la incidencia', result['condiciones'][0])
+        self.assertIn('incidencia delictiva sólo aporta contexto', result['condiciones'][0])
 
 
 if __name__ == '__main__':

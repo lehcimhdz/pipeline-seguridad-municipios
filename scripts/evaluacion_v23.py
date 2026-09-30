@@ -222,13 +222,16 @@ def revisar_ficha(n, section, old, years, entries, data, definitions):
         return scored(score,{str(y):str(v) for y,v in zip(years,rates)})
     if n == 18:
         ratios=[]
-        for e in entries:
-            values=[numeric(e.get(k)) for k in ('personas_mp','delitos_municipales','personas_mp_estatal','delitos_estatales')]
-            if any(v is None for v in values) or values[1]==0 or values[3]==0 or e.get('incidencia_comparable') is not True:
-                return missing('Separar personas ante MP de justicia cívica y documentar incidencia comparable; población no sustituye delitos.')
-            local,state=values[0]/values[1],values[2]/values[3]
-            if state==0:return missing('Razón estatal cero; no comparar mediante división.')
-            ratios.append(local/state)
+        rates={}
+        for y,e in zip(years,entries):
+            local,state=(numeric(e.get(k)) for k in ('personas_mp','personas_mp_estatal'))
+            if local is None or state is None or e.get('universo_remisiones') != 'ministerio_publico':
+                return missing('Faltan personas remitidas al Ministerio Público para municipio y estado, del mismo universo y año; la incidencia delictiva sólo sirve como contexto.')
+            pair=tasas_comparables(data,y,local,state,por=100000)
+            if pair is None:
+                return missing('Faltan poblaciones municipal y estatal comparables para calcular puestas a disposición por cien mil habitantes.')
+            if pair[1]==0:return missing('La tasa estatal de personas ante el Ministerio Público es cero; no se compara mediante división.')
+            ratios.append(pair[0]/pair[1]);rates[str(y)]={'municipal':str(pair[0]),'estatal':str(pair[1])}
         if all(v>=1 for v in ratios):
             verified=all(e.get('revision_derechos')=='sin_recomendaciones_documentada' and e.get('control_uso_fuerza')=='revisado' for e in entries)
             stable=all(a<=b for a,b in zip(ratios,ratios[1:]))
@@ -236,5 +239,6 @@ def revisar_ficha(n, section, old, years, entries, data, definitions):
         elif all(Decimal('.75')<=v<1 for v in ratios):score=3
         elif all(v<Decimal('.75') for v in ratios):score=2
         else:return missing('Las razones cruzan umbrales; la ficha no define una combinación temporal inequívoca.')
-        return scored(score,{str(y):str(v) for y,v in zip(years,ratios)})
+        return scored(score,{'unidad':'personas_por_100000_habitantes','tasas':rates,
+                             'razon_municipal_estatal':{str(y):str(v) for y,v in zip(years,ratios)}})
     return result

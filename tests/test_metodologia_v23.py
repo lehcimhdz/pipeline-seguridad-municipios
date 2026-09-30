@@ -180,6 +180,25 @@ class EvidenciaTests(unittest.TestCase):
             for scope, series in (('municipal', 'a'), ('estatal', 'b'))]}
         self.assertIsNone(tasas_comparables(data, 2024, 10, 10))
 
+    def test_ficha_18_usa_tasas_poblacionales_y_no_delitos(self):
+        population = {'poblacion': [
+            {'ambito': scope, 'anio': 2024, 'valor': value, 'serie': 'censo_2020',
+             'metodo': 'censo_base_fija', 'fecha_referencia': '2020-03-15'}
+            for scope, value in [('municipal', 1000), ('estatal', 10000)]]}
+        section = {'numero': 18, 'tablas': []}
+        entry = {'universo_remisiones': 'ministerio_publico', 'personas_mp': 10,
+                 'personas_mp_estatal': 100}
+        result = revisar_ficha(18, section, {}, [2024], [entry], population,
+                               RULES['definiciones_config'])
+        self.assertEqual(result['puntaje'], 4)
+        self.assertEqual(result['metricas_revisadas']['tasas']['2024'],
+                         {'municipal': '1000', 'estatal': '1000'})
+        self.assertEqual(result['metricas_revisadas']['unidad'], 'personas_por_100000_habitantes')
+        self.assertNotIn('delitos_municipales', entry)
+        missing = dict(entry); missing.pop('personas_mp_estatal')
+        self.assertIsNone(revisar_ficha(18, section, {}, [2024], [missing], population,
+                                       RULES['definiciones_config'])['puntaje'])
+
     def test_llamadas_no_usan_porcentaje_como_eficacia(self):
         with tempfile.TemporaryDirectory() as directory:
             result = ejemplo(directory)

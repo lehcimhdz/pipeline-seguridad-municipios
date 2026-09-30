@@ -2,7 +2,7 @@
 
 ## Producto y documentos de referencia
 
-La rama `pipeline-v2` genera un único estudio de SEGURIDAD: `{municipio} Estudio Seguridad.docx`. Llena el formato que la consultora pidió con una interpretación de las estadísticas y una valoración de su desempeño documentado.
+La rama `pipeline-v2` genera `{municipio} Estudio Seguridad.docx`. Con `--plataforma-electoral` genera también `{municipio} Plataforma Electoral Seguridad.docx`, limitado a los dos incisos de Seguridad del machote electoral recibido. El estudio llena el formato de medición de la consultora con una interpretación de las estadísticas y una valoración de su desempeño documentado.
 
 El flujo distingue tres originales:
 
@@ -13,6 +13,8 @@ El flujo distingue tres originales:
 | `templates/Machote_seguridad_general_con_calificacion.docx` | Benchmark para evaluar: fichas, criterios, dimensiones, escala y candados. |
 
 `templates/seguridad_medicion.docx` es una base técnica derivada del formato de la consultora. Incluye portada y logo, capítulo SEGURIDAD con los 18 indicadores y bibliografía. La migración no altera sus documentos de referencia. Una operación separada y reproducible añade al benchmark interno el anexo metodológico 2.3; el formato y la guía originales no cambian. Las fichas internas e instrucciones no se insertan en el documento del cliente.
+
+`templates/PLATAFORMA ELECTORAL MACHOTE.docx` es el original del segundo producto. `scripts/crear_plantilla_electoral.py` deriva `templates/seguridad_plataforma_electoral.docx`: portada, introducción de Seguridad y cinco campos para cada inciso, «a. Protección Civil» y «b. Seguridad». Añade al final «Fuentes clave» para las referencias realmente citadas. La base conserva la presentación del Word recibido. El PDF de Cuernavaca orienta únicamente la organización y el tono; sus cifras y propuestas no se transfieren.
 
 La guía contiene una duplicación de Personal que no altera el catálogo: Personal es el indicador 4, evaluaciones el 5, instituto el 6 y Certificado Único Policial el 7. Se conservan 18 indicadores únicos.
 
@@ -79,6 +81,8 @@ El archivo editorial contiene:
 - Un encuadre general breve basado en el Marco de Sendai y las leyes generales de protección civil y seguridad pública se agrega a la síntesis. Sus fuentes verificadas se incorporan a la bibliografía en APA; no sustituyen las fuentes estadísticas municipales ni implican una evaluación jurídica de cumplimiento.
 - Selección de ilustraciones originales y declaración de revisión y tipo de autor: `agente_editorial` o `persona`.
 
+El archivo electoral independiente se guarda en `input/redaccion_electoral/{slug}.json`. Sus once campos de contenido, definidos en `config/variables_plataforma_electoral_seguridad.json`, citan indicadores de la misma evaluación. Cada campo puede declarar `referencias` con IDs de `config/fuentes_plataforma_electoral_seguridad.json`; la cita debe aparecer en ese argumento. El programa construye la bibliografía APA sólo con los IDs citados y conserva la huella del catálogo de fuentes. Declara municipio, estado, fuentes municipales y huella de la evaluación, y requiere revisión editorial. Si cambian las entradas o el cálculo, se revisan de nuevo las propuestas. No se publican marcadores, citas huérfanas ni cifras sin vinculación factual explícita. Las leyes se usan como referentes vigentes para propuestas, sin juzgar retroactivamente series anteriores; Sendai es un marco no vinculante y la literatura comparada no prueba efectos locales.
+
 El control editorial comprueba fuentes, coincidencia de celdas, operaciones y cifras citadas. Una nueva fuente, una modificación del benchmark o reglas distintas invalidan la vinculación anterior y exigen revisar la interpretación. Ninguna clave de API es necesaria para ejecutar el pipeline.
 
 La comprobación numérica no sustituye la lectura crítica: el autor debe revisar el significado, las unidades, las comparaciones, la causalidad y la pertinencia de las recomendaciones. El texto visible evita rutas, identificadores técnicos, instrucciones y referencias a versiones de trabajo. [ESTILO_REDACCION.md](ESTILO_REDACCION.md) explica el criterio de escritura.
@@ -105,7 +109,7 @@ Se ofrecen dos métodos:
 
 Los modos mantienen las mismas fichas individuales y la misma escala. La adaptación evaluable no atribuye puntajes a los pendientes ni equivale a un promedio completo. El JSON conserva un intervalo de sensibilidad de la evaluación completa; sus escenarios extremos no se publican como observaciones.
 
-Las definiciones 2.4.3 incorporan correspondencias automáticas y lecturas condicionales dentro del contrato 2.3. Un CUP explícitamente vigente puede evaluarse con el porcentaje reportado bajo la homologación censal adoptada. El título de una gráfica puede acreditar que las evaluaciones fueron aprobadas o que las cámaras estaban en funcionamiento, dentro del periodo expresado. Aprobar no equivale a tener una evaluación vigente; mencionar elementos de seguridad pública no permite descontar administrativos. Una contradicción entre un campo explícito y un complemento exige conciliación; no se impone silenciosamente una de las versiones.
+Las definiciones integradas 2.5 incorporan correspondencias automáticas y lecturas condicionales dentro del contrato de ponderación 2.3. Un CUP explícitamente vigente puede evaluarse con el porcentaje reportado bajo la homologación censal adoptada. El título de una gráfica puede acreditar que las evaluaciones fueron aprobadas o que las cámaras estaban en funcionamiento, dentro del periodo expresado. Aprobar no equivale a tener una evaluación vigente; mencionar elementos de seguridad pública no permite descontar administrativos. Una contradicción entre un campo explícito y un complemento exige conciliación; no se impone silenciosamente una de las versiones.
 
 Las valoraciones provisionales conservan `puntaje: null` y no cuentan para cobertura ni promedio. En capacitación policial se reconocen grupos núcleo del último año disponible, sin sumar asistentes entre cursos. En llamadas, dos cortes municipales recientes permiten una lectura condicional de continuidad de la serie; no prueban quién opera el servicio ni su eficacia. El renderizador vuelve a leer las imágenes y recalcula las correspondencias y las evaluaciones antes de aceptar el JSON; rechaza lecturas editadas o que no puedan reproducirse con las fuentes.
 
@@ -159,10 +163,13 @@ Paquete Seguridad + Anexo opcional
 
 ```sh
 python3 scripts/ejecutar_pipeline.py --estado "Nombre del estado"
+python3 scripts/ejecutar_pipeline.py --estado "Nombre del estado" --plataforma-electoral
 python3 scripts/ejecutar_pipeline.py --calificacion completo --graficas ninguna --estado "Nombre del estado"
 ```
 
 `--input` y `--output` permiten elegir las carpetas. `--redaccion` selecciona otro archivo editorial. El renderizador independiente permite regenerar desde el JSON vigente:
+
+`--plataforma-electoral` activa la segunda salida y `--redaccion-electoral` permite seleccionar su texto revisado. Ambas salidas se validan en el área temporal antes de sustituir los entregables vigentes.
 
 ```sh
 python3 scripts/renderizar_word.py output/json/{slug}_diagnostico_seguridad_municipal.json
@@ -172,8 +179,11 @@ Las salidas estables son:
 
 ```text
 output/word/{municipio} Estudio Seguridad.docx
+output/word/{municipio} Plataforma Electoral Seguridad.docx  (opcional)
 output/json/{slug}_diagnostico_seguridad_municipal.json
 output/json/{slug}_estudio_seguridad_renderizado.json
+output/json/{slug}_plataforma_electoral_seguridad.json  (opcional)
+output/json/{slug}_plataforma_electoral_renderizado.json  (opcional)
 ```
 
 El nombre del Word conserva el municipio legible. El slug del JSON usa minúsculas, sin acentos y con guiones bajos. El identificador de corrida queda dentro del JSON. El recibo vincula los artefactos mediante SHA-256 y conserva los resultados de la auditoría.

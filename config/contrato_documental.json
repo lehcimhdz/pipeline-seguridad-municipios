@@ -26,7 +26,7 @@
   },
   "benchmark": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "9fa749e1d25f6d078312ca8ea748b1fed39e5b0ca9ec40c3b22ed1c5155d02a3",
+    "sha256": "6eace4f784db820c733a1b0cdd6ee2ab0160109bfc6227bafb384e0064c2bab3",
     "rol": "Criterios para construir la metodología de calificación e interpretación."
   },
   "diccionario": {
@@ -35,11 +35,11 @@
   },
   "reglas": {
     "archivo": "config/reglas_calificacion.json",
-    "sha256": "235d19fb63820fad8c9d6a6cd39fdd867e5a1ec9451f5248164c5abdd7989336"
+    "sha256": "0360af806fa92aef9f647108f962659d69144e3ec31a15248d1a208bef461d26"
   },
   "metodologia": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "9fa749e1d25f6d078312ca8ea748b1fed39e5b0ca9ec40c3b22ed1c5155d02a3"
+    "sha256": "6eace4f784db820c733a1b0cdd6ee2ab0160109bfc6227bafb384e0064c2bab3"
   },
   "formato": {
     "archivo": "config/formato_editorial.json",
@@ -59,7 +59,7 @@
   },
   "definiciones": {
     "archivo": "config/definiciones_cngmd.json",
-    "sha256": "3ffbb657e2d69ad9ce9cb957b01541e9db6384f34a6ea8ca1cfd9d01602fe13d"
+    "sha256": "06f967c858e4adff349df79e17250141a0a9f92aa535c3f7c3a1bda423924d51"
   },
   "textos_narrativos": {
     "archivo": "config/textos_narrativos.json",

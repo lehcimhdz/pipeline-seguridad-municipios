@@ -6,7 +6,12 @@
   "seccion": "2. Seguridad",
   "subsecciones": ["a. Protección Civil", "b. Seguridad"],
   "identidad_reutilizada": ["municipio", "estado"],
-  "estado_integracion": "machote_electoral_preparado; pendiente_de_redaccion_municipal_y_renderizador",
+  "referencias": {
+    "catalogo": "config/fuentes_plataforma_electoral_seguridad.json",
+    "marcador_bibliografia": "{fuentes_clave}",
+    "regla": "Cada fuente incluida debe estar citada en el argumento que respalda; la bibliografía se construye con las referencias realmente utilizadas."
+  },
+  "estado_integracion": "renderizador_integrado; redaccion_municipal_revisada_obligatoria",
   "variables": {
     "seguridad_introduccion_electoral": {
       "marcador": "{seguridad_introduccion_electoral}",

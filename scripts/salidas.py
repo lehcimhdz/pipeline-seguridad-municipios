@@ -7,7 +7,8 @@ def _same_path(left: Path, right: Path | None) -> bool:
 
 
 def limpiar_salidas(json_dir: Path, word_dir: Path, *, json_actual: Path | None,
-                    word_actual: Path | None = None, recibo_actual: Path | None = None) -> dict[str, int]:
+                    word_actual: Path | None = None, recibo_actual: Path | None = None,
+                    json_adicionales=(), word_adicionales=()) -> dict[str, int]:
     """Conserva sólo los artefactos publicados por la ejecución exitosa actual.
 
     Las carpetas ``output/json`` y ``output/word`` pertenecen al pipeline. Los
@@ -15,8 +16,8 @@ def limpiar_salidas(json_dir: Path, word_dir: Path, *, json_actual: Path | None,
     abierto y normalmente los elimina al cerrarlo.
     """
     removidos = {'json': 0, 'word': 0}
-    keep_json = [json_actual, recibo_actual]
-    keep_word = [word_actual]
+    keep_json = [json_actual, recibo_actual, *json_adicionales]
+    keep_word = [word_actual, *word_adicionales]
     for path in json_dir.glob('*.json') if json_dir.exists() else ():
         if path.is_file() and not any(_same_path(path, keep) for keep in keep_json):
             path.unlink()

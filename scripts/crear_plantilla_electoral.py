@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from docx import Document
+from docx.text.paragraph import Paragraph
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -104,6 +105,16 @@ def main():
             continue
         if node not in keep:
             body.remove(node)
+    section = next((node for node in body if node.tag.endswith('}sectPr')), None)
+    position = list(body).index(section) if section is not None else len(body)
+    title_node = deepcopy(children[0]._p)
+    body.insert(position, title_node)
+    heading(Paragraph(title_node, document), 'Fuentes clave')
+    bibliography_node = deepcopy(introduction._p)
+    body.insert(position + 1, bibliography_node)
+    bibliography = Paragraph(bibliography_node, document)
+    bibliography.clear()
+    bibliography.add_run('{fuentes_clave}')
     destination = ROOT / spec['plantilla']
     document.save(destination)
     print(destination)

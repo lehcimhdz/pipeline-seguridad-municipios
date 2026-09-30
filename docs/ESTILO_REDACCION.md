@@ -155,7 +155,7 @@ El control numérico no demuestra por sí solo la verdad de una interpretación.
 como material de consulta. El texto municipal sigue siendo escrito y revisado;
 el programa no concatena frases según el semáforo. No se recibieron los 144
 cierres anunciados ni un bloque `apartados`: no se presentan como disponibles.
-Las propuestas electorales del catálogo no generan un segundo producto.
+La plataforma electoral sí puede generarse como segundo producto mediante `--plataforma-electoral`. Sus propuestas proceden de una redacción municipal revisada y vinculada a la evaluación; el catálogo narrativo sólo aporta ideas de encuadre, nunca párrafos publicables por sustitución automática. Cuando una medida se apoye en normas o investigación, integrar la cita en el razonamiento y declarar su ID en `referencias`: la bibliografía APA se genera con las fuentes efectivamente usadas. No acumular citas en todos los campos ni afirmar que una ley posterior acredita cumplimiento pasado. El Marco de Sendai no es un tratado; la evidencia sobre patrullajes focalizados y cámaras es contextual y no asegura resultados en el municipio.
 
 El razonamiento enlaza contexto, dato y consecuencia sin repetir una fórmula
 literal. Hay que verificar que cada encuadre corresponda al universo observado,

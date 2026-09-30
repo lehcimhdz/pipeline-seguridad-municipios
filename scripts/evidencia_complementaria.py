@@ -120,9 +120,9 @@ def poblacion(data, year, scope='municipal'):
     return next((r for r in data.get('poblacion', []) if r['anio'] == year and r['ambito'] == scope), None)
 
 
-def tasas_comparables(data, year, local, state):
+def tasas_comparables(data, year, local, state, por=1000):
     a, b = poblacion(data, year), poblacion(data, year, 'estatal')
     if not a or not b or (a['serie'], a['metodo'], a['fecha_referencia']) != (b['serie'], b['metodo'], b['fecha_referencia']):
         return None
-    return (Decimal(str(local)) * 1000 / Decimal(str(a['valor'])),
-            Decimal(str(state)) * 1000 / Decimal(str(b['valor'])))
+    return (Decimal(str(local)) * por / Decimal(str(a['valor'])),
+            Decimal(str(state)) * por / Decimal(str(b['valor'])))

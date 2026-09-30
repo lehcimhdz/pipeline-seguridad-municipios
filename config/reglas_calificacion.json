@@ -2,7 +2,7 @@
   "version": "2.3",
   "fuente": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "9fa749e1d25f6d078312ca8ea748b1fed39e5b0ca9ec40c3b22ed1c5155d02a3"
+    "sha256": "6eace4f784db820c733a1b0cdd6ee2ab0160109bfc6227bafb384e0064c2bab3"
   },
   "alcance": "Estudio de seguridad en el formato de la consultora; estadísticas del paquete de seguridad y contraste opcional con su anexo.",
   "criterio_operativo": {
@@ -2740,7 +2740,7 @@
     }
   },
   "definiciones_config": {
-    "version": "2.4.3",
+    "version": "2.5-integracion",
     "proposito": "Definiciones de referencia CNGMD, población, normalización de protección civil y valoración provisional. Integra y corrige la propuesta del asesor; complementa config/reglas_calificacion.json y config/ponderacion.json. Las escalas_operativas y revision_integracion prevalecen sobre descripciones históricas.",
     "fuentes_consultadas": [
       {
@@ -2791,7 +2791,7 @@
         14,
         15
       ],
-      "pendiente_para_el_colega": "Aportar población municipal y estatal en input/complementos/{slug}.json mediante --complemento; conservar fuentes y revisión. Sin esos denominadores las tasas de 4, 14 y 15 no se calculan. La ficha 18 requiere incidencia delictiva, no población. fuentes_por_año_de_referencia es un catálogo de alternativas, no una instrucción para mezclarlas."
+      "pendiente_para_el_colega": "Aportar población municipal y estatal en input/complementos/{slug}.json mediante --complemento; conservar fuentes y revisión. Sin esos denominadores las tasas de 4, 14, 15 y 18 no se calculan. La ficha 18 requiere personas ante el Ministerio Público del mismo universo en ambos ámbitos; la incidencia delictiva es sólo contexto. fuentes_por_año_de_referencia es un catálogo de alternativas, no una instrucción para mezclarlas."
     },
     "definiciones_por_ficha": [
       {
@@ -2924,7 +2924,7 @@
         "10": "Sin el porcentaje de personal, usar presencia o ausencia de temas núcleo: con dos o más grupos núcleo en la edición reciente, nivel indicativo 3; con uno, 2; sin ninguno, 1.",
         "14": "Sin poblaciones comparables, usar continuidad y evolución del conteo: presencia en todas las ediciones y sin retrocesos, nivel indicativo 3; presencia intermitente, 2. Confianza baja.",
         "15": "Conteos de llamadas procedentes en ambas ediciones recientes de la serie municipal permiten nivel indicativo 3, con confianza baja y condicionado a confirmar competencia y universo. Describe continuidad de la serie, no eficacia ni operación propia; no se aplica si se acredita que el registro no es de competencia municipal.",
-        "18": "Sin incidencia delictiva municipal, comparar remisiones por cada mil habitantes con la tasa estatal equivalente: dentro de más o menos 25% de la estatal, nivel indicativo 3; muy por encima, revisar naturaleza de las remisiones antes de fijar nivel. Confianza media."
+        "18": "Si las remisiones son del mismo destino y universo en ambos ámbitos, comparar provisionalmente sus tasas por población de la misma serie: dentro de más o menos 25% de la tasa estatal, nivel indicativo 3. Sin aclaración del destino, no asignar nivel. La incidencia delictiva sólo sirve de contexto."
       },
       "limite": "Ninguna valoración provisional puede sostener por sí sola una recomendación de política ni un juicio sobre derechos; solo describe el rango en el que caería el rubro."
     },
@@ -3090,6 +3090,45 @@
         "limite": "Vacíos no acreditados permanecen null. El crecimiento de llamadas se describe, no suma puntos por sí mismo.",
         "origen": "Convención de integración documentada; sustituye comparación del porcentaje como desempeño."
       }
+    },
+    "verificacion_v25": {
+      "prioridad": [
+        "dato_del_paquete_con_universo_y_año_identificables",
+        "dato_censal_extraido_y_documentado",
+        "sin_dato_utilizable"
+      ],
+      "registro_por_dato": [
+        "ficha",
+        "variable",
+        "origen",
+        "edicion",
+        "anio_referencia",
+        "modulo_seccion_pregunta",
+        "universo",
+        "valor",
+        "unidad",
+        "coincidencia_con_paquete",
+        "responsable",
+        "fecha"
+      ],
+      "regla": "El dato censal sólo sustituye al tabulado después de documentar la diferencia. Sin dato utilizable se conserva puntaje null y una valoración provisional separada."
+    },
+    "unidades_de_tasa": {
+      "4": "por_mil",
+      "14": "por_mil",
+      "18": "por_cien_mil"
+    },
+    "ficha_18_revisada": {
+      "metrica": "Personas puestas a disposición por cada 100000 habitantes, según destino cuando el desglose esté documentado.",
+      "comparador": "Tasa estatal del mismo universo y año, con población municipal y estatal comparables.",
+      "incidencia_delictiva": "Contraste contextual opcional; nunca denominador del puntaje ni sustituto del desglose por destino.",
+      "faltantes": "Sin población, destino o comparador estatal documentado, puntaje null; no convertir un denominador ausente en nivel 1.",
+      "version_fuente": "Definiciones CNGMD 2.5 y modificación de fichas 5 y 18 proporcionadas por el asesor; integración conservadora del equipo."
+    },
+    "contraste_ficha_5": {
+      "fuente": "Seguimiento de evaluaciones del CNCA/SESNSP para policías municipales de la entidad, con corte fechado.",
+      "uso": "Alerta para revisión documental; el agregado estatal no rebaja automáticamente el puntaje de un municipio porque difieren nivel geográfico, universo y corte.",
+      "falta_de_fuente": "No equivale a evaluación municipal reprobatoria ni a ausencia de respuesta."
     }
   }
 }

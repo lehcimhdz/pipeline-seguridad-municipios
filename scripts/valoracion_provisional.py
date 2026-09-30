@@ -266,9 +266,10 @@ def _remisiones(section, years, obs, data, result):
         result['evidencias'].extend({'tipo': 'poblacion', **p} for p in data.get('poblacion', []) if p['anio'] == year)
     if years and len(ratios) == len(years) and all(Decimal('.75') <= v <= Decimal('1.25') for v in ratios):
         result.update(nivel_indicativo=3, confianza='media')
-    result['condiciones'].append('La comparación poblacional sólo es indicativa y requiere el mismo '
-                                'tipo de personas y destino en ambos ámbitos. No sustituye la '
-                                'incidencia delictiva ni acredita respeto o violación de derechos.')
+    result['condiciones'].append('La lectura provisional no sustituye la tasa verificada de personas '
+                                'por cien mil habitantes del mismo destino en ambos ámbitos. La '
+                                'incidencia delictiva sólo aporta contexto y la tasa no acredita '
+                                'por sí misma respeto o violación de derechos.')
 
 
 def provisional(number, section, years, obs, motivo, definitions, mappings=None, data=None):

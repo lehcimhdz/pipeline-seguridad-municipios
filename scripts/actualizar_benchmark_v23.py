@@ -25,7 +25,7 @@ def actualizar():
     content = ET.SubElement(block, W + 'sdtContent')
     def add(text, heading=False):
         content.append(configurar(paragraph(text), 'medicion', 'subcapitulo' if heading else 'cuerpo'))
-    add('Anexo 3. Integración metodológica 2.3', True)
+    add('Anexo 3. Integración metodológica 2.3 con definiciones verificadas 2.5', True)
     add('Este anexo prevalece sobre los criterios históricos incompatibles del cuerpo anterior. Conserva 18 indicadores y escala de 1 a 5. Las nuevas convenciones son decisiones de integración del equipo, no estándares externos verificados. Es material interno; no se entrega con el estudio municipal.')
     add('Ponderación y cobertura', True)
     add('Protección civil: 25%; condiciones del personal: 35%; inteligencia y eficiencia policial: 40%. Dentro de cada dimensión, los indicadores 2, 4, 5, 10, 11, 12, 13 y 14 pesan 2; los restantes pesan 1. Sólo entran al promedio puntajes observados y acreditados.')
@@ -39,7 +39,8 @@ def actualizar():
     add('Las correspondencias explícitas se resuelven automáticamente desde las entradas, conservando regla y coordenadas. El título Certificado Único Policial vigente y su porcentaje publicado permiten homologar la ficha 7 con la definición general, sin reconstruir denominadores ni declarar una verificación externa. No se exige un complemento para repetir lo ya identificado; las ambigüedades y contradicciones se conservan para revisión.')
     add('También se leen los títulos incrustados en las gráficas mediante OCR local. Cada lectura conserva la imagen y sus huellas. Una gráfica que dice evaluaciones aprobadas resuelve ese estatus, aunque la vigencia siga pendiente. Las cámaras se reconocen en servicio cuando los títulos municipal y estatal indican funcionamiento. Las cifras proceden de las tablas; los años no se extienden más allá del intervalo explícito del título.')
     add('Personal: utilizar corporaciones policiales, sin administrativos, en las tasas; el denominador es población documentada por año. Una plantilla menor de 15 limita la ficha 4 a 4. Control de confianza: aprobatorias vigentes; CUP: vigente. Capacitación: no confundir con profesionalización ni sumar participantes duplicados. La capacitación de protección civil distingue personal de la unidad de cursos a la población.')
-    add('Equipo: cantidades asignadas al cierre, no compras anuales; cámaras: en servicio. Población municipal y estatal de la misma serie, fecha y método para comparaciones. Puestas a disposición: separar MP de justicia cívica y dividir entre incidencia comparable, no población. El máximo requiere revisión documentada de derechos humanos y uso de la fuerza; una razón superior al doble estatal no obtiene 5.')
+    add('Equipo: cantidades asignadas al cierre, no compras anuales; cámaras: en servicio. Población municipal y estatal de la misma serie, fecha y método para comparaciones. Puestas a disposición: separar Ministerio Público de justicia cívica y comparar tasas por cien mil habitantes del mismo universo y año. La incidencia delictiva sólo aporta contexto, no sirve de denominador. Sin dato estatal homólogo o población comparable, la ficha queda pendiente; nunca se presume nivel 1. El máximo requiere revisión documentada de derechos humanos y uso de la fuerza; una razón superior al doble estatal no obtiene 5.')
+    add('Control de confianza: el seguimiento estatal del CNCA/SESNSP se utiliza como alerta documental, no como rebaja automática de una corporación municipal. Se debe conciliar edición, corte, universo policial y vigencia antes de decidir. Un agregado estatal no prueba la situación de un municipio.')
     for key, label in (('proteccion_civil', 'Ficha 3. Cobertura temática'), ('llamadas', 'Ficha 15. Registro y respuesta')):
         scale = definitions['escalas_operativas'][key]
         add(label, True)
@@ -58,4 +59,4 @@ def actualizar():
 
 if __name__ == '__main__':
     actualizar()
-    print('Benchmark interno actualizado con anexo 2.3; formato y guía de la consultora sin cambios.')
+    print('Benchmark interno actualizado con definiciones 2.5; formato y guía de la consultora sin cambios.')

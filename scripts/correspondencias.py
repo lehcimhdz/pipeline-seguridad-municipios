@@ -210,9 +210,9 @@ def requisitos_pendientes(n, years, obs, data):
                    10: {'universo': 'corporaciones_policiales', 'definicion': 'capacitacion_sin_profesionalizacion'},
                    9: {'naturaleza_del_dato': 'asignado_al_cierre'},
                    14: {'universo': 'camaras_en_servicio'},
-                   15: {'registro_municipal': True}, 18: {'incidencia_comparable': True}}
+                   15: {'registro_municipal': True}, 18: {'universo_remisiones': 'ministerio_publico'}}
     quantities = {4: ('personal_policial',), 9: ('personal_policial', 'chalecos', 'radios', 'menos_letal'),
-                  18: ('personas_mp', 'delitos_municipales', 'personas_mp_estatal', 'delitos_estatales')}
+                  18: ('personas_mp', 'personas_mp_estatal')}
     result = {}
     for year in years:
         entry = obs.get(str(year), {})
@@ -229,6 +229,8 @@ def requisitos_pendientes(n, years, obs, data):
         if n in (4, 15) and not poblacion(data, year):
             needed.append('poblacion_municipal_documentada')
         if n == 14 and tasas_comparables(data, year, 1, 1) is None:
+            needed.append('poblaciones_municipal_y_estatal_comparables')
+        if n == 18 and tasas_comparables(data, year, 1, 1, por=100000) is None:
             needed.append('poblaciones_municipal_y_estatal_comparables')
         if entry.get('_conflictos'):
             needed.append('conciliar_contradicciones_documentales')

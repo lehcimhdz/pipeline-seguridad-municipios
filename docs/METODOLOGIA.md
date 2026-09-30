@@ -63,7 +63,7 @@ Los parámetros proceden del benchmark, no de las calificaciones impresas en el 
 | 14 | Cámaras por cada mil habitantes frente a la tasa estatal, continuidad y evolución. Requiere ambas poblaciones comparables. |
 | 15 | Continuidad de un registro de competencia municipal y tasas descriptivas calculables. Sin evidencia de respuesta no supera 4; un porcentaje de 100% limita a 3 y exige revisión. No se premia el crecimiento de llamadas. |
 | 17 | Fallecimientos, continuidad de los registros y, cuando corresponda, tasas comparables y eventos. Los porcentajes de egresos no sustituyen los conteos de muertes. |
-| 18 | Puestas a disposición divididas entre incidencia delictiva y comparación estatal. El máximo también requiere revisión documentada de recomendaciones de derechos humanos. |
+| 18 | Personas ante el Ministerio Público por cada 100 000 habitantes, comparadas con la tasa estatal del mismo universo y año. La incidencia delictiva sólo aporta contexto. Sin población o numerador estatal homólogo, el puntaje es `null`. El máximo exige además revisión documentada de derechos humanos y uso de la fuerza. |
 
 Las fichas históricas, sus revisiones y condiciones ejecutables están en `config/reglas_calificacion.json`. Las definiciones y los requisitos de cada indicador se resuelven por año, primero con el paquete y después, si hace falta, con evidencia complementaria. No existe una exigencia general de revisión manual para todas las fichas. Los faltantes se calculan dinámicamente y señalan el requisito pendiente, no la mera ausencia de un archivo auxiliar. Los campos necesarios y su contrato están en [RECOLECCION_DATOS.md](RECOLECCION_DATOS.md).
 
@@ -88,7 +88,7 @@ llamadas, fallecimientos ni remisiones, donde “más” no siempre es “mejor�
 
 ## Correspondencias entre datos y criterios
 
-Las definiciones 2.4.3 mantienen la integración metodológica 2.3 y hacen explícita la lectura automática del paquete y las gráficas de Seguridad del Anexo. Los archivos de `new-elements` aportan parámetros generales: no son datos de un municipio ni sustituyen a `input/`. El reconocimiento distingue tres operaciones:
+Las definiciones integradas 2.5 mantienen la ponderación 2.3 y hacen explícita la lectura automática del paquete y las gráficas de Seguridad del Anexo. Los archivos de `new-elements` aportan parámetros generales: no son datos de un municipio ni sustituyen a `input/`. El reconocimiento distingue tres operaciones:
 
 - Recuperar un dato explícito de su título o celda, conservando indicador, año, tabla, fila y columna según corresponda.
 - Homologar ese concepto con una definición o grupo temático ya adoptado, dejando identificada la regla.
@@ -192,4 +192,4 @@ Se prefiere una serie anual CONAPO consistente y documentada. Las tasas requiere
 
 Las precisiones censales del material recibido deben cotejarse contra la edición usada en cada tabla, especialmente catálogos de protección civil y universo policial. Fuentes de consulta: [CNGMD 2023, seguridad pública](https://www.inegi.org.mx/contenidos/programas/cngmd/2023/doc/cngmd_2023_m3s1.pdf), [ejercicio de la función policial](https://www.inegi.org.mx/contenidos/programas/cngmd/2023/doc/cngmd_2023_m3s2.pdf) y [protección civil](https://www.inegi.org.mx/contenidos/programas/cngmd/2023/doc/cngmd_2023_m4.pdf). Consultar esos cuestionarios no completa por sí solo las cifras municipales faltantes. La numeración de reactivos no se traslada automáticamente a otra edición.
 
-El catálogo narrativo recibido no contiene los 144 cierres anunciados. Sus encuadres son referencias que requieren revisión semántica. No se genera un documento electoral ni se trasladan causalidades, recomendaciones o cifras de ejemplo al estudio municipal.
+El catálogo narrativo recibido no contiene los 144 cierres anunciados. Sus encuadres son referencias que requieren revisión semántica. La plataforma electoral opcional usa el mismo cálculo municipal como contexto, pero requiere propuestas redactadas para ese municipio. No se trasladan causalidades, recomendaciones ni cifras de ejemplo al estudio o a la plataforma.

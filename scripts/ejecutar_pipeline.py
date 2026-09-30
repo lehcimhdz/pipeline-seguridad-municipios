@@ -49,7 +49,7 @@ def discover(input_dir):
     return municipality, documents
 
 
-def publicar(result, output, mode='final'):
+def publicar(result, output, mode='final', electoral=None):
     """Validar toda la entrega antes de sustituir los archivos publicados."""
     from renderizar_word import renderizar, guardar_recibo
     directory = output / 'json'
@@ -58,6 +58,9 @@ def publicar(result, output, mode='final'):
     dest = directory / f'{name}_diagnostico_seguridad_municipal.json'
     word = word_directory / f'{result["municipio"]} Estudio Seguridad.docx'
     receipt = directory / f'{name}_estudio_seguridad_renderizado.json'
+    electoral_json = directory / f'{name}_plataforma_electoral_seguridad.json' if electoral else None
+    electoral_receipt = directory / f'{name}_plataforma_electoral_renderizado.json' if electoral else None
+    electoral_word = word_directory / f'{result["municipio"]} Plataforma Electoral Seguridad.docx' if electoral else None
     result['salida_word'] = {
         'modo_solicitado': mode,
         'recibos_renderizado': {'medicion': str(receipt)} if mode != 'ninguno' else {},
@@ -74,11 +77,27 @@ def publicar(result, output, mode='final'):
             report.update(archivo=str(word), json_fuente=str(dest))
             staged_receipt = stage / receipt.name
             guardar_recibo(report, staged_receipt)
+        if electoral:
+            from plataforma_electoral import renderizar as renderizar_electoral
+            from renderizar_word import guardar_recibo
+            staged_electoral_json = stage / electoral_json.name
+            guardar_recibo(electoral, staged_electoral_json)
+            staged_electoral_word = stage / electoral_word.name
+            electoral_report = renderizar_electoral(electoral, staged_electoral_word)
+            electoral_report.update(archivo=str(electoral_word), json_fuente=str(electoral_json),
+                                    json_sha256=sha256(staged_electoral_json))
+            staged_electoral_receipt = stage / electoral_receipt.name
+            guardar_recibo(electoral_report, staged_electoral_receipt)
         directory.mkdir(parents=True, exist_ok=True)
         replacements = []
         if report:
             word_directory.mkdir(parents=True, exist_ok=True)
             replacements.extend(((staged_word, word), (staged_receipt, receipt)))
+        if electoral:
+            word_directory.mkdir(parents=True, exist_ok=True)
+            replacements.extend(((staged_electoral_word, electoral_word),
+                                 (staged_electoral_json, electoral_json),
+                                 (staged_electoral_receipt, electoral_receipt)))
         replacements.append((staged_json, dest))
         backups = {}
         backup_directory = stage / 'anteriores'
@@ -107,7 +126,9 @@ def publicar(result, output, mode='final'):
             raise OSError('No se pudo publicar; se restauró la entrega anterior.') from error
     removed = limpiar_salidas(directory, word_directory, json_actual=dest,
                               word_actual=word if report else None,
-                              recibo_actual=receipt if report else None)
+                              recibo_actual=receipt if report else None,
+                              json_adicionales=(electoral_json, electoral_receipt) if electoral else (),
+                              word_adicionales=(electoral_word,) if electoral else ())
     return dest, report, removed
 
 
@@ -192,6 +213,10 @@ def main():
     parser.add_argument('--complemento', type=Path, help='Datos y definiciones revisados, con fuente y localizador por observación.')
     parser.add_argument('--esquema', choices=('dimensiones_ponderadas', 'dimensiones_iguales', 'global'))
     parser.add_argument('--graficas', choices=('originales', 'ninguna'), default='originales')
+    parser.add_argument('--plataforma-electoral', action='store_true',
+                        help='Publica además el apartado de Seguridad del machote electoral.')
+    parser.add_argument('--redaccion-electoral', type=Path,
+                        help='Redacción revisada para los dos incisos electorales.')
     args = parser.parse_args()
     try:
         municipality, _ = discover(args.input)
@@ -222,11 +247,23 @@ def main():
         result['contenido_word']['ilustraciones_excluidas'] = writing.get('ilustraciones_excluidas', [])
         result['redaccion_editorial'] = {'archivo': str(writing_path), 'sha256': sha256(writing_path)}
         result['estado_ejecucion'] = 'compuesto'
-        dest, report, removed = publicar(result, args.output)
+        electoral = None
+        if args.plataforma_electoral:
+            from plataforma_electoral import cargar as cargar_electoral
+            electoral_path = (args.redaccion_electoral or ROOT / 'input/redaccion_electoral' /
+                              f'{slug(municipality)}.json')
+            electoral = cargar_electoral(result, electoral_path)
+            result['salida_electoral'] = {'redaccion': str(electoral_path),
+                                         'redaccion_sha256': sha256(electoral_path),
+                                         'plantilla_sha256': electoral['plantilla_sha256'],
+                                         'fuentes_clave_sha256': electoral['fuentes_clave_sha256']}
+        dest, report, removed = publicar(result, args.output, electoral=electoral)
     except (ValueError, KeyError, OSError) as error:
         parser.error(str(error))
     print(f'JSON: {dest}')
     print(f'Word: {report["archivo"]}')
+    if electoral:
+        print(f'Plataforma electoral: {args.output / "word" / (result["municipio"] + " Plataforma Electoral Seguridad.docx")}')
     for period, calculation in result['calculos'].items():
         print(f'{period}: {calculation["calificacion_final"] or "sin valoración conjunta"}; alcance {calculation.get("alcance", "completo")}.')
     print(f'Limpieza de salidas anteriores: {removed}.')
