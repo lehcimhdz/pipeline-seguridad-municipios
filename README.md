@@ -12,6 +12,10 @@ Los tres documentos de referencia tienen funciones distintas:
 
 La base operativa [seguridad_medicion.docx](templates/seguridad_medicion.docx) se deriva de esos documentos y tiene **25 variables de texto**. Se conservan el formato y la guía de la consultora. El benchmark interno incorpora un anexo de integración 2.3 que declara los cambios respecto de las fichas históricas. No se entrega al cliente ese documento interno.
 
+El apartado 2. Seguridad de la futura plataforma electoral se deriva del [machote electoral recibido](templates/PLATAFORMA%20ELECTORAL%20MACHOTE.docx) en una [base separada](templates/seguridad_plataforma_electoral.docx). Tiene [once variables de contenido](config/variables_plataforma_electoral_seguridad.json): introducción y cinco campos para cada inciso, «a. Protección Civil» y «b. Seguridad», además de reutilizar municipio y estado. El PDF de Cuernavaca es una referencia de estructura y tono, no una fuente de cifras o propuestas para otros municipios. Esta base aún no dispone de redacción municipal ni de un renderizador, por lo que no cambia la salida única de este pipeline.
+
+Para reconstruir la base electoral desde el Word original: `python3 scripts/crear_plantilla_electoral.py`. El generador comprueba la huella del machote recibido y la presencia y orden de ambos incisos.
+
 ## Preparar un municipio
 
 En `input/word/` se requiere `{municipio} PAQUETE SEGURIDAD.docx`. Puede acompañarse de `{municipio} Anexo.docx`, que permite contrastar información e incorporar sus gráficas originales cuando esté disponible. El municipio debe coincidir en ambos nombres.
