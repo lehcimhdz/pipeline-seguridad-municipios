@@ -1,9 +1,18 @@
 __pycache__/
 *.py[cod]
+.DS_Store
+.env
+.env.*
+!.env.example
+~$*
 
 # Archivos municipales de entrada y resultados generados.
 input/**/*.docx
 input/**/*.json
 input/**/*.csv
+input/**/*.pdf
+input/**/*.xlsx
+input/**/*.xls
+input/fuentes/**
 output/**/*.docx
 output/**/*.json

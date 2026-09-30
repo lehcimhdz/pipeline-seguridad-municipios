@@ -1,0 +1,100 @@
+{
+  "producto": "plataforma_electoral",
+  "fuente_machote": "templates/PLATAFORMA ELECTORAL MACHOTE.docx",
+  "fuente_machote_sha256": "39ed496860e13db899bac1572f2aab9f1125ec81fdfd055b2a3526d7b58e46cb",
+  "plantilla": "templates/seguridad_plataforma_electoral.docx",
+  "seccion": "2. Seguridad",
+  "subsecciones": ["a. Protección Civil", "b. Seguridad"],
+  "identidad_reutilizada": ["municipio", "estado"],
+  "referencias": {
+    "catalogo": "config/fuentes_plataforma_electoral_seguridad.json",
+    "marcador_bibliografia": "{fuentes_clave}",
+    "regla": "Cada fuente incluida debe estar citada en el argumento que respalda; la bibliografía se construye con las referencias realmente utilizadas."
+  },
+  "estado_integracion": "renderizador_integrado; redaccion_municipal_revisada_obligatoria",
+  "variables": {
+    "seguridad_introduccion_electoral": {
+      "marcador": "{seguridad_introduccion_electoral}",
+      "ubicacion": "Después del título 2. Seguridad",
+      "contenido": "Introducción breve al diagnóstico de seguridad y a las prioridades programáticas del municipio.",
+      "tipo": "texto",
+      "obligatorio": true
+    },
+    "proteccion_civil_propuesta_plan_general": {
+      "marcador": "{proteccion_civil_propuesta_plan_general}",
+      "ubicacion": "Propuesta o plan general",
+      "contenido": "Objetivo general de política pública en protección civil, expresado como acción municipal realizable.",
+      "tipo": "texto",
+      "obligatorio": true
+    },
+    "proteccion_civil_problema_social": {
+      "marcador": "{proteccion_civil_problema_social}",
+      "ubicacion": "Problema social a resolver",
+      "contenido": "Problema concreto identificado por la evidencia municipal, su población afectada y los límites de lo que puede concluirse.",
+      "tipo": "texto",
+      "obligatorio": true
+    },
+    "proteccion_civil_razonamiento_justificatorio": {
+      "marcador": "{proteccion_civil_razonamiento_justificatorio}",
+      "ubicacion": "Razonamiento justificatorio",
+      "contenido": "Relación entre el problema, las competencias municipales y la utilidad esperada de la propuesta, con respaldo documental verificable.",
+      "tipo": "texto",
+      "obligatorio": true
+    },
+    "proteccion_civil_propuestas_especificas": {
+      "marcador": "{proteccion_civil_propuestas_especificas}",
+      "ubicacion": "Propuestas específicas",
+      "contenido": "Medidas concretas de implementación, responsables o coordinación posible e indicadores para darles seguimiento; puede contener varios párrafos.",
+      "tipo": "texto",
+      "obligatorio": true
+    },
+    "proteccion_civil_linea_discursiva": {
+      "marcador": "{proteccion_civil_linea_discursiva}",
+      "ubicacion": "Línea discursiva",
+      "contenido": "Síntesis pública breve, comprensible y congruente con la evidencia y las medidas propuestas; no atribuir resultados no observados.",
+      "tipo": "texto",
+      "obligatorio": true
+    },
+    "seguridad_propuesta_plan_general": {
+      "marcador": "{seguridad_propuesta_plan_general}",
+      "ubicacion": "Propuesta o plan general",
+      "contenido": "Objetivo general de política pública para la función municipal de seguridad, sustentado en los hallazgos del estudio.",
+      "tipo": "texto",
+      "obligatorio": true
+    },
+    "seguridad_problema_social": {
+      "marcador": "{seguridad_problema_social}",
+      "ubicacion": "Problema social a resolver",
+      "contenido": "Problema de seguridad pública acreditado por los datos municipales y sus límites de interpretación.",
+      "tipo": "texto",
+      "obligatorio": true
+    },
+    "seguridad_razonamiento_justificatorio": {
+      "marcador": "{seguridad_razonamiento_justificatorio}",
+      "ubicacion": "Razonamiento justificatorio",
+      "contenido": "Relación verificable entre el problema, las competencias municipales y la medida propuesta.",
+      "tipo": "texto",
+      "obligatorio": true
+    },
+    "seguridad_propuestas_especificas": {
+      "marcador": "{seguridad_propuestas_especificas}",
+      "ubicacion": "Propuestas específicas",
+      "contenido": "Acciones concretas de seguridad, responsables o coordinación posible y forma de seguimiento; puede contener varios párrafos.",
+      "tipo": "texto",
+      "obligatorio": true
+    },
+    "seguridad_linea_discursiva": {
+      "marcador": "{seguridad_linea_discursiva}",
+      "ubicacion": "Línea discursiva",
+      "contenido": "Síntesis pública breve y coherente con las acciones y la evidencia, sin prometer efectos no demostrados.",
+      "tipo": "texto",
+      "obligatorio": true
+    }
+  },
+  "reglas_editoriales": [
+    "El texto se redacta y revisa para la plataforma electoral a partir de evidencia municipal vigente.",
+    "Una prioridad de política se fundamenta en hallazgos; un puntaje bajo por sí solo no demuestra causalidad.",
+    "El PDF de Cuernavaca orienta la estructura y el tono; sus cifras, diagnósticos y propuestas no se trasladan a otro municipio.",
+    "No publicar marcadores, instrucciones editoriales, rutas internas ni promesas de resultados sin sustento."
+  ]
+}

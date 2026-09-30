@@ -1,0 +1,44 @@
+{
+  "version": "2.3",
+  "perfil": "estudio_seguridad",
+  "idioma": "es-MX",
+  "tono": "Directo, sustantivo y orientado a decisiones de gestión municipal.",
+  "referencia_estilistica": "Muestra Estudio Seguridad: exclusivamente tono y organización argumental; nunca evidencia del municipio analizado.",
+  "marco_general": {
+    "texto": "La lectura toma como referentes la gestión del riesgo del Marco de Sendai (Oficina de las Naciones Unidas para la Reducción del Riesgo de Desastres [UNDRR], 2015), la protección civil (Congreso de la Unión, 2012) y la organización de la seguridad pública (Congreso de la Unión, 2025). Estos principios orientan el análisis; las cifras no constituyen por sí mismas una evaluación de cumplimiento legal.",
+    "referencias_apa": [
+      "Congreso de la Unión. (2012). Ley General de Protección Civil (última reforma publicada el 21 de diciembre de 2023). Cámara de Diputados. https://www.diputados.gob.mx/LeyesBiblio/pdf/LGPC.pdf",
+      "Congreso de la Unión. (2025). Ley General del Sistema Nacional de Seguridad Pública. Cámara de Diputados. https://www.diputados.gob.mx/LeyesBiblio/pdf/LGSNSP.pdf",
+      "Oficina de las Naciones Unidas para la Reducción del Riesgo de Desastres. (2015). Marco de Sendai para la Reducción del Riesgo de Desastres 2015–2030. https://www.undrr.org/publication/sendai-framework-disaster-risk-reduction-2015-2030"
+    ]
+  },
+  "criterios": [
+    "Abrir con un hallazgo sobre el municipio, precisar años y magnitudes e incorporar el contexto estatal cuando sea comparable.",
+    "Desarrollar la implicación para la gestión y una recomendación específica del tema, sin atribuir causas no acreditadas.",
+    "Conservar los valores ausentes como pendientes: ausencia de información no equivale a cero ni a mal desempeño.",
+    "No sumar participantes de cursos, elementos de uniforme ni categorías que puedan superponerse.",
+    "No equiparar existencia municipal con porcentaje estatal ni comparar conteos territoriales como tasas de cobertura.",
+    "Explicar los límites pertinentes junto al hallazgo, sin repetir una advertencia genérica al cerrar los dieciocho indicadores.",
+    "Reservar códigos, archivos, rutas, huellas y coordenadas para la trazabilidad técnica.",
+    "Interpretar el Paquete Seguridad y contrastar el Anexo cuando esté disponible; la muestra sólo orienta la escritura.",
+    "Escribir cada apartado como un argumento propio: elegir las cifras pertinentes, explicar su relación y proponer decisiones ligadas a ese hallazgo.",
+    "Redactar los dos resúmenes en tres párrafos cada uno. Sintetizar prioridades; no concatenar las frases de los dieciocho apartados.",
+    "Conservar la prosa editorial revisada y sus referencias de evidencia. Ante fuentes o criterios nuevos, exigir una nueva interpretación; nunca sustituirla por frases automáticas.",
+    "Incluir el marco general verificado una sola vez y conservar al final sus referencias APA; no usar una ley posterior para declarar cumplimiento en años anteriores.",
+    "Presentar el estudio como documento final, sin avisos de trabajo ni instrucciones para llenar documentos."
+  ],
+  "patrones_no_publicables": {
+    "referencia_informatica": "\\b(?:json|pipeline|sha[ -]?256|checksum|docx|snake_case|None|null)\\b",
+    "ruta_local": "(?:file://|/(?:Users|home|tmp|private|var)/|(?<![A-Za-z])[A-Za-z]:[\\\\/]|\\b(?:input|output|scripts|templates|config)/)",
+    "archivo_local": "\\b[^\\s/]+\\.(?:json|docx?|py|md|csv|ya?ml|env)\\b",
+    "identificador_interno": "\\b(?:calificacion_|analisis_|introduccion_|conclusiones_|tablas_|graficas_|resumen_|puntaje_|benchmark_|minimos_|base_calificacion|motivo_asignacion)[a-z0-9_]*\\b",
+    "periodo_interno": "\\b(?:ultimo_periodo|periodo_general)\\b",
+    "jerga_de_implementacion": "(?:criterios? internos?|criterio aplicado|celda vac[ií]a|campos? (?:del|de la) (?:documento|tabla)|puntajes calculados|hoja de c[oó]mputo)",
+    "autorreferencia_ia": "(?:como (?:modelo|asistente) de (?:ia|inteligencia artificial)|asistid[ao] por ia)",
+    "huella_digital": "\\b[0-9a-f]{64}\\b",
+    "marcador_editorial": "(?:\\{[a-zA-Z_][^}]*\\}|\\[INSERTAR)",
+    "documento_de_trabajo": "\\b(?:borrador(?:es)?|machote(?:s)?|plantilla(?:s)?)\\b|versi[oó]n (?:de trabajo|sujeta a revisi[oó]n)|para revisi[oó]n editorial"
+  },
+  "control": "Validar los textos públicos antes de guardar el resultado y antes de generar Word, preservando evidencia y bitácora técnicas.",
+  "sin_reescritura_automatica_de_fuentes": true
+}

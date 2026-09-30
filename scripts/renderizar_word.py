@@ -1,38 +1,45 @@
 #!/usr/bin/env python3
-"""Renderiza el diagnóstico desde JSON, sin modificar el DOCX de referencia."""
-from __future__ import annotations
-
-import argparse
+"""Publica el Estudio Seguridad en el formato de la consultora."""
 from collections import Counter
 from copy import deepcopy
-from datetime import datetime, timezone
 from decimal import Decimal
+import argparse
 import hashlib
 import json
 import os
 from pathlib import Path
 import re
 import tempfile
-from uuid import uuid4
+import unicodedata
 import zipfile
-
 from lxml import etree as ET
-
-from calificar import agregar
-from componer_documento import PERIODOS, decimal_corto
+from calificar import definir_periodos
+from evaluacion_v23 import evaluar
+from ponderacion import agregar_ponderado
+from evidencia_complementaria import validar as validar_complemento, huella_objeto
+from componer_documento import componer, etiqueta_calificacion
+from contrato import ROOT, CONTRACT, cargar_contrato, huellas
 from documentos import sha256
+from editorial import configurar
+from ilustraciones_word import importar_grafica, seleccionar_graficas, catalogar_graficas
+from lectura_graficas import validar_lecturas
+from salidas import limpiar_salidas
+from redaccion_consultoria import comprobar_texto, validar_publicacion
 
-ROOT = Path(__file__).resolve().parents[1]
-TEMPLATE = ROOT / 'templates/Machote_seguridad_general_con_calificacion.docx'
-DICTIONARY = ROOT / 'diccionario_datos_diagnostico_seguridad_municipal.json'
-RULES = ROOT / 'reglas_calificacion.json'
+TEMPLATE = ROOT / 'templates/seguridad_medicion.docx'
+DICTIONARY = ROOT / 'config/diccionario_datos_diagnostico_seguridad_municipal.json'
+RULES = ROOT / 'config/reglas_calificacion.json'
 W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
 XML = '{http://www.w3.org/XML/1998/namespace}'
 NS = {'w': W[1:-1]}
 STYLE = 'ContenidoJSON'
-MARKER = re.compile(r'\{\{\s*([^{}\s]+)\s*\}\}')
-SELECTOR = '[ 1 · 2 · 3 · 4 · 5 ]'
+MARKER = re.compile(r'(?<!\{)\{([a-z][a-z0-9_]*)\}(?!\})')
 PARSER = ET.XMLParser(resolve_entities=False, no_network=True)
+
+
+def slug(value):
+    value = ''.join(c for c in unicodedata.normalize('NFD', value.lower()) if unicodedata.category(c) != 'Mn')
+    return re.sub(r'[^a-z0-9]+', '_', value).strip('_')
 
 
 def texto(node):
@@ -47,13 +54,9 @@ def run(value, model=None, generated=True):
     element = ET.Element(W + 'r')
     props = deepcopy(model.find(W + 'rPr')) if model is not None and model.find(W + 'rPr') is not None else ET.Element(W + 'rPr')
     if generated:
-        for key in ('rStyle', 'highlight', 'color', 'rFonts'):
+        for key in ('rStyle', 'highlight', 'shd'):
             for child in props.findall(W + key):
                 props.remove(child)
-        props.insert(0, ET.Element(W + 'rFonts', {W + 'ascii': 'Archivo Light', W + 'hAnsi': 'Archivo Light',
-                                                   W + 'eastAsia': 'Archivo Light', W + 'cs': 'Archivo Light'}))
-        ET.SubElement(props, W + 'color', {W + 'val': '000000'})
-        ET.SubElement(props, W + 'highlight', {W + 'val': 'yellow'})
         props.insert(0, ET.Element(W + 'rStyle', {W + 'val': STYLE}))
     element.append(props)
     for i, line in enumerate(str(value).split('\n')):
@@ -63,64 +66,32 @@ def run(value, model=None, generated=True):
     return element
 
 
-def parrafo(value, model=None, generated=True):
+def parrafo(value, model=None, generated=True, perfil='medicion', rol='cuerpo', inicial=True):
     p = ET.Element(W + 'p')
     if model is not None and model.find(W + 'pPr') is not None:
         p.append(deepcopy(model.find(W + 'pPr')))
     p.append(run(value, model.find('.//' + W + 'r') if model is not None else None, generated))
-    formato_parrafo(p)
-    return p
-
-
-def color_generado(p, color='2F5496'):
-    """Aplica la jerarquía azul del machote sin quitar el resaltado amarillo."""
-    for r in p.iter(W + 'r'):
-        props = r.find(W + 'rPr')
-        if props is None:
-            continue
-        for node in props.findall(W + 'color'):
-            props.remove(node)
-        props.append(ET.Element(W + 'color', {W + 'val': color}))
-    return p
-
-
-def formato_parrafo(p, compact=False):
-    """Conserva fuente/énfasis y ajusta la copia a lectura continua y tablas."""
-    props = p.find(W + 'pPr')
-    if props is None:
-        props = ET.Element(W + 'pPr')
-        p.insert(0, props)
-    for key in ('spacing', 'ind', 'jc'):
-        for child in props.findall(W + key):
-            props.remove(child)
-    ET.SubElement(props, W + 'spacing', {W + 'before': '0', W + 'after': '40' if compact else '120',
-                                        W + 'line': '240' if compact else '276', W + 'lineRule': 'auto'})
-    ET.SubElement(props, W + 'jc', {W + 'val': 'left'})
+    return configurar(p, perfil, rol, inicial)
 
 
 def reemplazar(p, token, replacement, first_only=False):
-    """Sustituye marcadores incluso fragmentados; resalta sólo el texto nuevo."""
+    """Resuelve marcadores fragmentados, conservando estilos y texto circundante."""
     while token in texto(p):
-        start = texto(p).index(token)
-        end = start + len(token)
-        runs = list(p.iter(W + 'r'))
-        spans = []
-        offset = 0
-        for r in runs:
-            length = len(texto(r))
-            if offset < end and offset + length > start:
-                spans.append((r, offset, texto(r)))
-            offset += length
+        start = texto(p).index(token); end = start + len(token)
+        spans = []; offset = 0
+        for r in p.iter(W + 'r'):
+            value = texto(r)
+            if offset < end and offset + len(value) > start:
+                spans.append((r, offset, value))
+            offset += len(value)
         if not spans:
-            raise ValueError('Marcador sin segmentos de texto editables.')
+            raise ValueError('Marcador sin segmentos editables.')
         parent = spans[0][0].getparent()
-        if any(r.getparent() is not parent or any(c.tag not in (W + 'rPr', W + 't') for c in r)
-               for r, _, _ in spans):
-            raise ValueError(f'El marcador {token!r} cruza estructura compleja del DOCX; requiere revisión.')
+        if any(r.getparent() is not parent or any(c.tag not in (W + 'rPr', W + 't') for c in r) for r, _, _ in spans):
+            raise ValueError(f'Marcador en estructura compleja: {token}')
         first, first_offset, first_text = spans[0]
         last, last_offset, last_text = spans[-1]
-        before = first_text[:start - first_offset]
-        after = last_text[end - last_offset:]
+        before = first_text[:start - first_offset]; after = last_text[end - last_offset:]
         index = parent.index(first)
         nodes = ([run(before, first, False)] if before else []) + [run(replacement, first)]
         if after:
@@ -133,374 +104,284 @@ def reemplazar(p, token, replacement, first_only=False):
             break
 
 
-def tabla_evidencia(rows):
-    if not rows or any(not isinstance(row, list) for row in rows):
-        raise ValueError('Tabla de evidencia vacía o inválida.')
-    columns = max(map(len, rows))
-    if not columns:
-        raise ValueError('Tabla de evidencia sin columnas.')
-    table = ET.Element(W + 'tbl')
-    props = ET.SubElement(table, W + 'tblPr')
-    ET.SubElement(props, W + 'tblStyle', {W + 'val': 'Tablanormal'})
-    ET.SubElement(props, W + 'tblW', {W + 'w': '5000', W + 'type': 'pct'})
-    borders = ET.SubElement(props, W + 'tblBorders')
-    for edge in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
-        ET.SubElement(borders, W + edge, {W + 'val': 'single', W + 'sz': '4', W + 'color': 'B7B7B7'})
-    grid = ET.SubElement(table, W + 'tblGrid')
-    for _ in range(columns):
-        ET.SubElement(grid, W + 'gridCol', {W + 'w': str(9000 // columns)})
-    for index, values in enumerate(rows):
-        row = ET.SubElement(table, W + 'tr')
-        if index == 0:
-            ET.SubElement(ET.SubElement(row, W + 'trPr'), W + 'tblHeader')
-        for value in list(values) + [''] * (columns - len(values)):
-            cell = ET.SubElement(row, W + 'tc')
-            cell_props = ET.SubElement(cell, W + 'tcPr')
-            ET.SubElement(cell_props, W + 'tcW', {W + 'w': str(9000 // columns), W + 'type': 'dxa'})
-            if index == 0:
-                ET.SubElement(cell_props, W + 'shd', {W + 'val': 'clear', W + 'fill': '1F4E78'})
-            elif index % 2 == 0:
-                ET.SubElement(cell_props, W + 'shd', {W + 'val': 'clear', W + 'fill': 'EAF0F8'})
-            p = parrafo(value)
-            formato_parrafo(p, compact=True)
-            rpr = p.find(W + 'r/' + W + 'rPr')
-            ET.SubElement(rpr, W + 'sz', {W + 'val': '18'})
-            if index == 0:
-                ET.SubElement(rpr, W + 'b')
-            cell.append(p)
-    return table
+def nombre_documento(municipio):
+    if (not isinstance(municipio, str) or not municipio.strip()
+            or re.search(r'[/\\:\x00-\x1f]', municipio) or municipio in ('.', '..')):
+        raise ValueError('Municipio inválido para nombrar la entrega.')
+    return unicodedata.normalize('NFC', municipio.strip()) + ' Estudio Seguridad.docx'
 
 
-def _cell(cell, value):
-    model = cell.find(W + 'p')
-    new = parrafo(value, model)
-    formato_parrafo(new, compact=True)
-    props = new.find(W + 'r/' + W + 'rPr')
-    for child in props.findall(W + 'sz'):
-        props.remove(child)
-    props.insert(len(props) - 1, ET.Element(W + 'sz', {W + 'val': '18'}))
-    for child in list(cell):
-        if child.tag != W + 'tcPr':
-            cell.remove(child)
-    cell.append(new)
+def fuentes_corresponden(municipio, fuentes):
+    municipio = unicodedata.normalize('NFC', municipio)
+    fuentes = [unicodedata.normalize('NFC', nombre) for nombre in fuentes]
+    admitidas = {municipio + sufijo for sufijo in (' PAQUETE SEGURIDAD.docx', ' Anexo.docx')}
+    return (municipio + ' PAQUETE SEGURIDAD.docx' in fuentes
+            and len(fuentes) == len(set(fuentes)) and set(fuentes) <= admitidas)
 
 
-def _hoja(table, content):
-    found = set()
-    means = {'Promedio A.': 'proteccion_civil', 'Promedio B.': 'condiciones_del_personal',
-             'Promedio C.': 'inteligencia_y_eficiencia_policial'}
-    for row in table.findall(W + 'tr')[1:]:
-        cells = row.findall(W + 'tc')
-        label = texto(cells[0])
-        if label.isdigit():
-            number = int(label)
-            item = next(r for r in content['hoja_computo'] if r['indicador'] == number)
-            found.add(number)
-            for cell, key in zip(cells[2:], ('general', 'ultimo_periodo', 'nota')):
-                _cell(cell, item[key])
-        else:
-            for index, period in enumerate(PERIODOS, 1):
-                value = 'Pendiente'
-                for prefix, dimension in means.items():
-                    if label.startswith(prefix):
-                        value = content['promedios_dimension'][period][dimension] or 'Pendiente'
-                if label == 'PROMEDIO DE LAS TRES DIMENSIONES':
-                    mean = content['promedios_generales'][period]
-                    value = decimal_corto(mean) if mean is not None else 'Pendiente'
-                elif label.startswith('Candados aplicados'):
-                    value = content['candados'][period] or 'Ninguno'
-                elif label == 'CALIFICACIÓN':
-                    value = content['calificaciones'][period]
-                _cell(cells[index], value)
-    if found != set(range(1, 19)):
-        raise ValueError('La hoja de cómputo no contiene exactamente los indicadores 1–18.')
-    # La tabla original contiene anchos distintos por fila; fijar una cuadrícula
-    # común evita que las notas y los puntajes cambien de columna al paginar.
-    widths = [550, 2500, 1050, 1050, 3350]
-    props = table.find(W + 'tblPr')
-    for key in ('tblW', 'tblLayout'):
-        for node in props.findall(W + key):
-            props.remove(node)
-    ET.SubElement(props, W + 'tblW', {W + 'w': '5000', W + 'type': 'pct'})
-    ET.SubElement(props, W + 'tblLayout', {W + 'type': 'fixed'})
-    grid = table.find(W + 'tblGrid')
-    for node in list(grid):
-        grid.remove(node)
-    for width in widths:
-        ET.SubElement(grid, W + 'gridCol', {W + 'w': str(width)})
-    for row in table.findall(W + 'tr'):
-        column = 0
-        for cell in row.findall(W + 'tc'):
-            props = cell.find(W + 'tcPr')
-            if props is None:
-                props = ET.Element(W + 'tcPr')
-                cell.insert(0, props)
-            span_node = props.find(W + 'gridSpan')
-            span = int(span_node.get(W + 'val')) if span_node is not None else 1
-            for node in props.findall(W + 'tcW'):
-                props.remove(node)
-            props.insert(0, ET.Element(W + 'tcW', {W + 'w': str(sum(widths[column:column + span])), W + 'type': 'dxa'}))
-            column += span
-
-
-def _unique(blocks, predicate, description):
-    matches = [i for i, b in enumerate(blocks) if predicate(texto(b).strip())]
-    if len(matches) != 1:
-        raise ValueError(f'No se encontró un ancla única: {description}.')
-    return matches[0]
-
-
-def seleccionar_documento(root, result, mode):
-    """Selecciona el perfil de diagnóstico y mantiene el Anexo 1 de referencia."""
-    body = root.find(W + 'body')
-    original = list(body)
-    content = result['contenido_word']
-    selected = []
-    if mode == 'borrador':
-        selected.append(parrafo(content['aviso_borrador']))
-    selected.append(color_generado(parrafo(content['titulo'], original[0])))
-    selected.append(parrafo(content['periodo']))
-    for period, prefix in [('general', 'CALIFICACIÓN GENERAL:'), ('ultimo_periodo', 'CALIFICACIÓN DEL ÚLTIMO PERIODO:')]:
-        index = _unique(original, lambda t: t.startswith(prefix), prefix)
-        p = deepcopy(original[index])
-        suffix = texto(p).split(':', 1)[1]
-        reemplazar(p, suffix, ' ' + content['calificaciones'][period])
-        selected.append(p)
-    for key, heading in [('resumen_general', 'Síntesis del periodo general'),
-                         ('resumen_ultimo_periodo', 'Síntesis del último periodo')]:
-        index = _unique(original, lambda t: MARKER.fullmatch(t) and MARKER.fullmatch(t)[1] == key, key)
-        selected.extend([color_generado(parrafo(heading)), deepcopy(original[index])])
-    index = _unique(original, lambda t: t == 'HOJA DE CÓMPUTO', 'HOJA DE CÓMPUTO')
-    selected.append(deepcopy(original[index]))
-    worksheet = deepcopy(original[index + 1])
-    if worksheet.tag != W + 'tbl':
-        raise ValueError('No se encontró la tabla de cómputo tras su encabezado.')
-    _hoja(worksheet, content)
-    for p in worksheet.iter(W + 'p'):
-        formato_parrafo(p, compact=True)
-    selected.append(worksheet)
-    dimensions = {1: 'Protección civil', 4: 'Condiciones del personal', 11: 'Inteligencia y eficiencia policial'}
-    for section in result['indicadores']:
-        number = section['numero']
-        key = f'analisis_indicador_{number:02d}'
-        index = _unique(original, lambda t: MARKER.fullmatch(t) and MARKER.fullmatch(t)[1] == key, key)
-        if number in dimensions:
-            selected.append(color_generado(parrafo(dimensions[number])))
-        heading, rating, benchmark, analysis = deepcopy(original[index-3:index+1])
-        if texto(rating).count(SELECTOR) != 2 or not texto(benchmark).startswith('Benchmark:'):
-            raise ValueError(f'Cambió la estructura del indicador {number}.')
-        for paragraph in (heading, rating, benchmark):
-            props = paragraph.find(W + 'pPr')
-            if props is None:
-                props = ET.Element(W + 'pPr')
-                paragraph.insert(0, props)
-            if props.find(W + 'keepNext') is None:
-                props.insert(0, ET.Element(W + 'keepNext'))
-            for alignment in props.findall(W + 'jc'):
-                props.remove(alignment)
-            ET.SubElement(props, W + 'jc', {W + 'val': 'left'})
-        # Reemplazo de selectores por periodo sin alterar el texto circundante.
-        for period in PERIODOS:
-            value = section['evaluaciones'][period]['puntaje']
-            reemplazar(rating, SELECTOR, str(value) if value is not None else 'Pendiente', first_only=True)
-        selected.extend([heading, rating, benchmark, analysis])
-        for table in section['tablas']:
-            selected.append(color_generado(parrafo(f"Evidencia {table['ambito']} — PAQUETE SEGURIDAD, tabla {table['tabla']}")))
-            selected.append(tabla_evidencia(table['filas']))
-        selected.append(parrafo(next(a['cierre'] for a in content['analisis'] if a['indicador'] == number)))
-    if mode == 'borrador':
-        selected.append(parrafo('Pendientes de revisión', generated=False))
-        for validation in result['validaciones']:
-            detail = validation.get('detalle') or ', '.join(validation.get('variables', []))
-            context = f" — indicador {validation['indicador']}" if 'indicador' in validation else ''
-            context += f" — {validation['periodo']}" if 'periodo' in validation else ''
-            selected.append(parrafo(f"{validation['codigo']}{context}: {detail}"))
-    start = _unique(original, lambda t: t.startswith('Anexo 1. Fichas de calificación'), 'Anexo 1')
-    # El Anexo 2 inicia la sección apaisada final. Conservarlo completo evita
-    # dejar una sección horizontal vacía o cortar su tabla de referencias.
-    selected.extend(deepcopy(original[start:]))
-    for node in original:
-        body.remove(node)
-    for node in selected:
-        body.append(node)
-    for p in list(body.iter(W + 'p')):
-        for match in list(MARKER.finditer(texto(p))):
-            key = match[1]
-            value = result['valores_plantilla'].get(key)
-            if value is None:
-                if mode == 'final':
-                    raise ValueError(f'Falta variable activa: {key}.')
-                value = f'Pendiente de revisión: {key}'
-            if not isinstance(value, (str, int, float)) or isinstance(value, bool):
-                raise ValueError(f'Tipo de dato no válido para {key}.')
-            if '{{' in str(value) or '}}' in str(value):
-                raise ValueError(f'El contenido de {key} incluye marcadores sin resolver.')
-            if MARKER.fullmatch(texto(p).strip()) and '\n\n' in str(value):
-                parent = p.getparent()
-                index = parent.index(p)
-                paragraphs = [parrafo(piece, p) for piece in str(value).split('\n\n')]
-                parent.remove(p)
-                for offset, paragraph in enumerate(paragraphs):
-                    parent.insert(index + offset, paragraph)
-            else:
-                reemplazar(p, match[0], str(value))
-
-
-def validar_resultado(result, mode):
+def validar_resultado(result, mode='final'):
+    if mode != 'final':
+        raise ValueError('El estudio se publica en presentación final.')
     content = result.get('contenido_word', {})
-    if content.get('perfil') != 'diagnostico_desde_evidencia':
-        raise ValueError('El JSON no contiene composición Word compatible; vuelva a ejecutar el pipeline.')
+    if content.get('perfil') != 'estudio_seguridad':
+        raise ValueError('La composición no corresponde al Estudio Seguridad vigente.')
+    municipality = result['municipio']
+    nombre_documento(municipality)
+    sources = [item['archivo'] for item in result['fuentes']]
+    if not fuentes_corresponden(municipality, sources):
+        raise ValueError('Las fuentes deben corresponder al Paquete Seguridad y, opcionalmente, su Anexo.')
     sections = result['indicadores']
-    ids = [s['numero'] for s in sections]
-    if ids != list(range(1, 19)):
-        raise ValueError('Se requieren los 18 indicadores ordenados, sin duplicados.')
+    if [s['numero'] for s in sections] != list(range(1, 19)):
+        raise ValueError('Se requieren los dieciocho indicadores en orden.')
+    if result.get('periodos_evaluacion') != definir_periodos(sections):
+        raise ValueError('Los periodos no corresponden a las ediciones y años de las fuentes.')
     rules = json.loads(RULES.read_text(encoding='utf-8'))
+    mappings = json.loads((ROOT / 'config/normalizaciones.json').read_text(encoding='utf-8'))
     dictionary = json.loads(DICTIONARY.read_text(encoding='utf-8'))
-    active = {'municipio', 'estado', 'año_inicial', 'año_final', 'resumen_general', 'resumen_ultimo_periodo'} | {
-        f'analisis_indicador_{i:02d}' for i in range(1, 19)}
-    if set(content.get('variables_activas', [])) != active:
-        raise ValueError('El listado de variables activas no corresponde al perfil editorial.')
-    if sorted(row['indicador'] for row in content['hoja_computo']) != ids:
-        raise ValueError('La hoja de cómputo debe tener los 18 indicadores sin duplicados.')
-    if sorted(a['indicador'] for a in content['analisis']) != ids:
-        raise ValueError('Se requieren los 18 análisis sin duplicados.')
-    for key in active:
-        value = result['valores_plantilla'].get(key)
-        expected = dictionary['variables_documento'][key]['tipo_dato']
-        if value is not None and not ((expected == 'string' and isinstance(value, str))
-                                      or (expected == 'integer' and type(value) is int)):
-            raise ValueError(f'Tipo incorrecto para la variable activa {key}.')
-    for key in ('municipio', 'estado'):
-        if result['valores_plantilla'].get(key) != result.get(key):
-            raise ValueError(f'Identidad inconsistente: {key}.')
-    for period in PERIODOS:
-        scores = {s['numero']: s['evaluaciones'][period] for s in sections}
-        computed = agregar(scores, rules)
-        if computed != result['calculos'][period]:
-            raise ValueError(f'Cálculos agregados inconsistentes en {period}.')
-        if content['calificaciones'][period] != (computed['calificacion_final'] or 'PENDIENTE'):
-            raise ValueError(f'Calificación editorial inconsistente en {period}.')
-        for row in content['hoja_computo']:
-            value = scores[row['indicador']]['puntaje']
-            if row[period] != (str(value) if value is not None else 'Pendiente'):
-                raise ValueError('La hoja de cómputo difiere de las evaluaciones.')
-        for dimension, numbers in rules['dimensiones'].items():
-            values = [scores[i]['puntaje'] for i in numbers]
-            mean = None if None in values else decimal_corto(sum(Decimal(v) for v in values) / len(values))
-            if content['promedios_dimension'][period][dimension] != mean:
-                raise ValueError('Promedio editorial de dimensión inconsistente.')
-        if content['promedios_generales'][period] != computed.get('promedio_tres_dimensiones'):
-            raise ValueError('Promedio editorial general inconsistente.')
-    if mode == 'final':
-        if result.get('estado_ejecucion') != 'validado':
-            raise ValueError('La versión final exige estado_ejecucion=validado.')
-        if any(v.get('nivel') in ('bloqueante', 'revision') for v in result['validaciones']):
-            raise ValueError('Existen bloqueos o revisiones pendientes: sólo se permite un borrador.')
-        if any(result['calculos'][p].get('estado') != 'calculado' for p in PERIODOS):
-            raise ValueError('La versión final exige todos los puntajes y ambas calificaciones.')
-        if any(result['valores_plantilla'].get(k) in (None, '') for k in content['variables_activas']):
-            raise ValueError('Hay variables activas sin resolver.')
+    values = result['valores_plantilla']
+    if set(values) != set(dictionary['variables_documento']):
+        raise ValueError('Las variables de texto difieren del contrato documental.')
+    if set(content.get('variables_activas', [])) != set(values):
+        raise ValueError('La composición no declara todas las variables vigentes.')
+    if any(not isinstance(v, str) or not v.strip() for v in values.values()):
+        raise ValueError('Todos los apartados de la entrega deben contener texto editorial.')
+    if values['municipio'] != municipality or values['estado'] != result['estado']:
+        raise ValueError('La identidad editorial no corresponde al municipio.')
+    supplemental = validar_complemento(result['evidencia_complementaria'], municipality, result['estado'])
+    if huella_objeto(supplemental) != result.get('evidencia_complementaria_sha256'):
+        raise ValueError('Cambió la evidencia complementaria.')
+    catalogue = result.get('catalogo_ilustraciones', [])
+    if ('lecturas_graficas' in result or any('lecturas_graficas' in s for s in sections)
+            or any(i['indicador'] in (2, 4, 5, 14) for i in catalogue)):
+        canonical = [i for name in sources for i in catalogar_graficas(result['rutas_fuentes'][name])]
+        if catalogue != canonical:
+            raise ValueError('El catálogo de gráficas difiere de los documentos de entrada.')
+        readings = result.get('lecturas_graficas')
+        if not isinstance(readings, list):
+            raise ValueError('Falta la lectura de las gráficas de entrada; volver a preparar.')
+        validar_lecturas(readings, catalogue, result['rutas_fuentes'])
+        if any(s.get('lecturas_graficas') != [i for i in readings if i['indicador'] == s['numero']] for s in sections):
+            raise ValueError('La evidencia gráfica de un indicador difiere de su fuente.')
+    evaluations = evaluar(sections, rules, mappings, result['periodos_evaluacion'], supplemental)
+    for period in ('general', 'ultimo_periodo'):
+        computed = evaluations[period]
+        if any(section['evaluaciones'][period] != computed[section['numero']] for section in sections):
+            raise ValueError('Una evaluación difiere de la evidencia y de los criterios vigentes.')
+        grade = agregar_ponderado(computed, rules, modo=result['metodo_calificacion'], esquema=result['esquema_ponderacion'])
+        if grade != result['calculos'][period]:
+            raise ValueError('La calificación agregada difiere de su metodología.')
+        published_grade = etiqueta_calificacion(grade)
+        if values[f'calificacion_{period}'] != published_grade:
+            raise ValueError('La calificación publicada no corresponde a la evaluación.')
+    catalogue = result.get('catalogo_ilustraciones', [])
+    selected = content.get('ilustraciones', [])
+    if seleccionar_graficas(catalogue, selected) != selected:
+        raise ValueError('Las ilustraciones no corresponden al catálogo documental.')
+    for image in selected:
+        paragraphs = values[f'analisis_indicador_{image["indicador"]:02d}'].split('\n\n')
+        if image['despues_parrafo'] >= len(paragraphs):
+            raise ValueError('La ilustración no tiene un párrafo de interpretación asociado.')
+    if any(item.get('nivel') == 'bloqueante' for item in result.get('validaciones', [])):
+        raise ValueError('La entrega conserva una inconsistencia documental bloqueante.')
+    editorial = result.get('redaccion_editorial')
+    if not editorial:
+        raise ValueError('Falta el vínculo con la interpretación editorial.')
+    editorial_path = Path(editorial['archivo'])
+    if sha256(editorial_path) != editorial['sha256']:
+        raise ValueError('Cambió la interpretación editorial: vuelva a componer el estudio.')
+    copy = deepcopy(result)
+    componer(copy, dictionary, rules, redaccion=json.loads(editorial_path.read_text(encoding='utf-8')))
+    if copy['valores_plantilla'] != values:
+        raise ValueError('El texto publicado difiere de la interpretación verificada.')
+    validar_publicacion(result)
 
 
-def auditar(path, expected_generated=None):
-    count = 0
-    characters = 0
+def seleccionar_documento(root, result, mode, perfil, files):
+    body = root.find(W + 'body')
+    section = body.find(W + 'sectPr')
+    page = section.find(W + 'pgSz')
+    margins = section.find(W + 'pgMar')
+    max_width = (int(page.get(W + 'w')) - int(margins.get(W + 'left')) - int(margins.get(W + 'right'))) * 635
+    format_config = json.loads((ROOT / 'config/formato_editorial.json').read_text(encoding='utf-8'))
+    originals = []
+    for p in list(root.iter(W + 'p')):
+        matches = list(MARKER.finditer(texto(p)))
+        if not matches:
+            continue
+        if len(matches) == 1 and MARKER.fullmatch(texto(p).strip()):
+            key = matches[0][1]
+            value = result['valores_plantilla'][key]
+            role = 'bibliografia' if key == 'bibliografia' else 'cuerpo'
+            replacements = []
+            for index, piece in enumerate(value.split('\n\n')):
+                replacement = parrafo(piece, p, perfil=perfil, rol=role, inicial=index == 0)
+                if role == 'bibliografia':
+                    for r in replacement.iter(W + 'r'):
+                        ET.SubElement(r.find(W + 'rPr'), W + 'i')
+                    configurar(replacement, perfil, role, inicial=index == 0)
+                replacements.append(replacement)
+                if key.startswith('analisis_indicador_'):
+                    indicator = int(key.rsplit('_', 1)[1])
+                    illustrations = [i for i in result['contenido_word'].get('ilustraciones', [])
+                                     if i['indicador'] == indicator and i['despues_parrafo'] == index]
+                    for image in illustrations:
+                        source = Path(result['rutas_fuentes'][image['fuente']])
+                        drawing, proof = importar_grafica(files, source, image, len(originals) + 1, max_width)
+                        replacements.append(drawing)
+                        originals.append(proof)
+            parent = p.getparent()
+            index = parent.index(p)
+            parent.remove(p)
+            for offset, replacement in enumerate(replacements):
+                parent.insert(index + offset, replacement)
+        else:
+            for match in matches:
+                value = result['valores_plantilla'][match[1]]
+                reemplazar(p, match[0], value)
+                if match[1].startswith('calificacion_'):
+                    category = value.removesuffix(' (COBERTURA PARCIAL)')
+                    color_value = ('666666' if category == 'SIN VALORACIÓN CONJUNTA'
+                                   else format_config['colores_calificacion'][category])
+                    for r in p.iter(W + 'r'):
+                        props = r.find(W + 'rPr')
+                        if props is not None:
+                            for color in props.findall(W + 'color'):
+                                props.remove(color)
+                            ET.SubElement(props, W + 'color', {W + 'val': color_value})
+    return originals
+
+
+def auditar(path, expected_generated=None, imagenes_esperadas=()):
+    count = 0; characters = 0
     with zipfile.ZipFile(path) as archive:
         if archive.testzip():
-            raise ValueError('El DOCX contiene una entrada ZIP dañada.')
+            raise ValueError('DOCX dañado.')
+        if any(n.startswith('word/charts/') for n in archive.namelist()):
+            raise ValueError('El estudio no debe contener gráficas nuevas.')
+        document = ET.fromstring(archive.read('word/document.xml'), PARSER)
+        if document.find('.//' + W + 'tbl') is not None:
+            raise ValueError('El estudio no debe contener tablas añadidas.')
+        for expected in imagenes_esperadas:
+            if hashlib.sha256(archive.read(expected['parte_salida'])).hexdigest() != expected['sha256']:
+                raise ValueError('La ilustración dejó de ser una reproducción fiel de la fuente.')
         for name in archive.namelist():
             if not name.startswith('word/') or not name.endswith('.xml'):
                 continue
             root = ET.fromstring(archive.read(name), PARSER)
+            for node in root.iter():
+                if ((node.tag == W + 'highlight' and node.get(W + 'val') == 'yellow')
+                        or (node.tag == W + 'shd' and node.get(W + 'fill', '').upper() == 'FFFF00')):
+                    raise ValueError('El documento conserva resaltado amarillo.')
             for p in root.iter(W + 'p'):
-                value = texto(p)
-                if '{{' in value or '}}' in value or SELECTOR in value or re.search(r'\[(?:borrar|verificar)\b', value, re.I):
-                    raise ValueError(f'Marcador o instrucción editorial pendiente en {name}.')
+                if re.search(r'[{}]|\[INSERTAR', texto(p), re.I):
+                    raise ValueError(f'Marcador editorial pendiente en {name}.')
+                comprobar_texto(texto(p), name)
             for r in root.iter(W + 'r'):
                 style = r.find(W + 'rPr/' + W + 'rStyle')
-                if style is not None and style.get(W + 'val') == STYLE:
-                    count += 1
-                    characters += len(texto(r))
-                    highlight = r.find(W + 'rPr/' + W + 'highlight')
-                    if highlight is None or highlight.get(W + 'val') != 'yellow':
-                        raise ValueError('Contenido JSON sin resaltado amarillo.')
-                    fonts = r.find(W + 'rPr/' + W + 'rFonts')
-                    if fonts is None or fonts.get(W + 'ascii') != 'Archivo Light':
-                        raise ValueError('Contenido JSON sin fuente Archivo Light.')
+                if style is None or style.get(W + 'val') != STYLE:
+                    continue
+                count += 1; characters += len(texto(r))
+                props = r.find(W + 'rPr')
+                fonts = props.find(W + 'rFonts')
+                if fonts is None or fonts.get(W + 'ascii') not in ('Archivo', 'Archivo Medium', 'Archivo Light'):
+                    raise ValueError('Contenido JSON sin fuente editorial Archivo.')
     if not count or (expected_generated is not None and count != expected_generated):
-        raise ValueError('El contenido generado no coincide con la auditoría de inserciones.')
+        raise ValueError('Inserciones distintas a la auditoría.')
     return {'segmentos_json': count, 'caracteres_json': characters,
-            'resaltado_amarillo_verificado': True, 'marcadores_pendientes': 0}
+            'sin_resaltado_amarillo_verificado': True,
+            'redaccion_publicable_verificada': True, 'marcadores_pendientes': 0,
+            'tablas_creadas': 0, 'graficas_creadas': 0, 'graficas_reutilizadas': len(imagenes_esperadas)}
 
 
-def renderizar(json_path, output_dir, mode='borrador', template=TEMPLATE):
-    if mode not in ('borrador', 'final'):
-        raise ValueError('Modo de documento no reconocido.')
-    raw = json_path.read_bytes()
-    result = json.loads(raw)
-    for key, path in [('plantilla_sha256', template), ('diccionario_sha256', DICTIONARY), ('reglas_sha256', RULES)]:
-        if result['contrato'].get(key) != sha256(path):
+def renderizar(json_path, output_dir, mode='final', template=None, perfil='medicion'):
+    if mode != 'final' or perfil != 'medicion':
+        raise ValueError('Modo o perfil no reconocido.')
+    contract = cargar_contrato()
+    template = template or ROOT / contract['plantillas'][perfil]['archivo']
+    raw = json_path.read_bytes(); result = json.loads(raw)
+    expected = huellas()
+    for key, value in expected.items():
+        if result['contrato'].get(key) != value:
             raise ValueError(f'El JSON no corresponde al contrato actual: {key}.')
+    if sha256(template) != contract['plantillas'][perfil]['sha256']:
+        raise ValueError('La plantilla no corresponde al contrato actual.')
     validar_resultado(result, mode)
     with zipfile.ZipFile(template) as archive:
-        files = {item.filename: archive.read(item.filename) for item in archive.infolist()}
-        infos = archive.infolist()
+        files = {n: archive.read(n) for n in archive.namelist()}
     root = ET.fromstring(files['word/document.xml'], PARSER)
-    # La paginación calculada del original deja de ser válida al componer la copia.
-    for cached_break in list(root.iter(W + 'lastRenderedPageBreak')):
-        cached_break.getparent().remove(cached_break)
     dictionary = json.loads(DICTIONARY.read_text(encoding='utf-8'))
-    found = Counter(key for p in root.iter(W + 'p') for key in MARKER.findall(texto(p)))
-    if found != Counter({k: v['apariciones'] for k, v in dictionary['variables_documento'].items()}):
-        raise ValueError('Los marcadores de la plantilla no corresponden al diccionario.')
-    seleccionar_documento(root, result, mode)
+    found = Counter(k for p in root.iter(W + 'p') for k in MARKER.findall(texto(p)))
+    target = Counter({k: v['apariciones_por_documento'][perfil] for k, v in dictionary['variables_documento'].items() if v['apariciones_por_documento'][perfil]})
+    if found != target:
+        raise ValueError('Marcadores distintos al contrato del perfil.')
+    for cached in list(root.iter(W + 'lastRenderedPageBreak')):
+        cached.getparent().remove(cached)
+    originals = seleccionar_documento(root, result, mode, perfil, files)
     generated = len(root.xpath('.//w:r[w:rPr/w:rStyle[@w:val="ContenidoJSON"]]', namespaces=NS))
     files['word/document.xml'] = xml_bytes(root)
     styles = ET.fromstring(files['word/styles.xml'], PARSER)
-    if styles.xpath('./w:style[@w:styleId="ContenidoJSON"]', namespaces=NS):
-        raise ValueError('La plantilla ya contiene el estilo reservado ContenidoJSON.')
+    for existing in styles.xpath('./w:style[@w:styleId="ContenidoJSON"]', namespaces=NS):
+        styles.remove(existing)
     style = ET.SubElement(styles, W + 'style', {W + 'type': 'character', W + 'styleId': STYLE})
     ET.SubElement(style, W + 'name', {W + 'val': 'Contenido procedente del JSON'})
-    ET.SubElement(ET.SubElement(style, W + 'rPr'), W + 'highlight', {W + 'val': 'yellow'})
     files['word/styles.xml'] = xml_bytes(styles)
+    # Retirar también marcas heredadas de los estilos y partes del machote.
+    for name, data in list(files.items()):
+        if name.startswith('word/') and name.endswith('.xml'):
+            part = ET.fromstring(data, PARSER)
+            changed = False
+            for node in list(part.iter()):
+                if ((node.tag == W + 'highlight' and node.get(W + 'val') == 'yellow')
+                        or (node.tag == W + 'shd' and node.get(W + 'fill', '').upper() == 'FFFF00')):
+                    node.getparent().remove(node)
+                    changed = True
+            if changed:
+                files[name] = xml_bytes(part)
     output_dir.mkdir(parents=True, exist_ok=True)
-    suffix = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '_' + uuid4().hex[:8]
-    dest = output_dir / f'{json_path.stem}_{mode}_{suffix}.docx'
+    dest = output_dir / nombre_documento(result['municipio'])
     with tempfile.TemporaryDirectory(prefix='.render-', dir=output_dir) as directory:
-        temp = Path(directory) / 'documento.docx'
-        with zipfile.ZipFile(temp, 'w') as archive:
-            for info in infos:
-                archive.writestr(info, files[info.filename])
-        audit = auditar(temp, generated)
-        # Publicación atómica y exclusiva dentro del mismo sistema de archivos.
-        os.link(temp, dest)
-    return {**audit, 'archivo': str(dest), 'sha256': sha256(dest), 'modo': mode,
+        temporary = Path(directory) / 'documento.docx'
+        with zipfile.ZipFile(temporary, 'w', zipfile.ZIP_DEFLATED) as archive:
+            for name, data in files.items():
+                archive.writestr(name, data)
+        audit = auditar(temporary, generated, originals)
+        os.replace(temporary, dest)
+    return {**audit, 'archivo': str(dest), 'sha256': sha256(dest), 'modo': mode, 'perfil': perfil,
             'json_fuente': str(json_path), 'json_sha256': hashlib.sha256(raw).hexdigest(),
-            'plantilla_sha256': result['contrato']['plantilla_sha256'],
-            'perfil': result['contenido_word']['perfil']}
+            'plantilla_sha256': sha256(template), 'contrato_documental_sha256': sha256(CONTRACT),
+            'ilustraciones': originals,
+            'formato_ilustraciones': 'Reproducción fiel; tipografía de origen incrustada en los píxeles.' if originals else 'Sin ilustraciones.'}
 
 
 def guardar_recibo(report, receipt):
     receipt.parent.mkdir(parents=True, exist_ok=True)
-    with receipt.open('x', encoding='utf-8') as target:
-        json.dump(report, target, ensure_ascii=False, indent=2)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=receipt.parent, suffix='.tmp', delete=False) as target:
+            temporary = Path(target.name); json.dump(report, target, ensure_ascii=False, indent=2); target.write('\n')
+        os.replace(temporary, receipt)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('json', type=Path, help='JSON municipal compuesto por el pipeline.')
+    parser.add_argument('json', type=Path)
     parser.add_argument('--output', type=Path, default=ROOT / 'output/word')
-    parser.add_argument('--modo', choices=('borrador', 'final'), default='borrador')
+    parser.add_argument('--modo', choices=('final',), default='final')
+    parser.add_argument('--documento', choices=('medicion',), default='medicion')
     args = parser.parse_args()
     try:
-        report = renderizar(args.json, args.output, args.modo)
+        report = renderizar(args.json, args.output, args.modo, perfil=args.documento)
+        word = Path(report['archivo']); receipt = args.output.parent / 'json' / (slug(word.stem) + '_renderizado.json')
+        guardar_recibo(report, receipt)
+        print(f"Word (medicion): {word}. Inserciones verificadas: {report['segmentos_json']} segmentos.")
+        removidos = limpiar_salidas(args.output.parent / 'json', args.output, json_actual=args.json,
+                                    word_actual=word, recibo_actual=receipt)
     except (ValueError, KeyError, OSError, zipfile.BadZipFile) as error:
         parser.error(str(error))
-    # El recibo vincula el Word al JSON exacto sin modificar la entrada auditada.
-    receipt = args.output.parent / 'json' / (Path(report['archivo']).stem + '_renderizado.json')
-    guardar_recibo(report, receipt)
-    print(f"Word ({args.modo}): {report['archivo']}")
-    print(f"Resaltado amarillo verificado: {report['segmentos_json']} segmentos. Recibo: {receipt}")
+    print(f'Limpieza de salidas: {removidos}')
 
 
 if __name__ == '__main__':

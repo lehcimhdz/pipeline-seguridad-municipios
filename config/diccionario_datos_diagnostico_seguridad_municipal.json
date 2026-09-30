@@ -1,0 +1,1168 @@
+{
+  "metadatos": {
+    "version": "2.3",
+    "nombre": "diccionario_variables_diagnostico_seguridad_municipal",
+    "idioma": "es-MX",
+    "tipo_documento": "diccionario_de_datos_y_especificacion_de_contenido",
+    "es_json_schema_formal": false,
+    "descripcion": "Contenido del estudio de seguridad municipal, su evidencia y reglas de correspondencia con Word.",
+    "fuente": "Capítulo SEGURIDAD de Machote general medicion version final.docx, conservado sin sobrescribir.",
+    "alcance_activo": "Un Estudio Seguridad: interpretación narrativa y reproducciones pertinentes de gráficas ya existentes.",
+    "producto": "estudio_seguridad",
+    "nombre_salida": "{municipio} Estudio Seguridad.docx",
+    "cobertura_verificada": {
+      "marcadores_de_variables_unicos": 25,
+      "apariciones_de_variables": 25,
+      "indicadores": 18,
+      "dimensiones": 3,
+      "periodos_de_evaluacion": 2,
+      "documentos_generados": 1
+    },
+    "verificacion_externa_de_fuentes_realizada": false
+  },
+  "fuentes_autorizadas": {
+    "paquete_seguridad": {
+      "patron": "{municipio} PAQUETE SEGURIDAD.docx",
+      "obligatorio": true,
+      "rol": "Datos estadísticos e imágenes originales que sustentan la interpretación."
+    },
+    "anexo": {
+      "patron": "{municipio} Anexo.docx",
+      "obligatorio": false,
+      "rol": "Contraste de seguridad y gráficas originales cuando está disponible."
+    },
+    "complementos": {
+      "patron": "input/complementos/{slug}.json",
+      "obligatorio": false,
+      "rol": "Definiciones y denominadores documentados; fuente, año, localizador, SHA-256 y revisión por observación."
+    },
+    "regla": "No incorporar otros municipios ni búsquedas automáticas. Complementos explícitos y revisados mediante --complemento. La muestra sólo orienta el estilo."
+  },
+  "documentos_de_referencia": {
+    "formato_consultora": {
+      "archivo": "templates/Machote general medicion version final.docx",
+      "rol": "Orden y presentación de la salida; sólo su capítulo SEGURIDAD."
+    },
+    "guia_interpretacion": {
+      "archivo": "templates/Machote general medicion version final rzg investigación.docx",
+      "rol": "Preguntas de interpretación, relación entre hallazgos y propuestas; no aporta estadísticas municipales.",
+      "correspondencia": "El duplicado de Personal en la guía no crea otro indicador; se conserva el catálogo de 18 indicadores, incluido Certificado Único Policial."
+    },
+    "benchmark": {
+      "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
+      "rol": "Criterios de evaluación e interpretación; su contenido técnico no se inserta en la salida."
+    }
+  },
+  "convenciones": {
+    "nombres_de_variables": {
+      "formato": "snake_case",
+      "mayusculas": false,
+      "separador": "_",
+      "caracteres": "ASCII",
+      "ejemplos": [
+        "municipio",
+        "analisis_indicador_01"
+      ]
+    },
+    "marcadores": {
+      "formato_en_word": "{nombre_variable}",
+      "formato_de_clave_json": "nombre_variable",
+      "regla": "Llaves simples; una variable por función e indicador, sin selección de variantes."
+    },
+    "valores_pendientes": {
+      "valor": null,
+      "regla": "No sustituir información desconocida por cero ni imputar puntajes sin una regla explícita."
+    },
+    "redaccion_publicable": {
+      "configuracion": "config/redaccion_consultoria.json",
+      "regla": "Prosa diagnóstica consultiva; hallazgos y sus límites, sin archivos, rutas, códigos ni mensajes del sistema."
+    },
+    "trazabilidad": "Conservar localizadores, huellas y validaciones en metadatos; publicar títulos de fuentes y notas sustantivas.",
+    "periodos": "Aplicar la definición de config/reglas_calificacion.json y declarar años observados/evaluados; no inventar observaciones anuales.",
+    "años": "Las etiquetas de las tablas no se identifican automáticamente con el año de referencia del censo.",
+    "porcentajes": "Conservar unidades de la fuente; no convertir conteos a porcentajes sin denominador."
+  },
+  "variables_documento": {
+    "municipio": {
+      "marcador": "{municipio}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Nombre del municipio del Paquete Seguridad y, cuando se proporciona, de su Anexo.",
+      "obligatorio": true
+    },
+    "estado": {
+      "marcador": "{estado}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Entidad federativa confirmada en la evidencia documental.",
+      "obligatorio": true
+    },
+    "calificacion_general": {
+      "marcador": "{calificacion_general}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Categoría y justificación del periodo general con la metodología basada en el benchmark.",
+      "obligatorio": true
+    },
+    "calificacion_ultimo_periodo": {
+      "marcador": "{calificacion_ultimo_periodo}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Categoría y justificación del periodo reciente con la misma metodología.",
+      "obligatorio": true
+    },
+    "resumen_general": {
+      "marcador": "{resumen_general}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Balance del periodo completo, resultados por dimensión y límites sustantivos de la evidencia.",
+      "obligatorio": true
+    },
+    "resumen_ultimo_periodo": {
+      "marcador": "{resumen_ultimo_periodo}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Balance de las observaciones recientes definidas por la metodología; explicar cambios y límites.",
+      "obligatorio": true
+    },
+    "analisis_indicador_01": {
+      "marcador": "{analisis_indicador_01}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_02": {
+      "marcador": "{analisis_indicador_02}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_03": {
+      "marcador": "{analisis_indicador_03}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_04": {
+      "marcador": "{analisis_indicador_04}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_05": {
+      "marcador": "{analisis_indicador_05}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_06": {
+      "marcador": "{analisis_indicador_06}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_07": {
+      "marcador": "{analisis_indicador_07}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_08": {
+      "marcador": "{analisis_indicador_08}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_09": {
+      "marcador": "{analisis_indicador_09}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_10": {
+      "marcador": "{analisis_indicador_10}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_11": {
+      "marcador": "{analisis_indicador_11}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_12": {
+      "marcador": "{analisis_indicador_12}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_13": {
+      "marcador": "{analisis_indicador_13}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_14": {
+      "marcador": "{analisis_indicador_14}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_15": {
+      "marcador": "{analisis_indicador_15}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_16": {
+      "marcador": "{analisis_indicador_16}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_17": {
+      "marcador": "{analisis_indicador_17}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "analisis_indicador_18": {
+      "marcador": "{analisis_indicador_18}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Interpretación del indicador en uno o varios párrafos: datos concretos, comparación válida, implicación y acción sustentada; sin fórmulas repetidas.",
+      "obligatorio": true
+    },
+    "bibliografia": {
+      "marcador": "{bibliografia}",
+      "apariciones": 1,
+      "apariciones_por_documento": {
+        "medicion": 1
+      },
+      "tipo_dato": "string",
+      "tipo_contenido": "texto",
+      "debe_contener": "Referencias legibles de las fuentes efectivamente utilizadas, sin rutas, nombres técnicos ni huellas digitales.",
+      "obligatorio": true
+    }
+  },
+  "catalogos": {
+    "periodos": [
+      "general",
+      "ultimo_periodo"
+    ],
+    "dimensiones": [
+      {
+        "codigo": "proteccion_civil",
+        "letra": "A",
+        "nombre": "Protección civil",
+        "indicadores": [
+          1,
+          2,
+          3
+        ],
+        "peso": 0.25
+      },
+      {
+        "codigo": "condiciones_del_personal",
+        "letra": "B",
+        "nombre": "Condiciones del personal",
+        "indicadores": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "peso": 0.35
+      },
+      {
+        "codigo": "inteligencia_y_eficiencia_policial",
+        "letra": "C",
+        "nombre": "Inteligencia y eficiencia policial",
+        "indicadores": [
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18
+        ],
+        "peso": 0.4
+      }
+    ],
+    "calificaciones": [
+      {
+        "minimo": 4.5,
+        "calificacion": "EXCELENTE"
+      },
+      {
+        "minimo": 3.5,
+        "calificacion": "MUY BIEN"
+      },
+      {
+        "minimo": 2.5,
+        "calificacion": "REGULAR"
+      },
+      {
+        "minimo": 1.5,
+        "calificacion": "MAL"
+      },
+      {
+        "minimo": 1,
+        "calificacion": "CATASTRÓFICO"
+      }
+    ],
+    "estados_del_dato": [
+      "reportado",
+      "pendiente",
+      "sin_respuesta_municipal",
+      "variable_no_existente_en_edicion",
+      "dato_dudoso",
+      "no_aplicable",
+      "en_conflicto"
+    ]
+  },
+  "catalogo_indicadores": [
+    {
+      "id": 1,
+      "nombre": "Plan o programa de protección civil",
+      "dimension": "proteccion_civil",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "existe_programa": {
+          "tipo_dato": "boolean",
+          "periodicidad": "por_edicion"
+        },
+        "porcentaje_estatal_municipios_con_programa": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "evidencia_documental_programa": {
+          "tipo_dato": "string",
+          "debe_contener": "Referencia documental disponible sobre existencia, publicación o vigencia."
+        }
+      },
+      "precauciones": [
+        "La existencia declarada no acredita por sí sola actualización ni funcionamiento.",
+        "Si la evidencia documental contradice el censo, registrar la discrepancia y justificar cualquier ajuste."
+      ],
+      "peso": 1,
+      "prioritario": false
+    },
+    {
+      "id": 2,
+      "nombre": "Capacitación en materia de protección civil",
+      "dimension": "proteccion_civil",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "numero_cursos": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "numero_servidores_publicos_capacitados": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "totales_estatales": {
+          "tipo_dato": "object",
+          "debe_contener": "Conteos estatales de cursos y personas con sus definiciones."
+        }
+      },
+      "precauciones": [
+        "No comparar directamente el conteo municipal con una suma estatal como si fueran unidades equivalentes.",
+        "Distinguir personas únicas de participaciones si la fuente lo permite."
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
+    },
+    {
+      "id": 3,
+      "nombre": "Temas de la capacitación de protección civil",
+      "dimension": "proteccion_civil",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "temas_impartidos_por_edicion": {
+          "tipo_dato": "array",
+          "debe_contener": "Tema, edición y condición de impartición."
+        },
+        "temas_nucleo_cubiertos": {
+          "tipo_dato": "array",
+          "tipo_elemento": "string"
+        },
+        "numero_temas_nucleo": {
+          "tipo_dato": "integer",
+          "minimo": 0,
+          "maximo": 6
+        },
+        "incluye_analisis_de_riesgos": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_por_tema": {
+          "tipo_dato": "array",
+          "debe_contener": "Porcentaje de municipios que impartieron cada tema, por edición."
+        }
+      },
+      "temas_nucleo_del_documento": [
+        "identificacion_y_analisis_de_riesgos",
+        "sistema_de_comando_de_incidentes",
+        "mapas_de_riesgo_y_alerta_temprana",
+        "evacuacion_busqueda_y_rescate",
+        "primeros_auxilios",
+        "prevencion_y_combate_de_incendios"
+      ],
+      "regla_especifica": "Si el indicador 2 obtiene 1, este indicador también obtiene 1 en la misma evaluación.",
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.",
+      "escala_vigente": {
+        "descripcion": "Cobertura anual sobre grupos captados acreditados por edición; general usa la media de coberturas. Sin catálogo no puntúa.",
+        "niveles": {
+          "1": "0 con ausencia explícita y catálogo completo",
+          "2": ">0",
+          "3": ">=1/3",
+          "4": ">=2/3; máximo si falta análisis de riesgos",
+          "5": ">=80% y análisis de riesgos en cada observación evaluada"
+        },
+        "origen": "Convención de integración: completa escalones que la propuesta dejó sin definir."
+      }
+    },
+    {
+      "id": 4,
+      "nombre": "Personal destinado a funciones de seguridad pública",
+      "dimension": "condiciones_del_personal",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "poblacion": {
+          "tipo_dato": "integer",
+          "minimo_para_calcular_tasa": 1
+        },
+        "año_referencia_poblacion": {
+          "tipo_dato": "integer"
+        },
+        "policias_por_mil_habitantes": {
+          "tipo_dato": "number",
+          "formula": "personal_policial / poblacion * 1000"
+        },
+        "personal_policial": {
+          "tipo_dato": "integer",
+          "minimo": 0,
+          "universo": "Corporaciones policiales; excluye administrativos."
+        }
+      },
+      "regla_especifica": "La ficha establece un máximo de 4 si la plantilla total tiene menos de 15 elementos.",
+      "precauciones": [
+        "Documentar el año y la fuente de población.",
+        "Aclarar cómo se aplica el límite de plantilla cuando su tamaño cambia durante el periodo."
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
+    },
+    {
+      "id": 5,
+      "nombre": "Evaluaciones de control de confianza",
+      "dimension": "condiciones_del_personal",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "porcentaje_personal_evaluado": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "porcentaje_estatal": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "definicion_exacta_variable": {
+          "tipo_dato": "string",
+          "debe_contener": "Aclaración de si la fuente mide evaluación, aprobación o vigencia."
+        },
+        "evidencia_aprobacion_y_vigencia": {
+          "tipo_dato": "string",
+          "obligatorio": "Si se afirma que el personal está aprobado y vigente."
+        }
+      },
+      "precaucion": "No presentar personal evaluado como equivalente a personal aprobado y vigente.",
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
+    },
+    {
+      "id": 6,
+      "nombre": "Instituto de formación, capacitación y/o profesionalización",
+      "dimension": "condiciones_del_personal",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "existe_instituto_municipal": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_municipios_con_instituto": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "acceso_a_academia_externa": {
+          "tipo_dato": "boolean",
+          "admite_null": true
+        },
+        "evidencia_convenio_o_formacion_externa": {
+          "tipo_dato": "string"
+        }
+      },
+      "regla_especifica": "Si no existe instituto propio pero el indicador 10 obtiene 3 o más, la ficha establece asignar al menos 3.",
+      "precaucion": "Ausencia de instituto propio no significa necesariamente ausencia de acceso a formación.",
+      "peso": 1,
+      "prioritario": false
+    },
+    {
+      "id": 7,
+      "nombre": "Certificado Único Policial vigente",
+      "dimension": "condiciones_del_personal",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "porcentaje_personal_cup_vigente": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "porcentaje_estatal_cup_vigente": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "revision_consistencia_control_confianza": {
+          "tipo_dato": "string"
+        }
+      },
+      "precaucion": "Marcar como dudoso un cero aislado entre valores altos o una inconsistencia relevante con el indicador 5.",
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
+    },
+    {
+      "id": 8,
+      "nombre": "Uniformes",
+      "dimension": "condiciones_del_personal",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "prendas_otorgadas": {
+          "tipo_dato": "array",
+          "tipo_elemento": "string"
+        },
+        "frecuencia_dotacion": {
+          "tipo_dato": "string"
+        },
+        "numero_prendas_basicas": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "porcentaje_estatal_por_prenda": {
+          "tipo_dato": "array"
+        },
+        "cobertura_del_personal": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100",
+          "admite_null": true
+        }
+      },
+      "precaucion": "La entrega de prendas no demuestra que la dotación haya alcanzado a todo el personal.",
+      "peso": 1,
+      "prioritario": false
+    },
+    {
+      "id": 9,
+      "nombre": "Equipamiento",
+      "dimension": "condiciones_del_personal",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "unidades_por_tipo_equipo": {
+          "tipo_dato": "array",
+          "debe_contener": "Tipo de equipo y número de unidades por edición."
+        },
+        "total_personal_denominador": {
+          "tipo_dato": "integer",
+          "debe_contener": "Personal compatible con el indicador 4."
+        },
+        "chalecos_por_elemento": {
+          "tipo_dato": "number"
+        },
+        "radios_por_elemento": {
+          "tipo_dato": "number"
+        },
+        "disponibilidad_equipo_menos_letal": {
+          "tipo_dato": "boolean"
+        },
+        "naturaleza_del_dato": {
+          "tipo_dato": "string",
+          "opciones": [
+            "asignado_al_cierre"
+          ],
+          "precaucion": "Unidades asignadas, no personas que recibieron equipo ni compras anuales."
+        }
+      },
+      "precauciones": [
+        "No dividir entre cero.",
+        "Una dotación anual de cero no prueba que el inventario sea cero.",
+        "Mantener consistencia temporal con el personal usado como denominador."
+      ],
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
+    },
+    {
+      "id": 10,
+      "nombre": "Temas de capacitación policial",
+      "dimension": "condiciones_del_personal",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "personal_capacitado_por_tema": {
+          "tipo_dato": "array",
+          "debe_contener": "Tema, edición y número de personas o porcentaje reportado."
+        },
+        "porcentaje_personal_capacitado_por_tema": {
+          "tipo_dato": "array"
+        },
+        "grupos_de_temas_homologados": {
+          "tipo_dato": "array",
+          "tipo_elemento": "string"
+        },
+        "regla_homologacion_entre_ediciones": {
+          "tipo_dato": "string"
+        }
+      },
+      "precauciones": [
+        "Documentar cambios de categorías entre ediciones.",
+        "No sumar personas capacitadas por tema como si fueran personas únicas sin verificar duplicidades."
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
+    },
+    {
+      "id": 11,
+      "nombre": "Sistemas de información georreferenciados",
+      "dimension": "inteligencia_y_eficiencia_policial",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "existe_sistema": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_municipios_con_sistema": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "evidencia_uso_operativo": {
+          "tipo_dato": "string"
+        },
+        "equivalencia_registro_con_coordenadas": {
+          "tipo_dato": "string",
+          "debe_contener": "Justificación documental si se considera equivalente un registro de incidentes con coordenadas."
+        }
+      },
+      "precaucion": "Existencia declarada no acredita uso efectivo para orientar el patrullaje.",
+      "peso": 2,
+      "prioritario": true
+    },
+    {
+      "id": 12,
+      "nombre": "Patrullajes estratégicos",
+      "dimension": "inteligencia_y_eficiencia_policial",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "existen_patrullajes_estrategicos": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_municipios": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "evidencia_focalizacion_y_dosificacion": {
+          "tipo_dato": "string"
+        }
+      },
+      "regla_especifica": "Si el indicador 11 obtiene 1, este indicador no puede recibir más de 3 en la misma evaluación.",
+      "peso": 2,
+      "prioritario": true
+    },
+    {
+      "id": 13,
+      "nombre": "Atención a problemas comunitarios",
+      "dimension": "inteligencia_y_eficiencia_policial",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "existe_atencion_a_problemas_comunitarios": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_municipios": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "metodo_documentado": {
+          "tipo_dato": "string"
+        },
+        "capacitacion_relacionada": {
+          "tipo_dato": "string",
+          "debe_contener": "Evidencia del indicador 10 sobre proximidad o solución de problemas."
+        }
+      },
+      "precaucion": "No deducir la existencia de un método completo de solución de problemas a partir de una respuesta binaria.",
+      "peso": 2,
+      "prioritario": true
+    },
+    {
+      "id": 14,
+      "nombre": "Cámaras de vigilancia",
+      "dimension": "inteligencia_y_eficiencia_policial",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "total_camaras": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "poblacion": {
+          "tipo_dato": "integer",
+          "minimo_para_calcular_tasa": 1
+        },
+        "camaras_por_mil_habitantes": {
+          "tipo_dato": "number",
+          "formula": "total_camaras / poblacion * 1000"
+        },
+        "tasa_estatal_comparable": {
+          "tipo_dato": "number"
+        },
+        "evidencia_funcionamiento_y_monitoreo": {
+          "tipo_dato": "string"
+        }
+      },
+      "precauciones": [
+        "El conteo no demuestra funcionamiento ni monitoreo activo.",
+        "Verificar saltos abruptos antes de asignar el puntaje máximo."
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
+    },
+    {
+      "id": 15,
+      "nombre": "Llamadas procedentes",
+      "dimension": "inteligencia_y_eficiencia_policial",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "llamadas_procedentes": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "registro_municipal": {
+          "tipo_dato": "boolean",
+          "debe_contener": "Competencia del registro verificada por año."
+        },
+        "poblacion": {
+          "tipo_dato": "integer",
+          "minimo": 1
+        },
+        "meta_respuesta": {
+          "tipo_dato": "string",
+          "obligatorio_para": "Puntaje 5, cumplimiento documentado en cada año."
+        }
+      },
+      "regla_especifica": "Un 100% poco plausible se marca como dato dudoso y no puede recibir más de 3 conforme a la ficha.",
+      "precaucion": "Un porcentaje alto no es por sí mismo evidencia de mejor resultado.",
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.",
+      "escala_vigente": {
+        "descripcion": "Registro de competencia municipal y población documentados. No se interpreta volumen como eficacia.",
+        "niveles": {
+          "1": "Ausencia de registro acreditada en todos los cortes aplicables",
+          "2": "Registro previo que falta en ambos cortes recientes por ausencia acreditada",
+          "3": "Registro parcial con ambos cortes recientes; o inconsistencia pendiente (incluye 100%)",
+          "4": "Registro completo y tasas calculables, sin meta de respuesta acreditada",
+          "5": "Registro completo, tasas calculables y cumplimiento documentado de meta de respuesta/despacho en todo el periodo"
+        },
+        "limite": "Vacíos no acreditados permanecen null. El crecimiento de llamadas se describe, no suma puntos por sí mismo.",
+        "origen": "Convención de integración documentada; sustituye comparación del porcentaje como desempeño."
+      }
+    },
+    {
+      "id": 16,
+      "nombre": "Informe anual de actividades",
+      "dimension": "inteligencia_y_eficiencia_policial",
+      "modelo": "ficha_indicador",
+      "datos_especificos": {
+        "existe_informe": {
+          "tipo_dato": "boolean"
+        },
+        "porcentaje_estatal_municipios_con_informe": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "referencia_del_informe": {
+          "tipo_dato": "string"
+        },
+        "incluye_indicadores_de_resultado": {
+          "tipo_dato": "boolean",
+          "admite_null": true
+        },
+        "tipo_de_informe": {
+          "tipo_dato": "string",
+          "opciones": [
+            "especifico_de_seguridad",
+            "informe_de_gobierno_con_apartado_de_seguridad",
+            "otro",
+            "no_identificado"
+          ]
+        }
+      },
+      "precaucion": "Distinguir existencia declarada, publicación y contenido efectivo del informe.",
+      "peso": 1,
+      "prioritario": false
+    },
+    {
+      "id": 17,
+      "nombre": "Cambio del estado de fuerza, egresos y fallecimientos",
+      "dimension": "inteligencia_y_eficiencia_policial",
+      "modelo": "ficha_indicador",
+      "periodicidad": "anual",
+      "datos_especificos": {
+        "estado_de_fuerza": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "porcentaje_cadetes_egresados": {
+          "tipo_dato": "number",
+          "unidad": "porcentaje_0_a_100"
+        },
+        "base_del_porcentaje_de_egresos": {
+          "tipo_dato": "string"
+        },
+        "numero_fallecimientos": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "desglose_fallecimientos": {
+          "tipo_dato": "array",
+          "debe_contener": "Desglose disponible por evento e instrumento."
+        },
+        "fallecimientos_por_mil_elementos": {
+          "tipo_dato": "number",
+          "formula": "numero_fallecimientos / estado_de_fuerza * 1000"
+        },
+        "tasa_estatal_comparable": {
+          "tipo_dato": "number"
+        },
+        "analisis_capacidad_reposicion": {
+          "tipo_dato": "string",
+          "tipo_contenido": "analisis"
+        }
+      },
+      "precauciones": [
+        "Reportar los conteos junto con las tasas.",
+        "En corporaciones pequeñas, describir los casos y evitar conclusiones basadas solo en tasas inestables.",
+        "No afirmar que se calculó un índice de letalidad con datos que no lo permiten.",
+        "No confundir fallecimientos de policías con civiles fallecidos por intervención policial."
+      ],
+      "peso": 1,
+      "prioritario": false
+    },
+    {
+      "id": 18,
+      "nombre": "Puestas a disposición",
+      "dimension": "inteligencia_y_eficiencia_policial",
+      "modelo": "ficha_indicador",
+      "periodicidad": "anual",
+      "datos_especificos": {
+        "personas_puestas_a_disposicion": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "delitos_fuero_comun_registrados": {
+          "tipo_dato": "integer",
+          "minimo": 0
+        },
+        "razon_puestas_a_disposicion_delitos": {
+          "tipo_dato": "number",
+          "formula": "personas_puestas_a_disposicion / delitos_fuero_comun_registrados"
+        },
+        "razon_estatal_comparable": {
+          "tipo_dato": "number"
+        },
+        "distincion_ministerio_publico_juez_civico": {
+          "tipo_dato": "string",
+          "debe_contener": "Aclaración de si la fuente permite separar ambos destinos."
+        },
+        "revision_recomendaciones_derechos_humanos": {
+          "tipo_dato": "string",
+          "debe_contener": "Resultado y alcance de la revisión documental pertinente."
+        }
+      },
+      "regla_especifica": "Si la razón supera el doble de la estatal, la ficha indica no asignar 5 y revisar la naturaleza de las puestas a disposición.",
+      "precauciones": [
+        "No dividir entre cero.",
+        "No interpretar esta razón como porcentaje de delitos resueltos.",
+        "No asumir ausencia de recomendaciones de derechos humanos si no se realizó la revisión.",
+        "Distinguir delitos, faltas administrativas y limitaciones de la fuente."
+      ],
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
+    }
+  ],
+  "campos_auxiliares": {
+    "identidad_evidencia": "Párrafo original que identifica municipio y estado.",
+    "fuentes": "Paquete y Anexo si está disponible, con nombre, rol y SHA-256; trazabilidad interna.",
+    "evidencia_complementaria": "Versión 1.0, identidad, fuentes conservadas, poblacion por ámbito/año y observaciones por indicador/año; docs/RECOLECCION_DATOS.md.",
+    "evidencia_complementaria_sha256": "Huella del objeto canónico completo; invalida redacción si cambia.",
+    "evaluacion_sha256": "Huella de puntajes, cálculos y periodos; cambiar modo o esquema exige revisar la redacción.",
+    "evidencia_documental": "Bloques originales de las entradas recibidas, conservados para auditoría.",
+    "lecturas_graficas": "OCR local por imagen: estado, texto, título, idioma y motor, con fuente, indicador, ámbito y huellas. Las cifras se toman de las tablas. Se verifica la lectura antes de publicar.",
+    "validaciones": "Pendientes de revisión, inconsistencias y límites; los códigos no son texto del informe.",
+    "contrato": "Versiones y huellas de los componentes que produjeron el resultado.",
+    "contenido_word": "Perfil estudio_seguridad, 25 variables de texto, ilustraciones originales y controles de publicación.",
+    "contenido_word.ilustraciones": "Referencias a imágenes existentes: fuente, parte del DOCX, huella, indicador y ubicación; nunca datos para generar una gráfica nueva."
+  },
+  "modelos_reutilizables": {
+    "ficha_indicador": {
+      "numero": "integer 1..18",
+      "nombre": "string",
+      "dimension": "codigo de dimensión",
+      "tablas": "Tablas originales y localizadores de evidencia.",
+      "lecturas_graficas": "Subconjunto del registro de OCR correspondiente a este indicador; no inferir conceptos de otro ámbito o fuera del periodo explícito del título.",
+      "evaluaciones": {
+        "general": "evaluacion_indicador",
+        "ultimo_periodo": "evaluacion_indicador"
+      },
+      "control_cruzado_anexo": "Correspondencia de tablas y calificación reportada entre los dos documentos."
+    },
+    "evaluacion_indicador": {
+      "puntaje": "integer 1..5|null",
+      "criterio_aplicado": "string cuando existe puntaje",
+      "motivo": "string que explica por qué no puede asignarse puntaje",
+      "años_observados": "array de integer",
+      "años_evaluados": "array de integer",
+      "estado_dato": "reportado|pendiente|no_aplicable|en_conflicto",
+      "correspondencias": "Por año: campos resueltos con valor, tipo (lectura_directa, lectura_grafica, homologacion, complemento_verificado), regla y evidencias; conflictos impiden puntuar. Coordenadas: tabla y fila desde 1, incluido encabezado; fuentes y huellas en el resultado.",
+      "requisitos_pendientes": "Campos o comprobaciones aún necesarios por año; no equivale a inexistencia de la variable en el cuestionario general.",
+      "valoracion_provisional": "Nivel indicativo o null, base, confianza, falta, evidencias y condiciones; indicar años usados. Nunca computa en la agregación.",
+      "regla": "No confundir la calificación reportada en la entrada con una evaluación calculada; justificar toda asignación."
+    },
+    "ilustracion_original": {
+      "indicador": "integer 1..18",
+      "archivo_fuente": "string",
+      "parte": "Ruta de la imagen dentro del DOCX de entrada",
+      "sha256": "string",
+      "regla": "Copiar bytes originales y conservar proporción; omitir imágenes inconsistentes o irrelevantes. No reconstruir tablas ni gráficas."
+    }
+  },
+  "calculos_derivados": {
+    "metodologia": "config/reglas_calificacion.json",
+    "periodos": [
+      "general",
+      "ultimo_periodo"
+    ],
+    "promedio_por_dimension": "Aplicar las reglas de agregación, cobertura y límites documentadas en la metodología vigente.",
+    "promedio_tres_dimensiones": "Media ponderada 25/35/40 por defecto; registrar esquema y coeficientes efectivos. Esquemas alternativos explícitos para comparación.",
+    "clasificacion": "Aplicar escala, redondeo y candados de las reglas conservando sus motivos.",
+    "regla_faltantes": "Distinguir desempeño y suficiencia documental; toda calificación requiere criterio y límites explícitos según la metodología."
+  },
+  "tratamiento_datos_faltantes": {
+    "fuente_no_disponible": "Conservar null y explicar el faltante. Admitir complementos revisados, sin búsqueda ni imputación automática.",
+    "denominador_no_disponible": "No estimar tasas, razones o porcentajes sin su base de cálculo.",
+    "serie_reciente_incompleta": "Declarar cobertura y años evaluados según la periodicidad observada; no interpolar años.",
+    "dato_dudoso": "Conservar el valor original y registrar el motivo de revisión."
+  },
+  "validaciones_finales": [
+    {
+      "id": "fuentes_unicas",
+      "regla": "Un Paquete Seguridad y, opcionalmente, un Anexo del mismo municipio."
+    },
+    {
+      "id": "contrato_editorial_v2",
+      "regla": "25 variables snake_case del único perfil medicion; comprobar original, base y componentes del contrato."
+    },
+    {
+      "id": "cobertura_indicadores",
+      "regla": "18 indicadores en el orden del machote y dos periodos declarados por indicador."
+    },
+    {
+      "id": "puntajes_consistentes",
+      "regla": "Las calificaciones y su explicación utilizan las mismas evaluaciones calculadas."
+    },
+    {
+      "id": "trazabilidad",
+      "regla": "Toda cifra municipal debe sustentarse en las entradas; toda calificación debe identificarse con la metodología."
+    },
+    {
+      "id": "comparaciones_validas",
+      "regla": "No comparar conteos municipales con sumas estatales ni mezclar unidades o años."
+    },
+    {
+      "id": "objetos_visuales",
+      "regla": "Sólo imágenes originales seleccionadas por su pertinencia; verificar procedencia y huella. No generar tablas ni gráficas nuevas."
+    },
+    {
+      "id": "redaccion_consultiva",
+      "regla": "Bloquear referencias técnicas internas y prosa no sustentada en el contenido publicable."
+    },
+    {
+      "id": "cierre_editorial",
+      "regla": "Documento de consultoría sin instrucciones, nombres de archivos internos, variables pendientes ni rótulos de borrador o machote."
+    }
+  ],
+  "metodologia_v23": {
+    "ponderacion": "config/ponderacion.json",
+    "definiciones": "config/definiciones_cngmd.json",
+    "referencia_editorial": "config/textos_narrativos.json",
+    "complemento": "Objeto evidencia_complementaria, versión 1.0: fuentes, poblacion y observaciones por indicador/año; véase docs/RECOLECCION_DATOS.md.",
+    "estados": [
+      "reportado",
+      "pendiente",
+      "no_aplicable",
+      "en_conflicto"
+    ],
+    "correspondencias": "Resolución automática desde input con reglas generales y trazabilidad por año; sin convertir inferencias en revisiones humanas. El complemento sólo aporta requisitos no resueltos.",
+    "puntaje": "Entero 1–5 o null; la valoración provisional nunca se incorpora al puntaje.",
+    "prioritarios": [
+      2,
+      4,
+      5,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "prioridad_cierre": {
+      "indicadores": [
+        5,
+        7
+      ],
+      "periodo": "ultimo_periodo",
+      "peso_primera_edicion": 1,
+      "peso_ultima_edicion": 2,
+      "condicion": "Sólo si el porcentaje comparable del último corte supera al anterior y ambas definiciones están acreditadas.",
+      "formula": "(porcentaje_primero + 2 * porcentaje_ultimo) / 3; en los demás casos se conserva el promedio ordinario.",
+      "limites": "No reemplaza la exigencia de mínimo anual para el nivel 5, no imputa faltantes y no desactiva candados por mejoras en otros indicadores. Aumentos de conteos o llamadas no se presumen mejoras."
+    },
+    "pesos_dimension": {
+      "proteccion_civil": 0.25,
+      "condiciones_del_personal": 0.35,
+      "inteligencia_y_eficiencia_policial": 0.4
+    },
+    "publicacion": "Exige cobertura por dimensión y al menos seis prioritarios; no sustituir evidencia faltante por prosa."
+  }
+}

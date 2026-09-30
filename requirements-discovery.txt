@@ -1,0 +1,2 @@
+# Sólo para localizar y descargar recursos de datos.gob.mx; no es requisito del pipeline.
+open-data-mexico==1.1.0

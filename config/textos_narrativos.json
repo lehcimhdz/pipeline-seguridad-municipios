@@ -1,0 +1,735 @@
+{
+  "version": "1.1-integracion",
+  "compatibilidad": {
+    "reglas_calificacion": "2.3"
+  },
+  "uso": "Apoyo editorial, no ensamblado automático. 18 encuadres; resúmenes y respuestas requieren evidencia propia. No contiene el catálogo de 144 cierres; no simular su recepción.",
+  "reglas_de_redaccion": {
+    "estructura": [
+      "Movimiento 1. Encuadre",
+      "Movimiento 2. Dato",
+      "Movimiento 3. Consecuencia"
+    ],
+    "detalle": {
+      "Movimiento 1. Encuadre": "Una oración que nombra la norma, el estándar o la evidencia aplicable. Sale de la cláusula fija de cada indicador (lista más abajo). No se inventan estándares nuevos ni se cita legislación que no esté en el benchmark.",
+      "Movimiento 2. Dato": "Una o dos oraciones con las cifras indispensables, con territorio, año y unidad. Se eligen las cifras que sostienen el argumento; el resto de la serie se resume en una oración.",
+      "Movimiento 3. Consecuencia": "Implicación y acción sustentadas, con formulación libre. No exigir un arranque repetido."
+    },
+    "formato": "Extensión: entre 60 y 110 palabras, de tres a cinco oraciones. Voz activa, sin adjetivos de valoración. Se alterna el arranque de los apartados para que no suenen a una misma ficha: unos empiezan por el encuadre, otros por el dato. El lector es un gobierno municipal: la oración final debe poder convertirse en una instrucción.",
+    "expresiones_prohibidas": [
+      "borrador",
+      "machote",
+      "plantilla"
+    ],
+    "criterios_revision": [
+      "Atribuir intenciones, causas políticas o decisiones presupuestales que la documentación no muestre.",
+      "Afirmar que el municipio incumple la ley; el estudio compara con parámetros, no dictamina cumplimiento jurídico.",
+      "Afirmar que la seguridad de la población mejoró o empeoró a partir de estos indicadores.",
+      "Convertir una celda vacía en cero, en falta de respuesta o en puntaje 1.",
+      "Comparar un porcentaje de municipios con un porcentaje de policías, o un total estatal con la cobertura municipal.",
+      "Sumar participantes de cursos distintos como si fueran personas únicas.",
+      "Usar rutas, nombres de archivo, identificadores internos o las palabras «borrador», «machote» y «plantilla».",
+      "Cerrar el documento con un apéndice de advertencias genéricas: cada salvedad va junto a su hallazgo."
+    ]
+  },
+  "encuadres": {
+    "1": "La Ley General de Protección Civil y la ley estatal exigen un programa municipal, y el Marco de Sendai junto con el indicador 11.b.2 de los Objetivos de Desarrollo Sostenible miden justamente su existencia.",
+    "2": "La prioridad 4 del Marco de Sendai supone capacidad instalada, y la evidencia sobre educación para la reducción del riesgo indica que la preparación se sostiene con cursos periódicos, no con esfuerzos aislados.",
+    "3": "El ciclo de gestión integral de riesgos de la Ley General de Protección Civil abarca identificación, prevención, preparación y auxilio; la literatura de vulnerabilidad advierte que capacitar sólo en respuesta no reduce la exposición de la población.",
+    "4": "El Modelo Óptimo de la Función Policial fija 1.8 policías por cada mil habitantes, y la evidencia económica indica que el efecto de la plantilla depende tanto de su tamaño como de su despliegue.",
+    "5": "La Ley General del Sistema Nacional de Seguridad Pública hace del control de confianza un requisito de ingreso y permanencia; la literatura sobre integridad policial lo considera un filtro necesario, aunque no suficiente.",
+    "6": "El Programa Rector de Profesionalización exige formación inicial y continua, no una academia propia, y la evidencia disponible señala que lo decisivo es el contenido de la formación.",
+    "7": "El Certificado Único Policial reúne control de confianza, formación inicial, competencias básicas y evaluación del desempeño: es el parámetro más cercano a un policía plenamente habilitado.",
+    "8": "La obligación de dotar al personal de lo necesario para su función, y las revisiones sistemáticas sobre estresores organizacionales, vinculan la dotación periódica con las condiciones de trabajo.",
+    "9": "El Principio Básico 2 de las Naciones Unidas y la Ley Nacional sobre el Uso de la Fuerza exigen equipo de protección y alternativas menos letales para que la fuerza pueda graduarse.",
+    "10": "El Modelo Nacional de Policía y Justicia Cívica y los Principios Básicos 19 y 20 fijan los temas mínimos de formación; la evaluación de justicia procedimental en Chicago documentó menos uso de la fuerza y menos quejas.",
+    "11": "La concentración del delito en pocos lugares convierte a la información georreferenciada en condición previa de cualquier despliegue dirigido.",
+    "12": "El experimento de Kansas City mostró que el patrullaje aleatorio no reduce el delito, y la revisión sistemática sobre puntos calientes documenta efectos sin desplazamiento, con resultados más modestos en América Latina.",
+    "13": "Las revisiones sistemáticas atribuyen efectos sobre el delito a la solución de problemas, mientras que la proximidad mejora sobre todo la legitimidad y la satisfacción con el servicio.",
+    "14": "La revisión de cuarenta años sobre videovigilancia reporta efectos modestos, mayores cuando hay monitoreo activo, y su uso obliga a proteger datos personales.",
+    "15": "La norma técnica del 9-1-1 estandariza la atención de llamadas, y la evidencia indica que el tiempo de respuesta afecta el esclarecimiento de los delitos.",
+    "16": "La rendición de cuentas exige informar resultados, y la literatura sobre medición del desempeño advierte que informar sólo actividades genera incentivos equivocados.",
+    "17": "Los fallecimientos en funciones expresan las condiciones de riesgo del personal, y los conteos pequeños no admiten tasas ni índices de letalidad con esta fuente.",
+    "18": "El artículo 16 constitucional y la jurisprudencia sobre demora en la puesta a disposición hacen del procedimiento, y no del número de remisiones, el parámetro aplicable."
+  },
+  "impactos_personas": {
+    "1": {
+      "texto": "Sin un instrumento de planeación vigente, la respuesta ante una emergencia depende de decisiones improvisadas en el momento con menos margen de error para la vida de las personas.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "2": {
+      "texto": "Sin capacitación continua, quienes deben auxiliar a la población en una emergencia operan sin destrezas verificadas.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "3": {
+      "texto": "Cuando la formación cubre la respuesta y omite el análisis de riesgos, el municipio atiende emergencias pero no reduce la exposición de la población a ellas.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "4": {
+      "texto": "Una plantilla por debajo de la referencia limita la cobertura por turno y, con ello, el tiempo de llegada cuando alguien solicita auxilio.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "5": {
+      "texto": "El control de confianza es el filtro previsto para quien porta un arma y ejerce autoridad; sin él, interviene sobre la libertad de las personas personal cuya evaluación no está acreditada.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "6": {
+      "texto": "Sin acceso a formación inicial y continua, la actuación policial se aprende en la práctica y sin parámetros verificables.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "7": {
+      "texto": "Sin el certificado vigente, la actuación policial ocurre sin la habilitación que la ley prevé para quien ejerce autoridad sobre las personas.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "8": {
+      "texto": "La dotación incompleta afecta la identificación del policía por la ciudadanía y las condiciones materiales en que trabaja.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "9": {
+      "texto": "La falta de chaleco por elemento y de equipo menos letal reduce las opciones entre no intervenir y usar el arma de fuego, lo que eleva el riesgo para el policía y para terceros.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "10": {
+      "texto": "Sin formación en derechos humanos, uso de la fuerza y primer respondiente, aumenta la probabilidad de actuaciones que afectan la integridad y el debido proceso de las personas detenidas.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "11": {
+      "texto": "Sin información georreferenciada, el despliegue no puede dirigirse a los lugares donde las personas sufren más delitos.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "12": {
+      "texto": "Un patrullaje sin focalización reparte la presencia policial de manera pareja en un territorio donde el delito no lo está.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "13": {
+      "texto": "Sin un método para atender problemas comunitarios, los conflictos vecinales se atienden como incidentes sueltos y vuelven a presentarse.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "14": {
+      "texto": "Cámaras sin monitoreo ni registro de uso no previenen delitos y sí generan obligaciones de protección de datos personales.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "15": {
+      "texto": "El registro de llamadas es el punto de contacto de la población con la policía; si no se documenta, no puede saberse cuánto de lo que se solicita se atiende.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "16": {
+      "texto": "Sin informe público, la población carece de información para valorar el servicio que recibe y para exigirlo.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "17": {
+      "texto": "Los fallecimientos del personal señalan condiciones de riesgo que también afectan la capacidad de proteger a la población.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    "18": {
+      "texto": "Sin registro del tiempo ni del tipo de asunto, no puede verificarse que la puesta a disposición ocurrió sin demora, que es una garantía de la persona detenida.",
+      "activacion": "puntaje <= 2",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    }
+  },
+  "bloques": {
+    "resumen_general": {
+      "parrafo_1_bienes_y_derechos": {
+        "seleccion": "calificacion_general",
+        "variantes": {
+          "EXCELENTE": {
+            "texto": "La seguridad pública municipal protege bienes concretos de las personas: la vida y la integridad física frente a desastres y delitos, y el derecho a un trato legal en cualquier contacto con la policía. En {PERIODO}, {MUNICIPIO} sostuvo las capacidades que hacen posible esa protección, entre ellas {HALLAZGOS_ALTOS}. El resultado corresponde a capacidades instaladas en las tres dimensiones evaluadas y no a esfuerzos aislados de una administración.",
+            "marcadores_obligatorios": [
+              "HALLAZGOS_ALTOS",
+              "MUNICIPIO",
+              "PERIODO"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "MUY BIEN": {
+            "texto": "La seguridad pública municipal protege la vida y la integridad de las personas frente a desastres y delitos, y su derecho a un trato legal en el contacto con la policía. En {PERIODO}, {MUNICIPIO} cuenta con la mayor parte de esas capacidades, en particular {HALLAZGOS_ALTOS}. Las carencias se concentran en {HALLAZGOS_BAJOS}: {IMPACTO_PRINCIPAL}",
+            "marcadores_obligatorios": [
+              "HALLAZGOS_ALTOS",
+              "HALLAZGOS_BAJOS",
+              "IMPACTO_PRINCIPAL",
+              "MUNICIPIO",
+              "PERIODO"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "REGULAR": {
+            "texto": "Lo que está en juego en esta función son la vida y la integridad de las personas ante desastres y delitos, y su derecho a un trato legal cuando interviene la policía. En {PERIODO}, {MUNICIPIO} cumple esa función de manera básica y discontinua: {HALLAZGOS}. Cuando las capacidades aparecen y desaparecen entre observaciones, la protección depende de la reacción ante cada hecho y no de un servicio disponible de manera permanente. {IMPACTO_PRINCIPAL}",
+            "marcadores_obligatorios": [
+              "HALLAZGOS",
+              "IMPACTO_PRINCIPAL",
+              "MUNICIPIO",
+              "PERIODO"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "MAL": {
+            "texto": "Lo que está en juego en esta función son la vida y la integridad de las personas ante desastres y delitos, y su derecho a un trato legal cuando interviene la policía. En {PERIODO}, las carencias documentadas en {HALLAZGOS_BAJOS} afectan directamente esos bienes: {IMPACTO_PRINCIPAL} {IMPACTO_SECUNDARIO} El municipio registra intentos de cumplir, pero no se sostienen entre observaciones.",
+            "marcadores_obligatorios": [
+              "HALLAZGOS_BAJOS",
+              "IMPACTO_PRINCIPAL",
+              "IMPACTO_SECUNDARIO",
+              "PERIODO"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "CATASTRÓFICO": {
+            "texto": "Lo que está en juego en esta función son la vida y la integridad de las personas ante desastres y delitos, y su derecho a un trato legal cuando interviene la policía. En {PERIODO}, la documentación disponible no muestra capacidades instaladas en {DIMENSIONES_AFECTADAS}, o no existe información para acreditarlas. En estas condiciones no puede afirmarse que el municipio protege esos bienes por sí mismo: la atención depende de otras autoridades y la falta de registro impide a la población verificar el servicio que recibe.",
+            "marcadores_obligatorios": [
+              "DIMENSIONES_AFECTADAS",
+              "PERIODO"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          }
+        },
+        "nota": "Regla de uso: {HALLAZGOS_ALTOS} y {HALLAZGOS_BAJOS} se llenan con los indicadores de puntaje 4-5 y 1-2, nombrados con el rótulo del formato. {IMPACTO_PRINCIPAL} e {IMPACTO_SECUNDARIO} se toman del catálogo de impactos y corresponden a los dos indicadores prioritarios con el puntaje más bajo. Si ningún indicador prioritario está por debajo de 3, se omiten los marcadores de impacto en lugar de inventar una consecuencia."
+      },
+      "parrafo_2_entidad_vs_municipio": {
+        "seleccion": "comparacion_estatal",
+        "variantes": {
+          "favorable": {
+            "texto": "Frente a {ESTADO}, {MUNICIPIO} supera la referencia estatal en {N} de {COMPARABLES} indicadores comparables, en particular {INDICADORES}. La comparación describe capacidades registradas y no identifica por sí misma las causas de la diferencia.",
+            "marcadores_obligatorios": [
+              "COMPARABLES",
+              "ESTADO",
+              "INDICADORES",
+              "MUNICIPIO",
+              "N"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "similar": {
+            "texto": "Frente a {ESTADO}, {MUNICIPIO} supera la referencia estatal en {N} de {COMPARABLES} indicadores comparables. Los resultados de {INDICADORES} permiten identificar capacidades compartidas y diferencias, sin establecer sus causas.",
+            "marcadores_obligatorios": [
+              "COMPARABLES",
+              "ESTADO",
+              "INDICADORES",
+              "MUNICIPIO",
+              "N"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "desfavorable": {
+            "texto": "Frente a {ESTADO}, {MUNICIPIO} queda por debajo de la referencia estatal en {N} de {COMPARABLES} indicadores comparables, especialmente {INDICADORES}. Se requiere información adicional para explicar la diferencia.",
+            "marcadores_obligatorios": [
+              "COMPARABLES",
+              "ESTADO",
+              "INDICADORES",
+              "MUNICIPIO",
+              "N"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "complemento_entidad_rezagada": {
+            "texto": "Conviene precisar el punto de comparación: en {INDICADOR}, sólo {X}% de los municipios de {ESTADO} reporta la capacidad. Ubicarse en el promedio estatal no equivale a alcanzar el parámetro de referencia.",
+            "marcadores_obligatorios": [
+              "ESTADO",
+              "INDICADOR",
+              "X"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          }
+        },
+        "regla": [
+          "Existencia (indicadores 1, 6, 11, 12, 13 y 16): se compara el «sí» o «no» municipal con el porcentaje de municipios de la entidad que lo reportan. Contar el indicador como favorable sólo si el municipio lo tiene; señalar aparte si la entidad está por debajo de la mitad.",
+          "Porcentajes del personal (5, 7 y 15): comparación directa en puntos porcentuales frente al valor estatal del mismo año.",
+          "Tasas (4 y 14): por cada mil habitantes, con ambas poblaciones documentadas y del mismo año de referencia.",
+          "Cobertura temática o material (3, 8, 9 y 10): comparar la presencia de cada grupo temático o de cada grupo de prendas y equipo con el porcentaje de municipios que lo reporta. No comparar conteos municipales con sumas estatales.",
+          "Series anuales (17 y 18): usar tasas comparables (fallecimientos por cada mil elementos; remisiones entre incidencia delictiva) y sólo con denominadores documentados.",
+          "Resultado: favorable si el municipio supera la referencia estatal en 60% o más de los indicadores comparables; similar entre 40% y 60%; desfavorable por debajo de 40%. Declarar cuántos indicadores fueron comparables.",
+          "Los empates se contabilizan aparte. Favorable >=60%; similar >=40% y <60%; desfavorable <40%. Sin comparables no se selecciona variante."
+        ]
+      },
+      "parrafo_3_trayectoria": {
+        "seleccion": "tendencia_de_la_serie",
+        "variantes": {
+          "mejora_sostenida": {
+            "texto": "A lo largo de {PERIODO}, la trayectoria es de mejora: {INDICADORES} pasaron de {SITUACION_INICIAL} a {SITUACION_FINAL}, y el resultado se mantiene en las observaciones más recientes. Una mejora que persiste entre observaciones sugiere capacidades incorporadas al funcionamiento ordinario.",
+            "marcadores_obligatorios": [
+              "INDICADORES",
+              "PERIODO",
+              "SITUACION_FINAL",
+              "SITUACION_INICIAL"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "mejora_reciente": {
+            "texto": "La mejora es reciente y todavía no puede considerarse consolidada: {INDICADORES} cambian de {SITUACION_INICIAL} a {SITUACION_FINAL} sólo en las últimas observaciones. Dos observaciones no establecen una tendencia; conviene verificar el siguiente corte antes de darla por firme.",
+            "marcadores_obligatorios": [
+              "INDICADORES",
+              "SITUACION_FINAL",
+              "SITUACION_INICIAL"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "estable": {
+            "texto": "La trayectoria es estable: {INDICADORES} se mantienen en {NIVEL} en todas las observaciones disponibles. El municipio conserva lo que tenía, sin avances que lo acerquen a los parámetros pendientes en {RUBROS}.",
+            "marcadores_obligatorios": [
+              "INDICADORES",
+              "NIVEL",
+              "RUBROS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "intermitente": {
+            "texto": "La trayectoria es intermitente: {INDICADORES} aparecen y desaparecen entre {AÑOS}. Antes de atribuir estos cambios a decisiones de gestión, debe verificarse la comparabilidad del registro, porque las rupturas coinciden con {CAMBIO_DE_REGISTRO_O_PERIODO}.",
+            "marcadores_obligatorios": [
+              "AÑOS",
+              "CAMBIO_DE_REGISTRO_O_PERIODO",
+              "INDICADORES"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "deterioro": {
+            "texto": "La trayectoria es de retroceso: {INDICADORES} pasan de {SITUACION_INICIAL} a {SITUACION_FINAL} entre {AÑOS}. El estudio documenta la caída y su magnitud; identificar su origen requiere información que el paquete no contiene.",
+            "marcadores_obligatorios": [
+              "AÑOS",
+              "INDICADORES",
+              "SITUACION_FINAL",
+              "SITUACION_INICIAL"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "cobertura_insuficiente": {
+            "texto": "La trayectoria no puede establecerse para {INDICADORES}: las observaciones disponibles son {AÑOS} y {RUBROS} carecen de registro. La falta de información es en sí misma un resultado, porque impide verificar la continuidad del servicio.",
+            "marcadores_obligatorios": [
+              "AÑOS",
+              "INDICADORES",
+              "RUBROS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          }
+        }
+      }
+    },
+    "resumen_reciente": {
+      "proteccion_civil": {
+        "seleccion": "puntaje_dimension_reciente",
+        "variantes": {
+          "EXCELENTE": {
+            "texto": "En protección civil, las dos observaciones recientes muestran un programa vigente, capacitación en ambos cortes y cobertura de los grupos temáticos centrales, incluido el análisis de riesgos: {DATOS}. Esta combinación cubre tanto la preparación para responder como la identificación previa de los riesgos que afectan a la población.",
+            "marcadores_obligatorios": [
+              "DATOS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "MUY BIEN": {
+            "texto": "En protección civil, el municipio conserva el instrumento de planeación y la actividad de capacitación en las observaciones recientes: {DATOS}. La oferta reciente deja fuera {TEMAS_FALTANTES}, contenidos que permiten reconocer riesgos antes de que se presente la emergencia.",
+            "marcadores_obligatorios": [
+              "DATOS",
+              "TEMAS_FALTANTES"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "REGULAR": {
+            "texto": "En protección civil, el cumplimiento reciente es parcial: {DATOS}. La formación se concentra en la respuesta y no en la identificación de riesgos, de modo que el municipio mejora su capacidad de auxilio sin reducir la exposición de la población.",
+            "marcadores_obligatorios": [
+              "DATOS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "MAL": {
+            "texto": "En protección civil, las observaciones recientes muestran carencias: {DATOS}. {IMPACTO} La continuidad del instrumento de planeación y de la capacitación es la condición mínima para organizar la respuesta ante una emergencia.",
+            "marcadores_obligatorios": [
+              "DATOS",
+              "IMPACTO"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "CATASTRÓFICO": {
+            "texto": "En protección civil, las observaciones recientes no registran programa ni capacitación: {DATOS}. Con esa información, la atención de emergencias depende de la coordinación estatal y el municipio no dispone de una capacidad propia documentada.",
+            "marcadores_obligatorios": [
+              "DATOS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          }
+        }
+      },
+      "condiciones_del_personal": {
+        "seleccion": "puntaje_dimension_reciente",
+        "variantes": {
+          "EXCELENTE": {
+            "texto": "En condiciones del personal, las observaciones recientes muestran una plantilla dentro de la referencia, certificación vigente y dotación periódica: {DATOS}. Son las condiciones que la ley exige para operar y que la evidencia asocia con menor rotación y menos incidentes en el servicio.",
+            "marcadores_obligatorios": [
+              "DATOS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "MUY BIEN": {
+            "texto": "En condiciones del personal, el municipio cumple la mayor parte de los parámetros recientes: {DATOS}. Las carencias se concentran en {RUBROS}, que conviene atender antes de que afecten la operación cotidiana.",
+            "marcadores_obligatorios": [
+              "DATOS",
+              "RUBROS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "REGULAR": {
+            "texto": "En condiciones del personal, el resultado reciente es desigual: {DATOS}. La certificación avanza, pero la formación y la dotación no muestran continuidad, lo que deja al personal con requisitos administrativos cubiertos y condiciones materiales irregulares.",
+            "marcadores_obligatorios": [
+              "DATOS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "MAL": {
+            "texto": "En condiciones del personal, las observaciones recientes documentan carencias relevantes: {DATOS}. {IMPACTO} Revisar turnos, vigencias y dotación es una tarea previa a cualquier ampliación de funciones.",
+            "marcadores_obligatorios": [
+              "DATOS",
+              "IMPACTO"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "CATASTRÓFICO": {
+            "texto": "En condiciones del personal, las observaciones recientes no acreditan los requisitos básicos para operar: {DATOS}. {IMPACTO}",
+            "marcadores_obligatorios": [
+              "DATOS",
+              "IMPACTO"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          }
+        }
+      },
+      "inteligencia_y_eficiencia": {
+        "seleccion": "puntaje_dimension_reciente",
+        "variantes": {
+          "EXCELENTE": {
+            "texto": "En capacidades policiales, las observaciones recientes registran información georreferenciada, patrullaje dirigido y atención de problemas comunitarios, junto con {DATOS}. La tarea siguiente es documentar su uso: qué lugares se priorizan, qué problemas se atienden y con qué resultado.",
+            "marcadores_obligatorios": [
+              "DATOS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "MUY BIEN": {
+            "texto": "En capacidades policiales, el municipio dispone de la mayor parte de las herramientas evaluadas: {DATOS}. Falta {HERRAMIENTA}; sin ella, la información disponible se aprovecha sólo en parte para orientar el despliegue.",
+            "marcadores_obligatorios": [
+              "DATOS",
+              "HERRAMIENTA"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "REGULAR": {
+            "texto": "En capacidades policiales, las herramientas recientes son parciales: {DATOS}. El municipio cuenta con recursos aislados, pero no con un circuito que conecte el registro de incidentes, el despliegue y el seguimiento de los asuntos atendidos.",
+            "marcadores_obligatorios": [
+              "DATOS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "MAL": {
+            "texto": "En capacidades policiales, las observaciones recientes muestran ausencias en los rubros que organizan el trabajo preventivo: {DATOS}. {IMPACTO} Sin registro de incidentes ni focalización, la presencia policial se distribuye de forma pareja en un territorio donde el delito no lo está.",
+            "marcadores_obligatorios": [
+              "DATOS",
+              "IMPACTO"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          },
+          "CATASTRÓFICO": {
+            "texto": "En capacidades policiales, las observaciones recientes no registran ninguna de las herramientas evaluadas ni información suficiente para valorar el servicio: {DATOS}. La consecuencia inmediata es que el municipio no puede saber dónde ni cómo se emplea su policía.",
+            "marcadores_obligatorios": [
+              "DATOS"
+            ],
+            "evidencia_minima": 2,
+            "requiere_revision_semantica": true
+          }
+        }
+      }
+    },
+    "producto_gobierno": {
+      "que_dice_la_informacion": {
+        "seleccion": "comparacion_general_vs_reciente",
+        "variantes": {
+          "mejora": {
+            "texto": "La información muestra un avance: la valoración reciente es {CAT_RECIENTE} frente a {CAT_GENERAL} en el periodo completo, y los indicadores de mayor peso que se mueven al alza son {INDICADORES}. El avance es del registro documentado, no de la seguridad de la población, que estos indicadores no miden.",
+            "marcadores_obligatorios": [
+              "CAT_GENERAL",
+              "CAT_RECIENTE",
+              "INDICADORES"
+            ],
+            "evidencia_minima": 1,
+            "requiere_revision_semantica": true
+          },
+          "sin_cambio": {
+            "texto": "La información no muestra movimiento: la valoración reciente coincide con la del periodo completo ({CAT_GENERAL}) y los indicadores de mayor peso se mantienen en {NIVEL}. El municipio conserva el servicio que ya prestaba, sin acercarse a los parámetros pendientes.",
+            "marcadores_obligatorios": [
+              "CAT_GENERAL",
+              "NIVEL"
+            ],
+            "evidencia_minima": 1,
+            "requiere_revision_semantica": true
+          },
+          "retroceso": {
+            "texto": "La información muestra un retroceso: la valoración reciente es {CAT_RECIENTE} frente a {CAT_GENERAL} en el periodo completo, y la caída se concentra en {INDICADORES}, que son indicadores de mayor peso. Conviene verificar la comparabilidad del registro antes de interpretar la magnitud del cambio.",
+            "marcadores_obligatorios": [
+              "CAT_GENERAL",
+              "CAT_RECIENTE",
+              "INDICADORES"
+            ],
+            "evidencia_minima": 1,
+            "requiere_revision_semantica": true
+          }
+        }
+      },
+      "que_hacer": {
+        "seleccion": "calificacion_reciente",
+        "variantes": {
+          "atender_carencias": {
+            "texto": "Lo que sigue es instalar lo mínimo: {ACCIONES}. Se ordenan por el peso de cada indicador en la evaluación y por su efecto sobre las personas; mientras falten estas bases, los ajustes de proceso no modifican el resultado.",
+            "marcadores_obligatorios": [
+              "ACCIONES"
+            ],
+            "evidencia_minima": 1,
+            "requiere_revision_semantica": true
+          },
+          "cerrar_brechas": {
+            "texto": "Lo que sigue es cerrar dos o tres brechas concretas: {ACCIONES}. Son los indicadores de mayor peso con puntaje más bajo y, al mismo tiempo, los de corrección más directa en el próximo ciclo de registro.",
+            "marcadores_obligatorios": [
+              "ACCIONES"
+            ],
+            "evidencia_minima": 1,
+            "requiere_revision_semantica": true
+          },
+          "mejorar_procesos": {
+            "texto": "Lo que sigue es pasar del cumplimiento a la medición: {ACCIONES}. El municipio ya cuenta con las capacidades evaluadas; la tarea es documentar su uso y sus resultados para que no dependan de una administración.",
+            "marcadores_obligatorios": [
+              "ACCIONES"
+            ],
+            "evidencia_minima": 1,
+            "requiere_revision_semantica": true
+          }
+        }
+      }
+    },
+    "producto_electoral": {
+      "que_esta_bien": {
+        "texto": "Funciona {INDICADORES}, donde el municipio {POSICION_FRENTE_AL_ESTADO}. Conviene sostener esa base: {POLITICA_A_SOSTENER}.",
+        "evidencia_minima": 1,
+        "marcadores_obligatorios": [
+          "INDICADORES",
+          "POLITICA_A_SOSTENER",
+          "POSICION_FRENTE_AL_ESTADO"
+        ],
+        "requiere_revision_semantica": true
+      },
+      "que_esta_mal": {
+        "texto": "No funciona {INDICADORES}. {IMPACTO_PRINCIPAL} Es el rubro donde una decisión de gobierno produce un cambio verificable en el próximo registro.",
+        "evidencia_minima": 1,
+        "marcadores_obligatorios": [
+          "IMPACTO_PRINCIPAL",
+          "INDICADORES"
+        ],
+        "requiere_revision_semantica": true
+      },
+      "por_que": {
+        "texto": "El registro permite ubicar el problema, no su causa. Entre las explicaciones que el paquete deja ver: {EXPLICACIONES}. Cuando ninguna puede documentarse, el texto lo dice así y no atribuye el resultado a una administración, a un subsidio ni a una decisión presupuestal.",
+        "opciones": [
+          "la capacidad existe en la entidad y no en el municipio, lo que ubica la decisión en el ámbito municipal;",
+          "la capacidad tampoco existe en la mayoría de los municipios de la entidad, lo que sugiere una condición estatal;",
+          "el rubro depende de una plantilla pequeña que no puede sostener a la vez formación, análisis y monitoreo;",
+          "el registro se interrumpe entre observaciones, de modo que la continuidad del servicio no puede verificarse."
+        ],
+        "evidencia_minima": 0,
+        "marcadores_obligatorios": [
+          "EXPLICACIONES"
+        ],
+        "requiere_revision_semantica": true
+      }
+    }
+  },
+  "politicas": [
+    {
+      "nombre": "Policía de proximidad con formación en prevención de conflictos",
+      "indicadores": [
+        13,
+        10
+      ],
+      "activacion": "algún indicador con puntaje 1 a 3 en el periodo reciente",
+      "texto": "Instalar un esquema de proximidad con método de solución de problemas y formación en mediación y prevención de conflictos, con registro de los asuntos atendidos y de su resolución.",
+      "respaldo": "Las revisiones sistemáticas atribuyen efectos sobre el delito a la solución de problemas; la proximidad, por sí sola, mejora sobre todo la legitimidad. La formación en justicia procedimental documentó menos uso de la fuerza y menos quejas.",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    {
+      "nombre": "Tecnología para la prevención del delito",
+      "indicadores": [
+        11,
+        14
+      ],
+      "activacion": "algún indicador con puntaje 1 a 3 en el periodo reciente",
+      "texto": "Registrar los incidentes con coordenadas y conectar ese registro con el despliegue diario y con el monitoreo de cámaras.",
+      "respaldo": "La concentración del delito en pocos lugares es uno de los hallazgos más consistentes de la criminología; sin registro georreferenciado no puede dirigirse el despliegue.",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    {
+      "nombre": "Condiciones dignas de trabajo policial, incluido el salario",
+      "indicadores": [
+        8,
+        9,
+        4
+      ],
+      "activacion": "algún indicador con puntaje 1 a 3 en el periodo reciente",
+      "texto": "Asegurar dotación anual completa de uniforme, un chaleco por elemento y equipo menos letal, junto con una revisión del salario y de las jornadas.",
+      "respaldo": "Las revisiones sistemáticas sobre salud policial ubican los estresores organizacionales —cargas, recursos y mando— al mismo nivel que el riesgo operativo.",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    {
+      "nombre": "Personal profesionalizado",
+      "indicadores": [
+        5,
+        7,
+        6
+      ],
+      "activacion": "algún indicador con puntaje 1 a 3 en el periodo reciente",
+      "texto": "Mantener al cien por ciento del personal con control de confianza y Certificado Único Policial vigentes, mediante convenio con la academia estatal si no hay instituto propio.",
+      "respaldo": "El Certificado Único Policial es el parámetro que reúne evaluación, formación y desempeño; la literatura advierte que la certificación es un filtro necesario, aunque no suficiente.",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    {
+      "nombre": "Capacidades de protección civil ante el cambio climático",
+      "indicadores": [
+        1,
+        2,
+        3
+      ],
+      "activacion": "algún indicador con puntaje 1 a 3 en el periodo reciente",
+      "texto": "Actualizar el programa municipal con el atlas de riesgos, sostener la capacitación anual e incorporar análisis de riesgos, alerta temprana y sistema de comando de incidentes.",
+      "respaldo": "El Marco de Sendai y el Acuerdo de París ubican la adaptación en la escala local; la literatura distingue el plan como documento de la preparación efectiva.",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    {
+      "nombre": "Prevención en puntos calientes y patrullaje estratégico con datos",
+      "indicadores": [
+        12,
+        11
+      ],
+      "activacion": "algún indicador con puntaje 1 a 3 en el periodo reciente",
+      "texto": "Dirigir el patrullaje a los lugares y horarios de mayor incidencia, con dosificación y registro de la presencia efectiva.",
+      "respaldo": "La revisión sistemática sobre puntos calientes documenta reducciones sin desplazamiento; los estudios en América Latina reportan efectos más modestos y dependientes de la implementación.",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    {
+      "nombre": "Mediación de problemas comunitarios",
+      "indicadores": [
+        13
+      ],
+      "activacion": "algún indicador con puntaje 1 a 3 en el periodo reciente",
+      "texto": "Vincular la policía con los mecanismos de justicia cívica y mediación, y registrar los acuerdos alcanzados.",
+      "respaldo": "La legislación de mecanismos alternativos y el Modelo Nacional de Policía y Justicia Cívica ya prevén esta función; la evidencia sobre programas restaurativos reporta efectos favorables en reincidencia y satisfacción.",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    },
+    {
+      "nombre": "Videovigilancia con monitoreo y protección de datos",
+      "indicadores": [
+        14
+      ],
+      "activacion": "algún indicador con puntaje 1 a 3 en el periodo reciente",
+      "texto": "Ubicar las cámaras en los lugares de mayor incidencia, garantizar su monitoreo y adoptar un protocolo de protección de datos personales.",
+      "respaldo": "La revisión de cuarenta años reporta efectos modestos, mayores con monitoreo activo; la evidencia latinoamericana documenta disuasión en zonas específicas.",
+      "marcadores_obligatorios": [],
+      "requiere_revision_semantica": true
+    }
+  ],
+  "regla_politicas": "Regla de activación: se propone la política cuando alguno de sus indicadores tiene puntaje de 1 a 3 en el periodo reciente. Si todos están en 4 o 5, la política pasa al párrafo de «qué está bien» como capacidad a sostener. Nunca se proponen las ocho a la vez: se eligen las dos o tres con indicadores prioritarios más bajos.",
+  "ejemplos_de_apartado": [
+    {
+      "caso": "Indicador con puntaje alto",
+      "texto": "Según el Modelo Óptimo de la Función Policial, la referencia es de 1.8 policías por cada mil habitantes. {MUNICIPIO} reportó {PERSONAL} elementos en {AÑO}, equivalentes a {TASA} por cada mil habitantes con la población de {FUENTE_POBLACION}. Este dato indica que la plantilla se ubica por encima de la referencia de capacidad; el paso siguiente es verificar su distribución por turnos, porque el parámetro mide disponibilidad y no cobertura horaria.",
+      "marcadores_obligatorios": [
+        "AÑO",
+        "FUENTE_POBLACION",
+        "MUNICIPIO",
+        "PERSONAL",
+        "TASA"
+      ],
+      "requiere_revision_semantica": true
+    },
+    {
+      "caso": "Indicador con puntaje bajo",
+      "texto": "El Principio Básico 2 de las Naciones Unidas y la Ley Nacional sobre el Uso de la Fuerza exigen equipo de protección y alternativas menos letales. En {AÑO}, {MUNICIPIO} reportó {CHALECOS} chalecos para {PERSONAL} elementos y {MENOS_LETAL}. Este dato indica que parte del personal interviene sin protección balística y con opciones limitadas para graduar la fuerza, lo que eleva el riesgo para el policía y para terceros. La decisión inmediata es completar la dotación por elemento en turno y registrar la vigencia de cada chaleco.",
+      "marcadores_obligatorios": [
+        "AÑO",
+        "CHALECOS",
+        "MENOS_LETAL",
+        "MUNICIPIO",
+        "PERSONAL"
+      ],
+      "requiere_revision_semantica": true
+    },
+    {
+      "caso": "Indicador sin puntaje",
+      "texto": "La ficha requiere la plantilla y una población documentada para calcular la tasa. El paquete no reporta {DATO} en {AÑOS}, de modo que este indicador queda sin puntaje. La ausencia no equivale a cero ni acredita un desempeño bajo: su efecto es que la valoración se publica con {N} de 18 indicadores y que este rubro requiere una consulta directa al municipio.",
+      "marcadores_obligatorios": [
+        "AÑOS",
+        "DATO",
+        "N"
+      ],
+      "requiere_revision_semantica": true
+    }
+  ]
+}

@@ -1,18 +1,18 @@
 {
-  "version": "1.0",
+  "version": "2.3",
   "fuente": {
     "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
-    "sha256": "375e8f58120fffec24367d4b57ced17151f78d175ca17cc7736f008c3d9a01e4"
+    "sha256": "6eace4f784db820c733a1b0cdd6ee2ab0160109bfc6227bafb384e0064c2bab3"
   },
-  "alcance": "Transcripción de criterios internos; no verifica vigencia legal ni bibliográfica.",
+  "alcance": "Estudio de seguridad en el formato de la consultora; estadísticas del paquete de seguridad y contraste opcional con su anexo.",
   "criterio_operativo": {
     "prioridad": "Primera regla satisfecha. En binarios, ausencia en el último periodo aplica 2 antes de intermitencia (3).",
-    "huecos": "No interpolar huecos entre umbrales ni asignar puntaje si no se satisface un criterio explícito.",
+    "huecos": "Combinaciones no definidas por las fichas conservan puntaje null; no interpolar umbrales.",
     "faltantes": "Una celda vacía no demuestra falta de respuesta municipal; requiere clasificación.",
-    "periodos": "General: todas las observaciones documentadas. Último: dos etiquetas temporales más recientes, sin saltar vacíos.",
+    "periodos": "General: observaciones documentadas; reciente: dos ediciones censales para 1–16 y dos años calendario para 17–18.",
     "cobertura": "No inferir que una variable no existía en las ediciones ausentes; declarar cobertura observada.",
     "redondeo": "Agregación: ROUND_HALF_UP a dos decimales para clasificar; precisión interna conservada.",
-    "ajustes": "No se aplican ajustes discrecionales automáticos."
+    "ajustes": "Sin ajustes discrecionales automáticos. La escala no acredita cumplimiento normativo ni vigencia de las referencias."
   },
   "dimensiones": {
     "proteccion_civil": [
@@ -264,7 +264,9 @@
       "precauciones": [
         "La existencia declarada no acredita por sí sola actualización ni funcionamiento.",
         "Si la evidencia documental contradice el censo, registrar la discrepancia y justificar cualquier ajuste."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false
     },
     {
       "id": 2,
@@ -434,7 +436,10 @@
       "precauciones": [
         "No comparar directamente el conteo municipal con una suma estatal como si fueran unidades equivalentes.",
         "Distinguir personas únicas de participaciones si la fuente lo permite."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 3,
@@ -527,7 +532,21 @@
       "metodo": "revision_contextual",
       "reglas_ejecutables": [],
       "regla_especifica": "Si el indicador 2 obtiene 1, este indicador también obtiene 1 en la misma evaluación.",
-      "precauciones": []
+      "precauciones": [],
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.",
+      "escala_vigente": {
+        "descripcion": "Cobertura anual sobre grupos captados acreditados por edición; general usa la media de coberturas. Sin catálogo no puntúa.",
+        "niveles": {
+          "1": "0 con ausencia explícita y catálogo completo",
+          "2": ">0",
+          "3": ">=1/3",
+          "4": ">=2/3; máximo si falta análisis de riesgos",
+          "5": ">=80% y análisis de riesgos en cada observación evaluada"
+        },
+        "origen": "Convención de integración: completa escalones que la propuesta dejó sin definir."
+      }
     },
     {
       "id": 4,
@@ -583,7 +602,7 @@
         },
         {
           "bloque": 443,
-          "texto": "Por eso el benchmark funciona como un piso de capacidad, no como una medida de desempeño: un municipio puede superarlo y aun así no tener cobertura efectiva si el personal disponible no alcanza para sostener turnos."
+          "texto": "Por eso el benchmark funciona como un piso de capacidad, no como una medida de desempeño: un municipio puede superarlo y aun así no tener cobertura efectiva si la plantilla no alcanza para sostener turnos."
         },
         {
           "bloque": 444,
@@ -591,14 +610,10 @@
         },
         {
           "bloque": 446,
-          "texto": "Nota de aplicación: Criterio ajustable: si el estado de fuerza total tiene menos de 15 elementos, el puntaje máximo es 4, porque la cobertura por turno es insuficiente aunque la tasa sea alta."
+          "texto": "Nota de aplicación: Criterio ajustable: si la plantilla total tiene menos de 15 elementos, el puntaje máximo es 4, porque la cobertura por turno es insuficiente aunque la tasa sea alta."
         }
       ],
       "datos_requeridos": {
-        "total_personal": {
-          "tipo_dato": "integer",
-          "minimo": 0
-        },
         "poblacion": {
           "tipo_dato": "integer",
           "minimo_para_calcular_tasa": 1
@@ -608,7 +623,12 @@
         },
         "policias_por_mil_habitantes": {
           "tipo_dato": "number",
-          "formula": "total_personal / poblacion * 1000"
+          "formula": "personal_policial / poblacion * 1000"
+        },
+        "personal_policial": {
+          "tipo_dato": "integer",
+          "minimo": 0,
+          "universo": "Corporaciones policiales; excluye administrativos."
         }
       },
       "periodicidad": "por_edicion",
@@ -618,7 +638,10 @@
       "precauciones": [
         "Documentar el año y la fuente de población.",
         "Aclarar cómo se aplica el límite de plantilla cuando su tamaño cambia durante el periodo."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 5,
@@ -785,7 +808,22 @@
       "regla_especifica": null,
       "precauciones": [
         "No presentar personal evaluado como equivalente a personal aprobado y vigente."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.",
+      "prioridad_cierre": {
+        "indicadores": [
+          5,
+          7
+        ],
+        "periodo": "ultimo_periodo",
+        "peso_primera_edicion": 1,
+        "peso_ultima_edicion": 2,
+        "condicion": "Sólo si el porcentaje comparable del último corte supera al anterior y ambas definiciones están acreditadas.",
+        "formula": "(porcentaje_primero + 2 * porcentaje_ultimo) / 3; en los demás casos se conserva el promedio ordinario.",
+        "limites": "No reemplaza la exigencia de mínimo anual para el nivel 5, no imputa faltantes y no desactiva candados por mejoras en otros indicadores. Aumentos de conteos o llamadas no se presumen mejoras."
+      }
     },
     {
       "id": 6,
@@ -940,7 +978,9 @@
       "regla_especifica": "Si no existe instituto propio pero el indicador 10 obtiene 3 o más, la ficha establece asignar al menos 3.",
       "precauciones": [
         "Ausencia de instituto propio no significa necesariamente ausencia de acceso a formación."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false
     },
     {
       "id": 7,
@@ -1098,7 +1138,22 @@
       "regla_especifica": null,
       "precauciones": [
         "Marcar como dudoso un cero aislado entre valores altos o una inconsistencia relevante con el indicador 5."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.",
+      "prioridad_cierre": {
+        "indicadores": [
+          5,
+          7
+        ],
+        "periodo": "ultimo_periodo",
+        "peso_primera_edicion": 1,
+        "peso_ultima_edicion": 2,
+        "condicion": "Sólo si el porcentaje comparable del último corte supera al anterior y ambas definiciones están acreditadas.",
+        "formula": "(porcentaje_primero + 2 * porcentaje_ultimo) / 3; en los demás casos se conserva el promedio ordinario.",
+        "limites": "No reemplaza la exigencia de mínimo anual para el nivel 5, no imputa faltantes y no desactiva candados por mejoras en otros indicadores. Aumentos de conteos o llamadas no se presumen mejoras."
+      }
     },
     {
       "id": 8,
@@ -1187,12 +1242,14 @@
         }
       },
       "periodicidad": "por_edicion",
-      "metodo": "revision_contextual",
+      "metodo": "uniformes",
       "reglas_ejecutables": [],
       "regla_especifica": null,
       "precauciones": [
         "La entrega de prendas no demuestra que la dotación haya alcanzado a todo el personal."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false
     },
     {
       "id": 9,
@@ -1280,10 +1337,9 @@
         "naturaleza_del_dato": {
           "tipo_dato": "string",
           "opciones": [
-            "inventario",
-            "dotacion_del_año",
-            "pendiente_aclarar"
-          ]
+            "asignado_al_cierre"
+          ],
+          "precaucion": "Unidades asignadas, no personas que recibieron equipo ni compras anuales."
         }
       },
       "periodicidad": "por_edicion",
@@ -1294,7 +1350,10 @@
         "No dividir entre cero.",
         "Una dotación anual de cero no prueba que el inventario sea cero.",
         "Mantener consistencia temporal con el personal usado como denominador."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 10,
@@ -1384,7 +1443,10 @@
       "precauciones": [
         "Documentar cambios de categorías entre ediciones.",
         "No sumar personas capacitadas por tema como si fueran personas únicas sin verificar duplicidades."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 11,
@@ -1539,7 +1601,9 @@
       "regla_especifica": null,
       "precauciones": [
         "Existencia declarada no acredita uso efectivo para orientar el patrullaje."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true
     },
     {
       "id": 12,
@@ -1688,7 +1752,9 @@
         }
       ],
       "regla_especifica": "Si el indicador 11 obtiene 1, este indicador no puede recibir más de 3 en la misma evaluación.",
-      "precauciones": []
+      "precauciones": [],
+      "peso": 2,
+      "prioritario": true
     },
     {
       "id": 13,
@@ -1843,7 +1909,9 @@
       "regla_especifica": null,
       "precauciones": [
         "No deducir la existencia de un método completo de solución de problemas a partir de una respuesta binaria."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true
     },
     {
       "id": 14,
@@ -1937,7 +2005,10 @@
       "precauciones": [
         "El conteo no demuestra funcionamiento ni monitoreo activo.",
         "Verificar saltos abruptos antes de asignar el puntaje máximo."
-      ]
+      ],
+      "peso": 2,
+      "prioritario": true,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     },
     {
       "id": 15,
@@ -2001,25 +2072,21 @@
         }
       ],
       "datos_requeridos": {
-        "numero_llamadas_procedentes": {
+        "llamadas_procedentes": {
           "tipo_dato": "integer",
           "minimo": 0
         },
-        "porcentaje_llamadas_procedentes": {
-          "tipo_dato": "number",
-          "unidad": "porcentaje_0_a_100"
+        "registro_municipal": {
+          "tipo_dato": "boolean",
+          "debe_contener": "Competencia del registro verificada por año."
         },
-        "base_total_llamadas": {
+        "poblacion": {
           "tipo_dato": "integer",
-          "admite_null": true
+          "minimo": 1
         },
-        "porcentaje_estatal": {
-          "tipo_dato": "number",
-          "unidad": "porcentaje_0_a_100"
-        },
-        "tiempos_respuesta": {
-          "tipo_dato": "array",
-          "obligatorio": "Solo si están disponibles y se utilizan en el análisis."
+        "meta_respuesta": {
+          "tipo_dato": "string",
+          "obligatorio_para": "Puntaje 5, cumplimiento documentado en cada año."
         }
       },
       "periodicidad": "por_edicion",
@@ -2028,7 +2095,22 @@
       "regla_especifica": "Un 100% poco plausible se marca como dato dudoso y no puede recibir más de 3 conforme a la ficha.",
       "precauciones": [
         "Un porcentaje alto no es por sí mismo evidencia de mejor resultado."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana.",
+      "escala_vigente": {
+        "descripcion": "Registro de competencia municipal y población documentados. No se interpreta volumen como eficacia.",
+        "niveles": {
+          "1": "Ausencia de registro acreditada en todos los cortes aplicables",
+          "2": "Registro previo que falta en ambos cortes recientes por ausencia acreditada",
+          "3": "Registro parcial con ambos cortes recientes; o inconsistencia pendiente (incluye 100%)",
+          "4": "Registro completo y tasas calculables, sin meta de respuesta acreditada",
+          "5": "Registro completo, tasas calculables y cumplimiento documentado de meta de respuesta/despacho en todo el periodo"
+        },
+        "limite": "Vacíos no acreditados permanecen null. El crecimiento de llamadas se describe, no suma puntos por sí mismo.",
+        "origen": "Convención de integración documentada; sustituye comparación del porcentaje como desempeño."
+      }
     },
     {
       "id": 16,
@@ -2192,7 +2274,9 @@
       "regla_especifica": null,
       "precauciones": [
         "Distinguir existencia declarada, publicación y contenido efectivo del informe."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false
     },
     {
       "id": 17,
@@ -2292,7 +2376,7 @@
         }
       },
       "periodicidad": "anual",
-      "metodo": "revision_contextual",
+      "metodo": "fallecimientos",
       "reglas_ejecutables": [],
       "regla_especifica": null,
       "precauciones": [
@@ -2300,7 +2384,9 @@
         "En corporaciones pequeñas, describir los casos y evitar conclusiones basadas solo en tasas inestables.",
         "No afirmar que se calculó un índice de letalidad con datos que no lo permiten.",
         "No confundir fallecimientos de policías con civiles fallecidos por intervención policial."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false
     },
     {
       "id": 18,
@@ -2405,7 +2491,644 @@
         "No interpretar esta razón como porcentaje de delitos resueltos.",
         "No asumir ausencia de recomendaciones de derechos humanos si no se realizó la revisión.",
         "Distinguir delitos, faltas administrativas y limitaciones de la fuente."
-      ]
+      ],
+      "peso": 1,
+      "prioritario": false,
+      "revision_definiciones": "Resolver las correspondencias desde las entradas por año; exigir evidencia complementaria sólo para los requisitos que sigan sin acreditarse. Una homologación metodológica no equivale a revisión humana."
     }
-  ]
+  ],
+  "agregacion": {
+    "modo_predeterminado": "completo",
+    "modos": {
+      "completo": {
+        "requiere": "18 indicadores calificados",
+        "origen": "Benchmark suministrado"
+      },
+      "evaluables": {
+        "origen": "Adaptación operativa; no equivale a la evaluación completa del benchmark",
+        "cobertura_minima_por_dimension": "2/3 de sus indicadores, redondeado al entero superior",
+        "minimos": {
+          "proteccion_civil": 2,
+          "condiciones_del_personal": 5,
+          "inteligencia_y_eficiencia_policial": 6
+        },
+        "formula": "promedio ponderado de los indicadores calificados dentro de cada dimensión; suma de las tres dimensiones por sus pesos 0.25, 0.35 y 0.40",
+        "peso_dimensiones": "25% protección civil, 35% condiciones del personal, 40% inteligencia y eficiencia policial",
+        "imputacion": false,
+        "tope_con_pendientes": "MUY BIEN",
+        "declaracion": "Publicar cobertura y alcance parcial; conservar intervalo de sensibilidad de la evaluación completa.",
+        "minimo_prioritarios": 6
+      },
+      "disponibles": {
+        "origen": "Adaptación para publicar una valoración basada exclusivamente en indicadores acreditados",
+        "minimos": {
+          "proteccion_civil": 1,
+          "condiciones_del_personal": 1,
+          "inteligencia_y_eficiencia_policial": 1
+        },
+        "minimo_prioritarios": 1,
+        "imputacion": false,
+        "declaracion": "La categoría es de cobertura parcial y puede cambiar al completar los indicadores pendientes.",
+        "formula": "promedio ponderado de los indicadores con puntaje acreditado dentro de cada dimensión; suma con pesos 0.25, 0.35 y 0.40",
+        "peso_dimensiones": "25% protección civil, 35% condiciones del personal, 40% inteligencia y eficiencia policial"
+      }
+    },
+    "esquema_predeterminado": "dimensiones_ponderadas"
+  },
+  "convenciones_ejecutables": {
+    "uniformes": "Homologar seis prendas básicas; camisola/camisa y tipos de calzado cuentan una vez por grupo. Frecuencias semestral y anual cumplen al menos anual. Dotación en una sola edición precede a incompleta.",
+    "fallecimientos": "Usar la serie municipal de conteos, no porcentajes de egresos ni sumar los desgloses. Mayoría significa más de la mitad de los años del periodo, incluidos los vacíos en el denominador; un conteo desconocido no se transforma en cero.",
+    "ultimo_periodo": "El criterio de todas las ediciones se evalúa sobre ambas recientes; un cumplimiento completo puede obtener 5.",
+    "faltantes": "Sólo una falta de respuesta municipal acreditada permite penalizarla como tal; denominadores ausentes no son evidencia de abandono.",
+    "fuentes_normativas": "Referencias aportadas por el benchmark; no constituyen verificación externa ni acreditan vigencia jurídica.",
+    "implementacion_vigente": "evaluacion_v23.evaluar y ponderacion.agregar_ponderado; calificar conserva las reglas base y la comparación histórica."
+  },
+  "politica_evidencia": {
+    "fuentes_admitidas": [
+      "{municipio} PAQUETE SEGURIDAD.docx",
+      "{municipio} Anexo.docx (opcional)"
+    ],
+    "fuente_primaria": "PAQUETE SEGURIDAD",
+    "control_cruzado": "Anexo, si se aporta",
+    "fuentes_externas": true,
+    "muestra_estilo": "Referencia editorial; no aporta datos, calificaciones ni estándares.",
+    "faltantes": "Puntaje null cuando falta evidencia comparable; no convertir vacíos en cero, ausencia municipal o puntaje 1.",
+    "calificaciones_reportadas": "Se conservan para contraste, sin sustituir los puntajes calculados.",
+    "agregacion": "Modo completo requiere 18 puntajes; evaluables conserva los umbrales de cobertura; disponibles calcula con los puntajes acreditados, al menos uno por dimensión y uno prioritario, y declara alcance parcial.",
+    "ultimo_periodo": "Dos ediciones censales recientes para indicadores 1–16; dos años calendario recientes para 17–18. No omitir celdas vacías al seleccionar.",
+    "parametros_conservados": "18 indicadores y escala 1–5. Agregación, definiciones y fichas 3 y 15 revisadas explícitamente en 2.3.",
+    "limites": "Los umbrales del benchmark no acreditan vigencia normativa ni estándares externos. Las tasas requieren denominadores documentados; no se completan con cifras de la muestra editorial.",
+    "condiciones_fuentes_externas": "Complementos explícitos: archivo íntegro con SHA-256, identidad municipal, año, localizador y revisión. No búsqueda ni imputación automática.",
+    "precedencia": "El anexo de integración 2.3 y config/definiciones_cngmd.json prevalecen sobre criterios históricos incompatibles; los 90 criterios originales se conservan como transcripción, no como única especificación ejecutable.",
+    "correspondencias": "Resolver automáticamente campos explícitos y homologaciones autorizadas en definiciones_cngmd.json, con coordenadas por año. No exigir un complemento vacío como paso previo; sólo resolver ambigüedades o aportar datos realmente ausentes. Las contradicciones bloquean la valoración."
+  },
+  "ponderacion_config": {
+    "version": "2.3",
+    "descripcion": "Ponderación de indicadores y candados de prioridad. Se integra a config/reglas_calificacion.json.",
+    "compatibilidad": "dimensiones_iguales reproduce sólo el promedio aritmético histórico; conserva los controles nuevos y no equivale íntegramente a v2.2.",
+    "prioridad_cierre": {
+      "indicadores": [
+        5,
+        7
+      ],
+      "periodo": "ultimo_periodo",
+      "peso_primera_edicion": 1,
+      "peso_ultima_edicion": 2,
+      "condicion": "Sólo si el porcentaje comparable del último corte supera al anterior y ambas definiciones están acreditadas.",
+      "formula": "(porcentaje_primero + 2 * porcentaje_ultimo) / 3; en los demás casos se conserva el promedio ordinario.",
+      "limites": "No reemplaza la exigencia de mínimo anual para el nivel 5, no imputa faltantes y no desactiva candados por mejoras en otros indicadores. Aumentos de conteos o llamadas no se presumen mejoras."
+    },
+    "ponderacion": {
+      "esquema_predeterminado": "dimensiones_ponderadas",
+      "prioritarios": [
+        2,
+        4,
+        5,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "pesos": {
+        "1": 1,
+        "2": 2,
+        "3": 1,
+        "4": 2,
+        "5": 2,
+        "6": 1,
+        "7": 1,
+        "8": 1,
+        "9": 1,
+        "10": 2,
+        "11": 2,
+        "12": 2,
+        "13": 2,
+        "14": 2,
+        "15": 1,
+        "16": 1,
+        "17": 1,
+        "18": 1
+      },
+      "esquemas": {
+        "dimensiones_ponderadas": {
+          "formula_dimension": "sum(peso_i * puntaje_i) / sum(peso_i) sobre los indicadores calificados de la dimensión",
+          "formula_final": "sum(peso_dimension * puntaje_dimension)",
+          "peso_dimension": {
+            "proteccion_civil": 0.25,
+            "condiciones_del_personal": 0.35,
+            "inteligencia_y_eficiencia_policial": 0.4
+          },
+          "suma_pesos_por_dimension": {
+            "proteccion_civil": 4,
+            "condiciones_del_personal": 10,
+            "inteligencia_y_eficiencia_policial": 12
+          },
+          "motivo": "Convención del equipo: priorizar capacidad operativa con pesos de dimensión 25%, 35% y 40%.",
+          "efecto_marginal_por_punto": {
+            "1": 0.063,
+            "2": 0.125,
+            "3": 0.063,
+            "4": 0.07,
+            "5": 0.07,
+            "6": 0.035,
+            "7": 0.035,
+            "8": 0.035,
+            "9": 0.035,
+            "10": 0.07,
+            "11": 0.067,
+            "12": 0.067,
+            "13": 0.067,
+            "14": 0.067,
+            "15": 0.033,
+            "16": 0.033,
+            "17": 0.033,
+            "18": 0.033
+          }
+        },
+        "dimensiones_iguales": {
+          "formula_dimension": "sum(peso_i * puntaje_i) / sum(peso_i) sobre los indicadores calificados de la dimensión",
+          "formula_final": "promedio simple de las tres dimensiones",
+          "uso": "Comparación aritmética. La equivalencia integral v2.2 requiere además desactivar candados 7–9 y conservar los criterios de ficha históricos.",
+          "efecto_marginal_por_punto": {
+            "proteccion_civil_por_indicador": "1/9",
+            "personal_por_indicador": "1/21",
+            "inteligencia_por_indicador": "1/24"
+          },
+          "pesos_indicador": "todos_1"
+        },
+        "global": {
+          "formula_final": "sum(peso_i * puntaje_i) / sum(peso_i) sobre los 18 indicadores, sin igualar dimensiones",
+          "suma_pesos": 26,
+          "efecto_marginal_por_punto": {
+            "prioritario": 0.077,
+            "secundario": 0.038
+          },
+          "nota": "Protección civil baja a 4/26 del resultado."
+        }
+      }
+    },
+    "candados_adicionales": [
+      {
+        "id": 7,
+        "nombre": "prioritarios_para_excelente",
+        "condicion": "Se pretende asignar EXCELENTE.",
+        "requisito": "Los ocho indicadores prioritarios tienen puntaje igual o mayor que 4.",
+        "modifica_puntaje": false
+      },
+      {
+        "id": 8,
+        "nombre": "prioritarios_para_muy_bien",
+        "condicion": "Se pretende asignar MUY BIEN.",
+        "requisitos": [
+          "Promedio ponderado de los prioritarios igual o mayor que 3.00.",
+          "Ningún prioritario con puntaje 1."
+        ],
+        "modifica_puntaje": false
+      },
+      {
+        "id": 9,
+        "nombre": "prioritarios_colapsados",
+        "condicion": "Cuatro o más prioritarios con puntaje 1 por falta de respuesta acreditada.",
+        "efecto": "La calificación no puede superar MAL.",
+        "modifica_puntaje": false
+      }
+    ],
+    "agregacion": {
+      "completo": {
+        "requiere": "18 indicadores calificados",
+        "formula": "promedio ponderado dentro de cada dimensión; dimensiones con pesos 0.25, 0.35 y 0.40"
+      },
+      "evaluables": {
+        "formula": "promedio ponderado de los indicadores calificados dentro de cada dimensión; suma de las tres dimensiones por sus pesos 0.25, 0.35 y 0.40",
+        "cobertura_minima_por_dimension": {
+          "proteccion_civil": 2,
+          "condiciones_del_personal": 5,
+          "inteligencia_y_eficiencia_policial": 6
+        },
+        "cobertura_prioritaria_minima": 6,
+        "efecto_si_no_se_cumple": "resultado indeterminado; no se publica calificación conjunta",
+        "tope_con_pendientes": "MUY BIEN",
+        "imputacion": false,
+        "sensibilidad": "asignar 1 y 5 a los pendientes con los mismos pesos para obtener límites"
+      },
+      "disponibles": {
+        "formula": "promedio ponderado de los indicadores con puntaje acreditado dentro de cada dimensión; suma con pesos 0.25, 0.35 y 0.40",
+        "cobertura_minima_por_dimension": {
+          "proteccion_civil": 1,
+          "condiciones_del_personal": 1,
+          "inteligencia_y_eficiencia_policial": 1
+        },
+        "cobertura_prioritaria_minima": 1,
+        "efecto_si_no_se_cumple": "sin valoración agregada; publicar sólo el estudio descriptivo",
+        "tope_con_pendientes": "MUY BIEN",
+        "imputacion": false,
+        "etiqueta_con_pendientes": "COBERTURA PARCIAL",
+        "interpretacion": "Valoración de los indicadores disponibles, no calificación completa de los dieciocho. Informar la cobertura y que la categoría puede cambiar con los pendientes."
+      }
+    },
+    "pruebas_requeridas": [
+      "Monotonicidad: subir un punto cualquier indicador nunca baja la calificación agregada, y subir un punto un prioritario la mueve al menos tanto como subirlo en un secundario de la misma dimensión.",
+      "Comparación: dimensiones_iguales reproduce el promedio aritmético 2.2, no su categoría cuando intervienen los nuevos candados.",
+      "Sensibilidad: el intervalo que asigna 1 y 5 a los indicadores sin puntaje se calcula con los mismos pesos.",
+      "Cobertura prioritaria: en modo evaluables, con menos de seis prioritarios calificados el resultado se marca como indeterminado y no se publica una calificación conjunta.",
+      "Candados: casos de prueba para los candados 7, 8 y 9, incluido el caso límite de un prioritario con puntaje 1 no acreditado como falta de respuesta.",
+      "Reponderación: con cobertura completa, la razón entre efectos marginales de prioritarios es <= 2; con faltantes se informan los pesos efectivos."
+    ],
+    "requisito_previo": {
+      "descripcion": "Verificar el universo de cada dato; la lista de bloqueos se calcula en cada ejecución."
+    }
+  },
+  "definiciones_config": {
+    "version": "2.5-integracion",
+    "proposito": "Definiciones de referencia CNGMD, población, normalización de protección civil y valoración provisional. Integra y corrige la propuesta del asesor; complementa config/reglas_calificacion.json y config/ponderacion.json. Las escalas_operativas y revision_integracion prevalecen sobre descripciones históricas.",
+    "fuentes_consultadas": [
+      {
+        "documento": "CNGMD 2023, Módulo 3, Sección I. Estructura organizacional y recursos",
+        "url": "https://www.inegi.org.mx/contenidos/programas/cngmd/2023/doc/cngmd_2023_m3s1.pdf"
+      },
+      {
+        "documento": "CNGMD 2023, Módulo 3, Sección II. Ejercicio de la función de seguridad pública municipal",
+        "url": "https://www.inegi.org.mx/contenidos/programas/cngmd/2023/doc/cngmd_2023_m3s2.pdf"
+      },
+      {
+        "documento": "CNGMD 2023, Módulo 4. Protección civil",
+        "url": "https://www.inegi.org.mx/contenidos/programas/cngmd/2023/doc/cngmd_2023_m4.pdf"
+      }
+    ],
+    "poblacion": {
+      "regla": "Población positiva, año, ámbito, fuente, método y serie comparables. Policía/población*1000. No mezclar una población municipal con una magnitud estatal.",
+      "fuentes_potenciales_de_anclajes_no_cargados": {
+        "2010": "Censo de Población y Vivienda 2010 (INEGI)",
+        "2015": "Encuesta Intercensal 2015 (INEGI)",
+        "2020": "Censo de Población y Vivienda 2020 (INEGI)",
+        "2025": "Encuesta Intercensal 2025 (INEGI): verificar disponibilidad, cobertura y precisión de la estimación municipal antes de utilizarla. Ningún valor se incorpora por esta referencia."
+      },
+      "fuentes_por_año_de_referencia": {
+        "2014": "Proyecciones de población de los municipios, CONAPO (alternativa: interpolación entre Censo 2010 y Encuesta Intercensal 2015)",
+        "2015": "Encuesta Intercensal 2015",
+        "2016": "Proyecciones de población de los municipios, CONAPO",
+        "2018": "Proyecciones de población de los municipios, CONAPO",
+        "2020": "Censo de Población y Vivienda 2020",
+        "2022": "Proyecciones de población de los municipios, CONAPO (alternativa: interpolación entre Censo 2020 y Encuesta Intercensal 2025)",
+        "2024": "Proyecciones de población de los municipios, CONAPO (alternativa: interpolación entre Censo 2020 y Encuesta Intercensal 2025)",
+        "2025": "Encuesta Intercensal 2025"
+      },
+      "precauciones": [
+        "La Encuesta Intercensal es una encuesta por muestreo: sus cifras municipales traen estimadores de precisión. En municipios pequeños el error relativo puede ser alto; si el coeficiente de variación supera el umbral que publique el INEGI para uso con reserva, se prefiere la proyección de CONAPO y se declara el cambio.",
+        "Verificar la edición y base de la serie CONAPO usada. Una diferencia con otra fuente exige revisión, no sustitución automática de un año ni mezcla silenciosa de metodologías.",
+        "La serie de tasas no cambia de criterio a mitad del periodo: si se opta por interpolación en lugar de CONAPO, se aplica a todos los años sin anclaje."
+      ],
+      "campos_obligatorios_en_el_paquete_editorial": [
+        "poblacion",
+        "año_referencia_poblacion",
+        "fuente_poblacion",
+        "metodo_estimacion",
+        "coeficiente_variacion_si_aplica"
+      ],
+      "indicadores_afectados": [
+        4,
+        14,
+        15
+      ],
+      "pendiente_para_el_colega": "Aportar población municipal y estatal en input/complementos/{slug}.json mediante --complemento; conservar fuentes y revisión. Sin esos denominadores las tasas de 4, 14, 15 y 18 no se calculan. La ficha 18 requiere personas ante el Ministerio Público del mismo universo en ambos ámbitos; la incidencia delictiva es sólo contexto. fuentes_por_año_de_referencia es un catálogo de alternativas, no una instrucción para mezclarlas."
+    },
+    "definiciones_por_ficha": [
+      {
+        "ficha": 4,
+        "referencia_cuestionario": "Módulo 3, Sección I, preguntas 1.3, 1.12, 1.14 y 1.1.A",
+        "definicion": "1.3 capta personal adscrito al cierre, incluidos mandos, administrativos y apoyo. 1.12 distingue organizaciones policiales de áreas de dirección, administrativas y apoyo; 1.14 desagrega funciones policiales. 1.1.A identifica existencia de institución propia y 1.1.B esquemas de coordinación: mando único no equivale a ausencia de institución.",
+        "consecuencia_para_la_regla": "Usar personal policial en el numerador, población en el denominador. Personal total sólo describe una aproximación, no acredita el estándar. Registrar institución propia y mando único por separado."
+      },
+      {
+        "ficha": 5,
+        "referencia_cuestionario": "Módulo 3, Sección I, preguntas 1.16 y 1.17",
+        "definicion": "El censo distingue seis estatus por tipo de evaluación (control de confianza, competencias básicas y desempeño): con evaluaciones aprobatorias vigentes; aprobatorias no vigentes; vigentes no aprobatorias; programados; evaluados con resultados pendientes; y sin evaluación.",
+        "consecuencia_para_la_regla": "Se acaba la ambigüedad entre evaluado y aprobado: el porcentaje del benchmark se calcula con 'aprobatorias vigentes' sobre el personal de corporaciones policiales. Los otros estatus se usan en el texto para explicar si la brecha es de programación o de reprobación."
+      },
+      {
+        "ficha": 7,
+        "referencia_cuestionario": "Módulo 3, Sección I, preguntas 1.20 y 1.21",
+        "definicion": "El Certificado Único Policial vigente se reporta al cierre del año, para el personal de corporaciones policiales y desagregado por tipo de corporación.",
+        "consecuencia_para_la_regla": "CUP vigente sobre corporaciones policiales. No marcar inconsistencia sólo porque haya control de confianza aprobado sin CUP."
+      },
+      {
+        "ficha": 10,
+        "referencia_cuestionario": "Módulo 3, Sección I, subsecciones I.2.4.2 y I.2.4.4, preguntas 1.18, 1.19, 1.22 y 1.23",
+        "definicion": "Profesionalización (formación inicial, actualización, especialización y alta dirección, acreditadas con diploma) y capacitación (acciones formativas con evaluación) son dos cosas distintas, y el censo pide expresamente no contar la profesionalización dentro de la capacitación. Las acciones formativas se reportan impartidas y concluidas.",
+        "consecuencia_para_la_regla": "La ficha debe leer ambas: la profesionalización acreditada mide formación de carrera; la capacitación mide oferta del año. El porcentaje de personal capacitado se calcula sobre el personal de la pregunta 1.12, no sobre la suma de asistentes por tema."
+      },
+      {
+        "ficha": 18,
+        "referencia_cuestionario": "CNGMD 2023, módulo 3, sección II: bloques separados de justicia cívica y Ministerio Público; revisar cada edición.",
+        "definicion": "Distinguir personas, objetos, faltas cívicas y delitos. La pregunta 2.8 se refiere al uso de la fuerza en justicia cívica; el bloque ante Ministerio Público tiene reactivos propios, incluido 2.24. No agregar destinos ni trasladar el alcance de una pregunta al otro bloque.",
+        "consecuencia_para_la_regla": "Verificar qué destino contiene el paquete. La distinción disponible en el cuestionario no prueba que esté preservada en sus tablas. Los conteos de uso de la fuerza no demuestran por sí solos respeto ni violación de derechos humanos; el máximo exige una revisión específica documentada."
+      },
+      {
+        "ficha": 1,
+        "referencia_cuestionario": "Módulo 4, Sección I, preguntas 1.1, 1.2, 1.3, 1.6, 1.9 y 1.11",
+        "definicion": "Desde 2023 el censo capta el reglamento municipal, el Plan o Programa de Protección Civil y el Plan de Emergencia por separado, con fecha de publicación, fecha de última actualización y URL; los temas o ejes rectores del plan; las etapas del ciclo de gestión integral de riesgos que cubre; si fue evaluado; y si la unidad tiene informe anual.",
+        "consecuencia_para_la_regla": "El benchmark de 'vigente y actualizado' se vuelve medible: fecha de última actualización y cobertura de la etapa de identificación y análisis de riesgos (pregunta 1.6). También permite distinguir plan de protección civil de plan de emergencia."
+      },
+      {
+        "ficha": 2,
+        "referencia_cuestionario": "Módulo 4, Sección III, preguntas 3.16 y 3.17, y Sección V",
+        "definicion": "3.16 da acciones formativas impartidas, impartidas y concluidas, y personal capacitado contado una sola vez. 3.17 las desagrega por tema y ahí una persona se cuenta tantas veces como temas concluyó. La Sección V es distinta: capacitación y difusión hacia otras instituciones, personal voluntario y población.",
+        "consecuencia_para_la_regla": "Se resuelve la duplicidad: el conteo de personas se toma de 3.16 y los temas de 3.17, sin sumarlos. Hay que verificar de cuál de las dos secciones salen los cursos del paquete, porque capacitar al personal propio y capacitar a la población no son el mismo indicador."
+      },
+      {
+        "ficha": 3,
+        "referencia_cuestionario": "Módulo 4, Sección III, pregunta 3.17",
+        "definicion": "El catálogo de 2023 tiene veintiún temas, entre ellos identificación y análisis de riesgos, mapas de peligros y riesgos, sistemas de alerta temprana, evacuación, búsqueda y rescate, primeros auxilios, incendios y manejo de extintores, materiales peligrosos, Sistema de Comando de Incidentes, simulacros, brigadas, continuidad de operaciones y verificación de inmuebles.",
+        "consecuencia_para_la_regla": "La normalización se hace por grupos temáticos y no por rótulos, y el denominador son los grupos efectivamente captados en cada edición."
+      }
+    ],
+    "normalizacion_proteccion_civil": {
+      "problema": "Los rótulos del catálogo cambian entre ediciones y el módulo cambió de lugar: hasta 2021 la protección civil estaba en el módulo 2, sección IV, y desde 2023 tiene módulo propio con un catálogo más amplio. Contar rótulos produce caídas artificiales.",
+      "regla_1_grupos": "Se cuentan grupos temáticos, no rótulos. Un grupo se acredita si en la edición se impartió cualquiera de sus temas equivalentes.",
+      "regla_2_denominador": "El denominador son los grupos captados por el cuestionario de esa edición. Un grupo que no existía en el catálogo no cuenta como ausente: se excluye y se declara la cobertura (por ejemplo, 5 de 5 grupos captados).",
+      "regla_3_umbral": "El umbral del puntaje 5 deja de ser 'cinco de seis' y pasa a ser 'al menos el 80% de los grupos captados, incluyendo siempre identificación y análisis de riesgos'. Los demás escalones se prorratean igual.",
+      "regla_4_personas": "El personal capacitado se toma de la pregunta 3.16 (conteo único). Los totales por tema de 3.17 solo se usan para acreditar cobertura temática, nunca para sumar personas.",
+      "regla_5_origen": "Se verifica si la cifra del paquete proviene de la capacitación al personal de la unidad (sección III.5) o de la capacitación y difusión a la población (sección V). No se mezclan.",
+      "grupos": {
+        "identificacion_y_analisis_de_riesgos": [
+          "Identificación y análisis de riesgos",
+          "Mapas de peligros y riesgos",
+          "Análisis de riesgos"
+        ],
+        "comando_y_manejo_de_incidentes": [
+          "Sistema de Comando de Incidentes",
+          "Manejo de crisis"
+        ],
+        "alerta_temprana": [
+          "Sistemas de alerta temprana"
+        ],
+        "evacuacion_busqueda_y_rescate": [
+          "Evacuación, búsqueda y rescate",
+          "Formación de brigadas de protección civil",
+          "Simulacros"
+        ],
+        "primeros_auxilios": [
+          "Primeros auxilios"
+        ],
+        "incendios_y_materiales_peligrosos": [
+          "Prevención y combate de incendios, y manejo de extintores",
+          "Manejo de emergencias con materiales peligrosos"
+        ]
+      },
+      "temas_complementarios_no_nucleo": [
+        "Básico - Sistema Nacional de Protección Civil (SINAPROC)",
+        "Elaboración de programas o instrumentos de protección civil",
+        "Marco regulatorio sobre protección civil",
+        "Medidas de seguridad y autoprotección civil",
+        "Señalética de protección civil",
+        "Conocimiento de normas oficiales mexicanas",
+        "Verificación de inmuebles",
+        "Evaluación de daños",
+        "Continuidad de operaciones",
+        "Otro tema"
+      ],
+      "nota_2023": "Sistema de Comando de Incidentes, continuidad de operaciones, verificación de inmuebles y evaluación de daños aparecen en el catálogo reciente; antes de su incorporación no pueden tratarse como ausencia.",
+      "refuerzo_desde_el_plan": "La pregunta 1.6 del módulo 4 declara qué etapas del ciclo de gestión integral de riesgos cubre el plan. Si el plan incluye identificación y análisis de riesgos pero la capacitación no, el texto lo señala como brecha entre documento y práctica."
+    },
+    "llamadas_procedentes": {
+      "que_mide": "Una llamada procedente es la que corresponde a una emergencia real y se canaliza a una corporación. La improcedente es muda, incompleta, de broma, insulto, prueba o no emergencia. El porcentaje mide la calidad de la demanda que entra y del filtro que la clasifica.",
+      "quien_la_produce": "El registro proviene del centro de atención de llamadas de emergencia. Muchos municipios no operan uno: el 9-1-1 lo atiende el centro de mando estatal. En esos casos la ausencia de dato no indica mal desempeño municipal.",
+      "por_que_no_es_un_indicador_de_eficacia": "Un porcentaje alto depende sobre todo del comportamiento del público, no del municipio; un porcentaje bajo puede convivir con buena atención. Tampoco mide tiempo de respuesta ni resolución.",
+      "benchmark_revisado": {
+        "principal": "Continuidad y consistencia del registro de competencia municipal y tasas descriptivas calculables. El crecimiento de llamadas no se considera una mejora del desempeño; prevalece escalas_operativas.llamadas.",
+        "secundario": "Comparación del porcentaje con el estatal del mismo año, solo como contexto de la demanda.",
+        "no_asignar_5": "Sin evidencia de tiempos de respuesta o de despacho, el máximo es 4.",
+        "dato_dudoso": "100% de procedencia se marca como dato dudoso y no puede recibir más de 3."
+      },
+      "verificar": "Módulo 3, Sección I, subsección I.7, preguntas 1.122 a 1.129, para confirmar si el reactivo distingue llamadas recibidas por el centro municipal de las canalizadas por el centro estatal."
+    },
+    "interpretacion_provisional": {
+      "principio": "Cuando falta evidencia para aplicar un criterio, el puntaje sigue siendo null y no se imputa. Pero el indicador ya no queda mudo: se emite una valoración provisional con lo que sí está disponible, etiquetada como tal, que alimenta la narración y no el cálculo.",
+      "estructura": {
+        "puntaje": "null",
+        "valoracion_provisional": {
+          "nivel_indicativo": "entero 1 a 5 o null cuando tampoco existe evidencia sustituta suficiente",
+          "base": "variables efectivamente usadas",
+          "confianza": "alta | media | baja | no_estimable",
+          "falta": "qué dato la convertiría en puntaje",
+          "computa_en_agregacion": false
+        }
+      },
+      "efecto_en_la_agregacion": "No computa ni modifica cobertura. Escenario intermedio separado; conserva íntegros los extremos 1 y 5.",
+      "efecto_en_la_narracion": "El apartado se escribe con la fórmula de tres movimientos y cierra diciendo qué falta: «con la información disponible el rubro se ubicaría en el nivel N; no se le asigna puntaje porque falta X».",
+      "reglas_por_ficha": {
+        "3": "Contar grupos temáticos con el catálogo de la edición. Si la ficha 2 es 1, el nivel indicativo es 1 con confianza alta.",
+        "4": "Sin población y personal policial acreditados, describir la plantilla sin traducir su tamaño absoluto a un nivel de desempeño.",
+        "9": "Calcular las razones con el dato tal como viene y declarar si es inventario o dotación. Si el chaleco por elemento es mayor o igual a 1 bajo cualquiera de las dos lecturas, el nivel indicativo es 4; si es menor a 0.5 en ambas, es 2. Confianza baja.",
+        "10": "Sin el porcentaje de personal, usar presencia o ausencia de temas núcleo: con dos o más grupos núcleo en la edición reciente, nivel indicativo 3; con uno, 2; sin ninguno, 1.",
+        "14": "Sin poblaciones comparables, usar continuidad y evolución del conteo: presencia en todas las ediciones y sin retrocesos, nivel indicativo 3; presencia intermitente, 2. Confianza baja.",
+        "15": "Conteos de llamadas procedentes en ambas ediciones recientes de la serie municipal permiten nivel indicativo 3, con confianza baja y condicionado a confirmar competencia y universo. Describe continuidad de la serie, no eficacia ni operación propia; no se aplica si se acredita que el registro no es de competencia municipal.",
+        "18": "Si las remisiones son del mismo destino y universo en ambos ámbitos, comparar provisionalmente sus tasas por población de la misma serie: dentro de más o menos 25% de la tasa estatal, nivel indicativo 3. Sin aclaración del destino, no asignar nivel. La incidencia delictiva sólo sirve de contexto."
+      },
+      "limite": "Ninguna valoración provisional puede sostener por sí sola una recomendación de política ni un juicio sobre derechos; solo describe el rango en el que caería el rubro."
+    },
+    "pendientes_de_verificacion": [
+      {
+        "fuente": "Módulo 3, Sección I, subsección I.6 (preguntas 1.106 a 1.121)",
+        "pregunta": "Equipamiento y cámaras de vigilancia: confirmar si el reactivo pide inventario al cierre del año con condición de funcionamiento, como sí lo hace la pregunta 2.1 del módulo 4 para protección civil.",
+        "fichas": [
+          9,
+          14
+        ]
+      },
+      {
+        "fuente": "Módulo 3, Sección I, subsección I.7 (preguntas 1.122 a 1.129)",
+        "pregunta": "Centros de atención de llamadas de emergencia: confirmar universo del registro municipal frente al estatal.",
+        "fichas": [
+          15
+        ]
+      },
+      {
+        "fuente": "Módulo 3, Sección I, subsección I.10 (preguntas 1.138 a 1.149)",
+        "pregunta": "Academias o institutos de formación policial: confirmar si el reactivo capta el uso de academias de otra institución, que es lo que permite acreditar acceso por convenio.",
+        "fichas": [
+          6
+        ]
+      },
+      {
+        "fuente": "Módulo 3, Sección II, subsección II.6 (preguntas 2.52 a 2.56)",
+        "pregunta": "Enfrentamientos: confirmar dónde se capta el fallecimiento de personal en funciones y si distingue evento e instrumento.",
+        "fichas": [
+          17
+        ]
+      },
+      {
+        "fuente": "Ediciones 2015 a 2021 (módulo 2, sección IV)",
+        "pregunta": "Catálogos de protección civil previos al módulo propio de 2023, para completar el mapa de equivalencias.",
+        "fichas": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "fuente": "Descripción de archivos de cada edición",
+        "pregunta": "Confirmar nombres de variables y años de referencia; cada edición del censo capta dos años en las preguntas de ejercicio de la función.",
+        "fichas": [
+          17,
+          18
+        ]
+      }
+    ],
+    "cambios_para_el_modulo": [
+      "Cargar la serie de población municipal y estatal con fuente y año; habilita las fichas 4, 14 y 18.",
+      "Sustituir el denominador de las fichas 4, 5, 7, 9 y 10 por el personal de corporaciones policiales (módulo 3, pregunta 1.12, numeral 1) cuando el paquete lo traiga.",
+      "Separar en la ficha 5 el estatus 'aprobatorias vigentes' del resto de los estatus.",
+      "Normalizar los temas de protección civil por grupos y con denominador variable por edición.",
+      "Agregar el campo valoracion_provisional a la salida de cada ficha, sin efecto en la agregación.",
+      "Marcar los municipios bajo mando único para que su cero no se trate como falta de respuesta."
+    ],
+    "correspondencias_automaticas": {
+      "version": "1.1",
+      "principio": "Los datos municipales proceden exclusivamente de input. Las definiciones y equivalencias generales orientan su lectura, no aportan observaciones del municipio. Cada campo resuelto conserva regla y coordenadas; las homologaciones no son revisiones humanas ni verificaciones externas.",
+      "cup_vigente": {
+        "habilitada": true,
+        "titulo": "Certificado Único Policial vigente",
+        "regla": "El título explícito y una única cifra municipal en Porcentaje entre 0 y 100 por año permiten usar el porcentaje publicado como CUP vigente sobre corporaciones policiales. No se reconstruye un denominador ni se acredita una auditoría del dato original. Un complemento contradictorio bloquea la valoración.",
+        "origen": "Correspondencia metodológica de integración con la definición general de la ficha 7."
+      },
+      "titulos_graficas": {
+        "habilitada": true,
+        "regla": "OCR local de las gráficas originales, vinculado al indicador, ámbito, archivo, imagen y huellas. Sólo se reconocen descripciones completas y años dentro del intervalo del título. Las cifras siguen procediendo de las tablas. Reconocer aprobaciones no demuestra vigencia; personal de seguridad pública no excluye administrativos. Para cámaras, ambos ámbitos deben declarar funcionamiento antes de comparar tasas.",
+        "por_indicador": {
+          "2": [
+            {
+              "descripcion": "Número de servidores públicos capacitados",
+              "campo": "tipo_participantes",
+              "valor": "servidores_publicos"
+            }
+          ],
+          "4": [
+            {
+              "descripcion": "Número de elementos de seguridad pública",
+              "campo": "descripcion_personal",
+              "valor": "elementos_seguridad_publica"
+            }
+          ],
+          "5": [
+            {
+              "descripcion": "Porcentaje de elementos de seguridad pública que aprobó las evaluaciones de control de confianza",
+              "campo": "estatus_evaluaciones",
+              "valor": "aprobadas"
+            },
+            {
+              "descripcion": "Porcentaje de elementos de seguridad pública que no aprobó las evaluaciones de control de confianza",
+              "campo": "estatus_evaluaciones",
+              "valor": "no_aprobadas"
+            }
+          ],
+          "14": [
+            {
+              "descripcion": "Número de cámaras en funcionamiento",
+              "campo": "universo_camaras",
+              "valor": "camaras_en_servicio"
+            },
+            {
+              "descripcion": "Número de cámaras fuera de servicio",
+              "campo": "universo_camaras",
+              "valor": "camaras_fuera_de_servicio"
+            }
+          ]
+        }
+      },
+      "no_inferir": [
+        "El personal total no acredita personal exclusivamente policial.",
+        "Servidores capacitados no demuestra conteo único ni personal exclusivo de la unidad de protección civil.",
+        "Evaluaciones de control de confianza no demuestra aprobatorias vigentes.",
+        "Los temas observados no constituyen el catálogo completo de una edición.",
+        "Datos Municipales no demuestra quién opera el servicio de llamadas.",
+        "Total de cámaras no demuestra cámaras en servicio; personas no distingue MP y justicia cívica."
+      ]
+    },
+    "revision_integracion": {
+      "correcciones": [
+        "La tasa de la ficha 4 cambia el numerador policial; la población es su denominador.",
+        "Mando único y ausencia de institución municipal son situaciones distintas.",
+        "CUP nulo con control aprobado no demuestra inconsistencia: faltan otros componentes.",
+        "1.29 distingue unidades asignadas y personas que recibieron equipo; 1.110 excluye cámaras fuera de servicio.",
+        "Un escenario provisional no reduce los extremos del intervalo de sensibilidad."
+      ],
+      "pendientes": [
+        "Catálogos de protección civil 2015–2021 y correspondencia con años de referencia.",
+        "Verificar la columna y el universo exactos usados en cada tabla del Paquete.",
+        "No existe en la entrega el catálogo de 144 cierres anunciado."
+      ],
+      "decisiones": [
+        "Mantener ocho prioritarios; indicador 3 conserva peso 1.",
+        "Adoptar pesos 25/35/40 y candados 7–9 como convenciones versionadas.",
+        "Preferir una serie anual CONAPO consistente; interpolación geométrica sólo con anclajes y método explícitos.",
+        "No asignar nivel provisional cuando la base sustituta tampoco esté documentada."
+      ]
+    },
+    "escalas_operativas": {
+      "proteccion_civil": {
+        "descripcion": "Cobertura anual sobre grupos captados acreditados por edición; general usa la media de coberturas. Sin catálogo no puntúa.",
+        "niveles": {
+          "1": "0 con ausencia explícita y catálogo completo",
+          "2": ">0",
+          "3": ">=1/3",
+          "4": ">=2/3; máximo si falta análisis de riesgos",
+          "5": ">=80% y análisis de riesgos en cada observación evaluada"
+        },
+        "origen": "Convención de integración: completa escalones que la propuesta dejó sin definir."
+      },
+      "llamadas": {
+        "descripcion": "Registro de competencia municipal y población documentados. No se interpreta volumen como eficacia.",
+        "niveles": {
+          "1": "Ausencia de registro acreditada en todos los cortes aplicables",
+          "2": "Registro previo que falta en ambos cortes recientes por ausencia acreditada",
+          "3": "Registro parcial con ambos cortes recientes; o inconsistencia pendiente (incluye 100%)",
+          "4": "Registro completo y tasas calculables, sin meta de respuesta acreditada",
+          "5": "Registro completo, tasas calculables y cumplimiento documentado de meta de respuesta/despacho en todo el periodo"
+        },
+        "limite": "Vacíos no acreditados permanecen null. El crecimiento de llamadas se describe, no suma puntos por sí mismo.",
+        "origen": "Convención de integración documentada; sustituye comparación del porcentaje como desempeño."
+      }
+    },
+    "verificacion_v25": {
+      "prioridad": [
+        "dato_del_paquete_con_universo_y_año_identificables",
+        "dato_censal_extraido_y_documentado",
+        "sin_dato_utilizable"
+      ],
+      "registro_por_dato": [
+        "ficha",
+        "variable",
+        "origen",
+        "edicion",
+        "anio_referencia",
+        "modulo_seccion_pregunta",
+        "universo",
+        "valor",
+        "unidad",
+        "coincidencia_con_paquete",
+        "responsable",
+        "fecha"
+      ],
+      "regla": "El dato censal sólo sustituye al tabulado después de documentar la diferencia. Sin dato utilizable se conserva puntaje null y una valoración provisional separada."
+    },
+    "unidades_de_tasa": {
+      "4": "por_mil",
+      "14": "por_mil",
+      "18": "por_cien_mil"
+    },
+    "ficha_18_revisada": {
+      "metrica": "Personas puestas a disposición por cada 100000 habitantes, según destino cuando el desglose esté documentado.",
+      "comparador": "Tasa estatal del mismo universo y año, con población municipal y estatal comparables.",
+      "incidencia_delictiva": "Contraste contextual opcional; nunca denominador del puntaje ni sustituto del desglose por destino.",
+      "faltantes": "Sin población, destino o comparador estatal documentado, puntaje null; no convertir un denominador ausente en nivel 1.",
+      "version_fuente": "Definiciones CNGMD 2.5 y modificación de fichas 5 y 18 proporcionadas por el asesor; integración conservadora del equipo."
+    },
+    "contraste_ficha_5": {
+      "fuente": "Seguimiento de evaluaciones del CNCA/SESNSP para policías municipales de la entidad, con corte fechado.",
+      "uso": "Alerta para revisión documental; el agregado estatal no rebaja automáticamente el puntaje de un municipio porque difieren nivel geográfico, universo y corte.",
+      "falta_de_fuente": "No equivale a evaluación municipal reprobatoria ni a ausencia de respuesta."
+    }
+  }
 }

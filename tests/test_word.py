@@ -1,4 +1,4 @@
-"""Pruebas con datos sintéticos; no necesitan los archivos de un municipio."""
+"""Entrega editorial y reproducción fiel, con datos exclusivamente ficticios."""
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -11,157 +11,189 @@ from lxml import etree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from calificar import agregar
-from componer_documento import componer
 from documentos import sha256
-from renderizar_word import (DICTIONARY, RULES, TEMPLATE, W, STYLE, auditar,
-                             parrafo, reemplazar, renderizar, run, texto, validar_resultado)
-
-
-def ejemplo(pending=True):
-    dictionary = json.loads(DICTIONARY.read_text(encoding='utf-8'))
-    rules = json.loads(RULES.read_text(encoding='utf-8'))
-    sections = []
-    for ficha in rules['fichas']:
-        number = ficha['id']
-        evaluation = {'puntaje': None if pending and number == 4 else 5,
-                      'años_evaluados': [2020, 2022], 'criterio_aplicado': f'Ficha {number}, criterio 5'}
-        if evaluation['puntaje'] is None:
-            evaluation['motivo'] = 'Falta población comparable.'
-        sections.append({'numero': number, 'nombre': ficha['nombre'],
-                         'evaluaciones': {p: deepcopy(evaluation) for p in ('general', 'ultimo_periodo')},
-                         'control_cruzado_anexo': {'tablas_identicas': True, 'calificacion_reportada_coincide': True},
-                         'tablas': [{'tabla': number, 'ambito': 'municipal',
-                                     'filas': [['Año', 'Valor'], ['2020', 'Sí & válido < 100'], ['2022', '']]}]})
-    values = {k: None for k in dictionary['variables_documento']}
-    values.update(municipio='Municipio de prueba', estado='Entidad de prueba', año_inicial=2020, año_final=2022)
-    result = {'municipio': values['municipio'], 'estado': values['estado'], 'estado_ejecucion': 'requiere_revision',
-              'contrato': {'plantilla_sha256': sha256(TEMPLATE), 'diccionario_sha256': sha256(DICTIONARY), 'reglas_sha256': sha256(RULES)},
-              'valores_plantilla': values, 'indicadores': sections,
-              'calculos': {p: agregar({s['numero']: s['evaluaciones'][p] for s in sections}, rules)
-                          for p in ('general', 'ultimo_periodo')},
-              'validaciones': [{'nivel': 'bloqueante', 'codigo': 'COMPOSICION_WORD_PENDIENTE'},
-                               {'nivel': 'bloqueante', 'codigo': 'VARIABLES_PENDIENTES'}]}
-    if pending:
-        result['validaciones'].append({'nivel': 'bloqueante', 'codigo': 'INDICADOR_PENDIENTE', 'indicador': 4})
-    return componer(result, dictionary, rules)
+from renderizar_word import TEMPLATE, W, STYLE, auditar, fuentes_corresponden, parrafo, reemplazar, renderizar, run, texto, validar_resultado
+from ilustraciones_word import seleccionar_graficas
+from ejemplo_estudio import ejemplo
 
 
 class WordTests(unittest.TestCase):
+    def test_unicode_equivalent_source_names_are_accepted(self):
+        self.assertTrue(fuentes_corresponden('Garc\u00eda', [
+            'Garci\u0301a PAQUETE SEGURIDAD.docx', 'Garci\u0301a Anexo.docx']))
+        self.assertFalse(fuentes_corresponden('Garc\u00eda', [
+            'Garci\u0301a PAQUETE SEGURIDAD.docx', 'Otro Anexo.docx']))
+
     def test_fragmented_marker_preserves_surrounding_style(self):
         p = ET.Element(W + 'p')
-        for text in ('Antes {{ muni', 'cipio }} después'):
+        for text in ('Antes {muni', 'cipio} después'):
             r = run(text, generated=False)
             ET.SubElement(r.find(W + 'rPr'), W + 'i')
             p.append(r)
-        reemplazar(p, '{{ municipio }}', 'A & B < C')
+        reemplazar(p, '{municipio}', 'A & B < C')
         self.assertEqual(texto(p), 'Antes A & B < C después')
         runs = list(p.iter(W + 'r'))
         self.assertEqual(len(runs), 3)
-        for r in runs:
-            self.assertIsNotNone(r.find(W + 'rPr/' + W + 'i'))
-        self.assertIsNone(runs[0].find(W + 'rPr/' + W + 'highlight'))
-        self.assertIsNone(runs[2].find(W + 'rPr/' + W + 'highlight'))
-        self.assertEqual(runs[1].find(W + 'rPr/' + W + 'highlight').get(W + 'val'), 'yellow')
+        self.assertTrue(all(r.find(W + 'rPr/' + W + 'i') is not None for r in runs))
+        self.assertIsNone(runs[1].find(W + 'rPr/' + W + 'highlight'))
+        self.assertEqual(runs[1].find(W + 'rPr/' + W + 'rStyle').get(W + 'val'), STYLE)
 
-    def test_composition_keeps_missing_scores_and_inactive_variables(self):
-        result = ejemplo()
-        self.assertIn('4', result['valores_plantilla']['resumen_general'])
-        self.assertIsNone(result['valores_plantilla']['condicion_critica'])
-        self.assertIn('condicion_critica', result['contenido_word']['variables_no_aplicables'])
-        self.assertIsNone(result['calculos']['general']['calificacion_final'])
-        codes = {v['codigo'] for v in result['validaciones']}
-        self.assertNotIn('COMPOSICION_WORD_PENDIENTE', codes)
-        self.assertIn('INDICADOR_PENDIENTE', codes)
-        self.assertIn('REVISION_EDITORIAL_WORD', codes)
-
-    def test_draft_roundtrip_highlight_hashes_and_no_overwrite(self):
-        result = ejemplo()
+    def test_final_word_has_requested_name_no_tables_or_new_charts(self):
         before = sha256(TEMPLATE)
         with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / 'municipio.json'
+            root = Path(directory)
+            result = ejemplo(root)
+            path = root / 'municipio.json'
             path.write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')
-            report = renderizar(path, Path(directory) / 'word')
+            report = renderizar(path, root / 'word')
             word = Path(report['archivo'])
+            self.assertEqual(word.name, 'Municipio de prueba Estudio Seguridad.docx')
             self.assertEqual(report['json_sha256'], sha256(path))
             self.assertEqual(report['sha256'], sha256(word))
-            self.assertTrue(report['resaltado_amarillo_verificado'])
+            self.assertTrue(report['sin_resaltado_amarillo_verificado'])
             with zipfile.ZipFile(word) as archive:
-                root = ET.fromstring(archive.read('word/document.xml'))
-                text = texto(root)
-                self.assertIn('BORRADOR DE REVISIÓN', text)
-                self.assertIn('Sí & válido < 100', text)
-                self.assertIn('Falta población comparable', text)
-                self.assertNotIn('TEXTOS BASE', text)
-                self.assertNotIn('{{', text)
-                self.assertIn('Anexo 1.', text)
-                self.assertIn('Anexo 2.', text)
-                sections = root.findall('.//' + W + 'sectPr')
-                self.assertEqual(len(sections), 2)
-                self.assertEqual(sections[-1].find(W + 'pgSz').get(W + 'orient'), 'landscape')
-                for r in root.iter(W + 'r'):
-                    style = r.find(W + 'rPr/' + W + 'rStyle')
-                    if style is not None and style.get(W + 'val') == STYLE:
-                        self.assertEqual(r.find(W + 'rPr/' + W + 'highlight').get(W + 'val'), 'yellow')
-                        self.assertEqual(r.find(W + 'rPr/' + W + 'rFonts').get(W + 'ascii'), 'Archivo Light')
-            again = renderizar(path, word.parent)
-            self.assertNotEqual(report['archivo'], again['archivo'])
-            self.assertEqual(report['sha256'], sha256(word))
+                document = ET.fromstring(archive.read('word/document.xml'))
+                text = texto(document)
+                self.assertNotIn('borrador', text.lower())
+                self.assertNotIn('machote', text.lower())
+                self.assertNotIn('Indicador 01:', text)
+                self.assertNotIn('{', text)
+                self.assertNotIn('JSON', text)
+                self.assertIn('14 de los 18 indicadores', text)
+                self.assertIsNone(document.find('.//' + W + 'tbl'))
+                self.assertFalse(any(n.startswith('word/charts/') for n in archive.namelist()))
+                self.assertEqual(len(document.findall('.//' + W + 'sectPr')), 2)
+            again = renderizar(path, root / 'word')
+            self.assertEqual(again['archivo'], report['archivo'])
         self.assertEqual(before, sha256(TEMPLATE))
 
-    def test_final_refuses_partial_data_even_if_state_is_changed(self):
-        result = ejemplo()
-        result['estado_ejecucion'] = 'validado'
-        result['validaciones'] = []
-        with self.assertRaisesRegex(ValueError, 'todos los puntajes'):
-            validar_resultado(result, 'final')
-
-    def test_final_requires_review_and_accepts_complete_validated_json(self):
-        result = ejemplo(pending=False)
-        result['estado_ejecucion'] = 'validado'
-        with self.assertRaisesRegex(ValueError, 'revisiones pendientes'):
-            validar_resultado(result, 'final')
-        result['validaciones'] = []  # Simula una revisión resuelta en el JSON sintético.
+    def test_original_images_are_copied_byte_for_byte_and_linked(self):
         with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / 'municipio.json'
+            root = Path(directory)
+            result = ejemplo(root, graficas=True)
+            path = root / 'municipio.json'
             path.write_text(json.dumps(result), encoding='utf-8')
-            report = renderizar(path, Path(directory) / 'word', 'final')
+            report = renderizar(path, root / 'word')
+            self.assertEqual(report['graficas_reutilizadas'], 1)
+            self.assertEqual(report['graficas_creadas'], 0)
+            with zipfile.ZipFile(report['archivo']) as archive:
+                image = report['ilustraciones'][0]
+                source = Path(result['rutas_fuentes'][image['fuente']])
+                with zipfile.ZipFile(source) as original:
+                    self.assertEqual(archive.read(image['parte_salida']), original.read(image['parte_fuente']))
+                rels = ET.fromstring(archive.read('word/_rels/document.xml.rels'))
+                relation = next(r for r in rels if r.get('Id') == 'rIdEvidencia1')
+                self.assertIn('word/' + relation.get('Target'), archive.namelist())
+
+    def test_changed_original_image_source_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            result = ejemplo(root, graficas=True)
+            source = Path(next(iter(result['rutas_fuentes'].values())))
+            source.write_bytes(source.read_bytes() + b'changed source')
+            path = root / 'municipio.json'
+            path.write_text(json.dumps(result), encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'fuente'):
+                renderizar(path, root / 'word')
+            self.assertFalse((root / 'word').exists())
+
+    def test_unknown_image_and_nonexistent_insertion_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = ejemplo(Path(directory), graficas=True)
+            with self.assertRaises(ValueError):
+                seleccionar_graficas(result['catalogo_ilustraciones'], [{'fuente': 'Otra.docx', 'parte': 'word/media/x.png', 'indicador': 1}])
+            result['contenido_word']['ilustraciones'][0]['despues_parrafo'] = 100
+            with self.assertRaisesRegex(ValueError, 'párrafo'):
+                validar_resultado(result)
+
+    def test_full_method_publishes_study_without_forging_a_joint_grade(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            result = ejemplo(root, modo='completo')
+            self.assertIsNone(result['calculos']['general']['calificacion_final'])
+            self.assertEqual(result['valores_plantilla']['calificacion_general'], 'SIN VALORACIÓN CONJUNTA')
+            validar_resultado(result)
+            path = root / 'municipio.json'
+            path.write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')
+            report = renderizar(path, root / 'word')
             with zipfile.ZipFile(report['archivo']) as archive:
                 text = texto(ET.fromstring(archive.read('word/document.xml')))
-            self.assertNotIn('BORRADOR', text)
-            self.assertNotIn('PENDIENTE', text)
-            self.assertIn('CALIFICACIÓN GENERAL: EXCELENTE', text)
+            self.assertIn('SIN VALORACIÓN CONJUNTA', text)
+            self.assertIn('La valoración conjunta requiere completar la evidencia', text)
+            result['valores_plantilla']['calificacion_general'] = 'REGULAR'
+            with self.assertRaisesRegex(ValueError, 'calificación publicada'):
+                validar_resultado(result)
+
+    def test_disponibles_publica_categoria_identificada_como_parcial(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            result = ejemplo(root, modo='disponibles')
+            self.assertEqual(result['calculos']['general']['estado'], 'calculado_disponibles')
+            self.assertEqual(result['valores_plantilla']['calificacion_general'], 'MUY BIEN (COBERTURA PARCIAL)')
+            path = root / 'municipio.json'
+            path.write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')
+            report = renderizar(path, root / 'word')
+            with zipfile.ZipFile(report['archivo']) as archive:
+                text = texto(ET.fromstring(archive.read('word/document.xml')))
+            self.assertIn('MUY BIEN (COBERTURA PARCIAL)', text)
+            self.assertIn('Los demás no se calificaron por falta de evidencia suficiente', text)
+            result['valores_plantilla']['calificacion_general'] = 'MUY BIEN'
+            with self.assertRaisesRegex(ValueError, 'calificación publicada'):
+                validar_resultado(result)
+
+    def test_modified_grade_or_score_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = ejemplo(Path(directory))
+            for kind in ('score', 'grade'):
+                result = deepcopy(base)
+                if kind == 'score':
+                    result['indicadores'][0]['evaluaciones']['general']['puntaje'] = 1
+                else:
+                    result['valores_plantilla']['calificacion_general'] = 'CATASTRÓFICO'
+                with self.assertRaises(ValueError):
+                    validar_resultado(result)
+
+    def test_modified_text_is_rejected_even_when_contract_is_current(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = ejemplo(Path(directory))
+            result['valores_plantilla']['analisis_indicador_01'] = 'El municipio tiene 999 cámaras.'
+            with self.assertRaisesRegex(ValueError, 'interpretación verificada'):
+                validar_resultado(result)
 
     def test_contract_mismatch_blocks_output(self):
-        result = ejemplo()
-        result['contrato']['plantilla_sha256'] = 'incorrecto'
         with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / 'municipio.json'
+            root = Path(directory)
+            result = ejemplo(root)
+            result['contrato']['benchmark_sha256'] = 'incorrecto'
+            path = root / 'municipio.json'
             path.write_text(json.dumps(result), encoding='utf-8')
             with self.assertRaisesRegex(ValueError, 'contrato actual'):
-                renderizar(path, Path(directory) / 'word')
-            self.assertFalse((Path(directory) / 'word').exists())
+                renderizar(path, root / 'word')
+            self.assertFalse((root / 'word').exists())
 
-    def test_aggregate_and_worksheet_inconsistencies_block_output(self):
-        for key in ('calculos', 'hoja'):
-            result = ejemplo(pending=False)
-            if key == 'calculos':
-                result['calculos']['general']['calificacion_final'] = 'MAL'
-            else:
-                result['contenido_word']['hoja_computo'][0]['general'] = '1'
-            with self.assertRaises(ValueError):
-                validar_resultado(result, 'borrador')
-
-    def test_audit_rejects_unhighlighted_generated_text(self):
-        p = parrafo('Texto procedente del JSON')
-        props = p.find(W + 'r/' + W + 'rPr')
-        props.remove(props.find(W + 'highlight'))
+    def test_audit_rejects_yellow_generated_text(self):
+        p = parrafo('La información municipal presenta avances.')
+        ET.SubElement(p.find(W + 'r/' + W + 'rPr'), W + 'highlight', {W + 'val': 'yellow'})
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'bad.docx'
             with zipfile.ZipFile(path, 'w') as archive:
                 archive.writestr('word/document.xml', ET.tostring(p))
-            with self.assertRaisesRegex(ValueError, 'sin resaltado'):
+            with self.assertRaisesRegex(ValueError, 'resaltado amarillo'):
                 auditar(path)
+
+    def test_embedded_fonts_match_official_font_bytes(self):
+        from uuid import UUID
+        from fuentes_word import FONTS
+        with zipfile.ZipFile(TEMPLATE) as archive:
+            fonts = ET.fromstring(archive.read('word/fontTable.xml'))
+            for i, (family, filename, variant) in enumerate(FONTS, 1):
+                font = next(n for n in fonts if n.get(W + 'name') == family)
+                embed = font.find(W + variant)
+                mask = UUID(embed.get(W + 'fontKey').strip('{}')).bytes[::-1]
+                raw = bytearray(archive.read(f'word/fonts/archivo_{i}.odttf'))
+                for j in range(32):
+                    raw[j] ^= mask[j % 16]
+                self.assertEqual(bytes(raw), (ROOT / 'assets/fonts' / filename).read_bytes())
 
 
 if __name__ == '__main__':

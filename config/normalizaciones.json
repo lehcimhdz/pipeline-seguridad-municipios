@@ -1,7 +1,7 @@
 {
-  "version": "1.0",
+  "version": "2.2",
   "regla_periodo": {
-    "cobertura": "El último periodo usa las dos etiquetas temporales más recientes sin omitir celdas vacías.",
+    "cobertura": "Dos ediciones censales más recientes en indicadores 1–16; dos años calendario más recientes en 17–18. Las celdas vacías permanecen como desconocidas.",
     "frecuencia": {
       "semestral": "al_menos_anual",
       "anual": "al_menos_anual",
@@ -33,6 +33,6 @@
     "derechos_humanos_y_uso_de_la_fuerza": ["derechos humanos.*uso.*fuerza", "uso legitimo de la fuerza", "derechos humanos y garantias"],
     "primer_respondiente": ["primer respondiente"],
     "informe_policial_homologado": ["informe policial homologado", "\\biph\\b"],
-    "proximidad_o_solucion_de_problemas": ["proximidad social", "metodologia sara", "trabajo con la comunidad"]
+    "proximidad_o_solucion_de_problemas": ["proximidad social.*(comunicacion asertiva|justicia procedimental|mediacion|metodologia para el trabajo|solucion de problemas)", "metodologia sara", "trabajo con la comunidad"]
   }
 }

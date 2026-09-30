@@ -1,0 +1,144 @@
+{
+  "version": "2.3",
+  "alcance": "seguridad",
+  "producto": "estudio_seguridad",
+  "marcador": "{snake_case}",
+  "plantillas": {
+    "medicion": {
+      "archivo": "templates/seguridad_medicion.docx",
+      "sha256": "243a5ddc9690993ed10ac6be7703a79a4acdbf0f35fadf134d7d85028d98d34d",
+      "origen": "templates/Machote general medicion version final.docx",
+      "origen_sha256": "6404e0eed69c2562259787af065dddce4b004147923e0da32f4f30ecabc6f159",
+      "bloques_capitulo_origen": 95,
+      "bloques_capitulo_derivado": 41,
+      "derivacion": "Capítulo SEGURIDAD en el orden del formato de la consultora, encabezados humanos y 25 variables de texto. Portada y fuentes; sin nuevos cuadros o gráficas."
+    }
+  },
+  "fuente_formato": {
+    "archivo": "templates/Machote general medicion version final.docx",
+    "sha256": "6404e0eed69c2562259787af065dddce4b004147923e0da32f4f30ecabc6f159",
+    "rol": "Formato de entrega de la consultora; sólo capítulo SEGURIDAD."
+  },
+  "guia": {
+    "archivo": "templates/Machote general medicion version final rzg investigación.docx",
+    "sha256": "ac7402dbf1e06061570934aea41fa7798b296abeed376886b61b70b9a98662b3",
+    "rol": "Guía de lectura e interpretación; no es el documento de entrega ni aporta estadísticas."
+  },
+  "benchmark": {
+    "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
+    "sha256": "6eace4f784db820c733a1b0cdd6ee2ab0160109bfc6227bafb384e0064c2bab3",
+    "rol": "Criterios para construir la metodología de calificación e interpretación."
+  },
+  "diccionario": {
+    "archivo": "config/diccionario_datos_diagnostico_seguridad_municipal.json",
+    "sha256": "616cba56cb0cc32901d7047b9908c2e94a16d8dffee8651beec2f7b835d87c05"
+  },
+  "reglas": {
+    "archivo": "config/reglas_calificacion.json",
+    "sha256": "0360af806fa92aef9f647108f962659d69144e3ec31a15248d1a208bef461d26"
+  },
+  "metodologia": {
+    "archivo": "templates/Machote_seguridad_general_con_calificacion.docx",
+    "sha256": "6eace4f784db820c733a1b0cdd6ee2ab0160109bfc6227bafb384e0064c2bab3"
+  },
+  "formato": {
+    "archivo": "config/formato_editorial.json",
+    "sha256": "18e7d71c0d9515b4c14fbe349c85fe30b94c88103fa385fb4e76b483859e1741"
+  },
+  "redaccion": {
+    "archivo": "config/redaccion_consultoria.json",
+    "sha256": "b2774707c793b5da32bdf53f7b291ea4cd38bb43b0afba77a7f1fd1b37086a30"
+  },
+  "normalizaciones": {
+    "archivo": "config/normalizaciones.json",
+    "sha256": "9ac87940c020efe389510d8f0041e50fdc16f7438a1c1c73b23ee7ff8ec56e3e"
+  },
+  "ponderacion": {
+    "archivo": "config/ponderacion.json",
+    "sha256": "627d5c7a564f3ac95120a3994d2f919cb16dd8e486caa2e1563c4bab06bff174"
+  },
+  "definiciones": {
+    "archivo": "config/definiciones_cngmd.json",
+    "sha256": "06f967c858e4adff349df79e17250141a0a9f92aa535c3f7c3a1bda423924d51"
+  },
+  "textos_narrativos": {
+    "archivo": "config/textos_narrativos.json",
+    "sha256": "eef08f07299a4e2cfa5098fa448fed8d2acabb11f6df18c168a78c5f8ea9ee5b"
+  },
+  "tipografias": [
+    {
+      "archivo": "assets/fonts/Archivo-Regular.ttf",
+      "sha256": "59fbfd8a9bb41301bfe950e7b097fd42d52af224a07761e2c1b2c959a4c9cf9a"
+    },
+    {
+      "archivo": "assets/fonts/Archivo-Medium.ttf",
+      "sha256": "6d42123d7954e72600b2e29284a9c8c95cddb4372b21cd3d2a5e8cd4f231f36b"
+    },
+    {
+      "archivo": "assets/fonts/Archivo-Light.ttf",
+      "sha256": "950fc47e639af87cf403aa6617bffd72bd9cbfdfdacdc14141b374e059586892"
+    },
+    {
+      "archivo": "assets/fonts/Archivo-LightItalic.ttf",
+      "sha256": "1cd2e59510f36ba11015e6efc6e5f08e0506dfea7a59056f0a495e673992f39f"
+    }
+  ],
+  "orden_indicadores": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "titulos_indicadores": [
+    "Plan o programa de protección civil",
+    "Capacitación en materia de protección civil",
+    "Temas de la capacitación de protección civil",
+    "Personal destinado a funciones de seguridad pública",
+    "Evaluaciones de control de confianza",
+    "Instituto de formación, capacitación y/o profesionalización",
+    "Certificado Único Policial vigente",
+    "Uniformes",
+    "Equipamiento",
+    "Temas de capacitación policial",
+    "Sistemas de información georreferenciados",
+    "Patrullajes estratégicos",
+    "Atención a problemas comunitarios",
+    "Cámaras de vigilancia",
+    "Llamadas procedentes",
+    "Informe anual de actividades",
+    "Cambio del estado de fuerza, egresos y fallecimientos",
+    "Puestas a disposición"
+  ],
+  "correspondencia_guia": "La guía repite Personal y no identifica el Certificado Único Policial; se mantienen los 18 indicadores del formato y del Paquete Seguridad.",
+  "fuentes_entrada": [
+    "{municipio} PAQUETE SEGURIDAD.docx"
+  ],
+  "fuentes_opcionales": [
+    "{municipio} Anexo.docx"
+  ],
+  "fuentes_complementarias": {
+    "opcion": "--complemento",
+    "version": "1.0",
+    "contrato": "docs/RECOLECCION_DATOS.md",
+    "validacion": "Fuentes con huella y observaciones verificadas; no se autocompletan. Se mantienen separadas de las correspondencias automáticas extraídas del paquete."
+  },
+  "documentos_salida": [
+    "medicion"
+  ],
+  "nombre_salida": "{municipio} Estudio Seguridad.docx",
+  "ilustraciones": "Reproducción de imágenes originales verificadas; sin generar tablas o gráficas nuevas."
+}
